@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { __ } from '../../translate';
+import { __ , setLanguage} from '../../translate';
 type RegisterForm = {
     name: string;
     email: string;
@@ -34,6 +34,19 @@ export default function Register() {
     return (
         <AuthLayout title={__('Create an account')} description={__('Enter your details below to create your account')}>
             <Head title={__('Create an account')} />
+
+            {/* Selector de idioma */}
+            <div className="flex justify-end mb-4">
+                <select
+                    onChange={(e) => setLanguage(e.target.value)}
+                    defaultValue={localStorage.getItem('lang') || 'en'}
+                    className="p-2 border border-gray-300 rounded-md"
+                >
+                    <option className="text-black" value="en">🇬🇧 English</option>
+                    <option className="text-black" value="es">🇪🇸 Español</option>
+                </select>
+            </div>
+
             <form className="flex flex-col gap-6" onSubmit={submit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
