@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-
+import { __ } from '../../translate';
 type LoginForm = {
     email: string;
     password: string;
@@ -34,15 +34,14 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             onFinish: () => reset('password'),
         });
     };
-
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
+        <AuthLayout title={__('Log in to your account')} description={__('Enter your email and password below to log in')}>
+            <Head title={__('Log in')} />
 
             <form className="flex flex-col gap-6" onSubmit={submit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
+                        <Label htmlFor="email">{__('Email address')}</Label>
                         <Input
                             id="email"
                             type="email"
@@ -52,17 +51,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoComplete="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
+                            placeholder={__('email@example.com')}
                         />
                         <InputError message={errors.email} />
                     </div>
 
                     <div className="grid gap-2">
                         <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">{__('Password')}</Label>
                             {canResetPassword && (
                                 <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
+                                    {__('Forgot password?')}
                                 </TextLink>
                             )}
                         </div>
@@ -74,7 +73,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoComplete="current-password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
+                            placeholder={__('Password')}
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -87,19 +86,19 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             onClick={() => setData('remember', !data.remember)}
                             tabIndex={3}
                         />
-                        <Label htmlFor="remember">Remember me</Label>
+                        <Label htmlFor="remember">{__('Remember me')}</Label>
                     </div>
 
                     <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
+                        {__('Log in')}
                     </Button>
                 </div>
 
                 <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
+                    {__("Don't have an account?")}{' '}
                     <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
+                        {__('Sign up')}
                     </TextLink>
                 </div>
             </form>
