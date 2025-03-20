@@ -14,7 +14,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     protected $table = 'users';
-    protected $primaryKey = 'id_employee';
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +22,6 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'id_employee',
         'number_employ',
         'name',
         'last_name',
