@@ -13,7 +13,7 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
-    protected $table = 'employee';
+    protected $table = 'users';
     protected $primaryKey = 'id_employee';
 
     /**
@@ -35,7 +35,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'departamento_id',
         'photograph',
         'license',
-        'status_truck',
         'driver_license',
         'license_expiration_date',
     ];

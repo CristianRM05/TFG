@@ -20,7 +20,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
-        'barcode', // o 'sku'
+        'num_reference', //
         'weight', // peso en kg, por ejemplo
         'volume', // volumen en metros cúbicos o litros
         'price',  // precio unitario (opcional según gestión)

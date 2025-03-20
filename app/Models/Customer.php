@@ -22,7 +22,7 @@ class Customer extends Model
         'email',
         'phone',
         'address',
-        'company_name', // opcional si es empresa
+        'company_name', 
     ];
 
     /**
