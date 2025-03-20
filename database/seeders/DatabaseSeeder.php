@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('admin123'),
             'phone' => '123456789',
             'address' => 'Calle Falsa 123',
-            'roles' => RolesEmployee::Manager,
+            'roles' => RolesEmployee::Admin,
             'photograph' => 'profile.jpg',
             'license' => 'L12345',
             'driver_license' => 'B',

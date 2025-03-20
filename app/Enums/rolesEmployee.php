@@ -7,4 +7,5 @@ enum RolesEmployee: string
     case Manager = 'Manager';
     case Operator = 'Operario';
     case Dealer = 'Repartidor';
+    case Admin = 'Admin';
 }
