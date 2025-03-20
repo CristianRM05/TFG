@@ -35,6 +35,7 @@ export default function Welcome() {
                                     Register
                                 </Link>
                             </>
+
                         )}
                     </nav>
                 </header>

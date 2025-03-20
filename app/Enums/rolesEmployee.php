@@ -2,9 +2,9 @@
 
 namespace App\Enums;
 
-enum rolesEmployee: string
+enum RolesEmployee: string
 {
-    case Manager = 'Jefe de Trafico';
-    case operator = 'Operario';
-    case dealer = 'Repartidor';
+    case Manager = 'Manager';
+    case Operator = 'Operario';
+    case Dealer = 'Repartidor';
 }
