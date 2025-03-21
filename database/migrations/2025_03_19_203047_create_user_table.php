@@ -21,11 +21,13 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone');
             $table->string('address');
-            $table->enum ('roles', ['Manager', 'Operario', 'Repartidor'])->default('Operario');
+            $table->enum ('roles', ['Manager', 'Operario', 'Repartidor','Admin'])->default('Operario');
             $table->string('photograph')->nullable();
             $table->string('license')->nullable();
             $table->string('driver_license');
             $table->date('license_expiration_date');
+            $table->date('email_verified_at')->nullable();
+
             $table->timestamps();
         });
     }
