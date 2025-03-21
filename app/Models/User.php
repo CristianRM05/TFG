@@ -57,7 +57,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'roles' => RolesEmployee::class,
-        'status_truck' => StatusTruck::class,
         'license_expiration_date' => 'date',
     ];
 }

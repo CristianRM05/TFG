@@ -24,6 +24,8 @@ class Product extends Model
         'weight', // peso en kg, por ejemplo
         'volume', // volumen en metros cúbicos o litros
         'price',  // precio unitario (opcional según gestión)
+        'images',
+        'category',
     ];
 
     /**
