@@ -19,6 +19,8 @@ return new class extends Migration
             $table->float('weight');
             $table->float('volume');
             $table->float('price');
+            $table->string('images')->nullable(); $table->enum ('category', ['refreco','whisky','ron','vodka','ginebra','cerveza','otros']);
+
             $table->timestamps();
         });
     }

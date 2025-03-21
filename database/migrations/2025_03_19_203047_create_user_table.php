@@ -18,10 +18,11 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('dni')->unique();
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone');
             $table->string('address');
-            $table->enum ('roles', ['Manager', 'Operario', 'Repartidor','Admin'])->default('Operario');
+            $table->enum ('roles', ['Admin','Manager', 'Operario', 'Repartidor'])->default('Operario');
             $table->string('photograph')->nullable();
             $table->string('license')->nullable();
             $table->string('driver_license');
