@@ -27,6 +27,8 @@ return new class extends Migration
             $table->string('license')->nullable();
             $table->string('driver_license');
             $table->date('license_expiration_date');
+            $table->date('email_verified_at')->nullable();
+
             $table->timestamps();
         });
     }
