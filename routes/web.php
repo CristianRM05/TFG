@@ -42,6 +42,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
 });
 
+Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

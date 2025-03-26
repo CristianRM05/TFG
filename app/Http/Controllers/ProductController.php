@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\validator;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     public function index()
     {
         $products = Product::paginate(5);
-        return response()->json($products, 200);
+        return inertia('Products/Index', ['products' => $products]);
     }
 
     public function show($id)
@@ -19,69 +19,70 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         if (!$product) {
-            return response()->json(['error' => 'Producto no encontrado'], 404);
+            abort(404, 'Producto no encontrado');
         }
 
-        return response()->json($product, 200);
+        return inertia('Products/Show', ['product' => $product]);
     }
 
     public function store(Request $request)
     {
-
-
-
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'num_reference' => 'required|string|max:50|unique:products,num_reference',
             'weight' => 'required|numeric|min:0',
             'volume' => 'required|numeric|min:0',
             'price' => 'required|numeric|min:0',
+            'photograph' => 'nullable|image|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+        if ($request->hasFile('photograph')) {
+            $validated['photograph'] = $request->file('photograph')->store('products', 'public');
         }
 
-        $product = Product::create($request->all());
-        return response()->json($product, 201);
-    }
+        Product::create($validated);
 
+        return redirect()->back()->with('success', 'Producto creado con éxito');
+    }
 
     public function update(Request $request, $id)
     {
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
 
-        if (!$product) {
-            return response()->json(['error' => 'Producto no encontrado'], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'num_reference' => 'sometimes|string|max:50|unique:products,num_reference,' . $id,
+            'num_reference' => 'sometimes|string|max:50|unique:products,num_reference,' . $product->id,
             'weight' => 'sometimes|numeric|min:0',
             'volume' => 'sometimes|numeric|min:0',
             'price' => 'sometimes|numeric|min:0',
+            'image_url' => 'nullable|image|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+        if ($request->hasFile('photograph')) {
+            if ($product->photograph) {
+                Storage::disk('public')->delete($product->photograph);
+            }
+
+            $validated['photograph'] = $request->file('photograph')->store('products', 'public');
         }
 
-        $product->update($request->all());
-        return response()->json($product, 200);
+        $product->update($validated);
+
+        return redirect()->back()->with('success', 'Producto actualizado con éxito');
     }
 
     public function destroy($id)
     {
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
 
-        if (!$product) {
-            return response()->json(['error' => 'Producto no encontrado'], 404);
+        if ($product->photograph) {
+            Storage::disk('public')->delete($product->photograph);
         }
 
         $product->delete();
-        return response()->json(['message' => 'Producto eliminado correctamente'], 200);
+
+        return redirect()->back()->with('success', 'Producto eliminado correctamente');
     }
 }
