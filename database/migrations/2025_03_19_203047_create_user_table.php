@@ -22,12 +22,11 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone');
             $table->string('address');
-            $table->enum ('roles', ['Admin','Manager', 'Operario', 'Repartidor'])->default('Operario');
+            $table->enum ('role', ['Admin','Manager', 'Operario', 'Repartidor'])->default('Operario');
             $table->string('photograph')->nullable();
             $table->string('license')->nullable();
-            $table->string('driver_license');
-            $table->date('license_expiration_date');
-            $table->date('email_verified_at')->nullable();
+            $table->string('driver_license')->nullable();
+            $table->date('license_expiration_date')->nullable();
 
             $table->timestamps();
         });
@@ -38,6 +37,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::table('users', function (Blueprint $table) {
+
+            $table->string('license')->nullable(false);
+            $table->string('driver_license')->nullable(false);
+            $table->date('license_expiration_date')->nullable(false);
+        });
     }
 };

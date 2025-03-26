@@ -30,8 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone',
         'address',
-        'roles',
-        'departamento_id',
+        'role',
         'photograph',
         'license',
         'driver_license',
@@ -56,7 +55,29 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'roles' => RolesEmployee::class,
+        'role' => RolesEmployee::class,
         'license_expiration_date' => 'date',
     ];
+
+    protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($user) {
+        // Solo si no viene seteado manualmente
+        if (empty($user->number_employ)) {
+            $user->number_employ = self::generateEmployeeNumber();
+        }
+    });
+}
+
+public static function generateEmployeeNumber()
+{
+    do {
+        $random = strtoupper(chr(rand(65, 90))) . str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+    } while (self::where('number_employ', $random)->exists());
+
+    return $random;
+}
+
 }

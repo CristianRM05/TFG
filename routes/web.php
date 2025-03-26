@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -12,6 +15,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
+
+/**
+ * Ruta protegida solo para administradores
+ */
+Route::middleware(['auth'])->get('/admin/dashboard', function () {
+    return Inertia::render('dashboardAdmin'); // 👈 esto tiene que existir
+})->name('admin.dashboard');
+
+Route::get('/middleware-test', function () {
+    return 'Middleware ejecutado correctamente';
+})->middleware('role:Admin');
+
+
+Route::middleware(['auth'])->get('/admin/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
+
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
+});
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

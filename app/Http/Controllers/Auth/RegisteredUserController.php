@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\Rule;
+
 
 class RegisteredUserController extends Controller
 {
@@ -30,20 +32,37 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'last_name' => 'required|string|max:255',
+            'dni' => 'required|string|max:20|unique:users,dni',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'role' => [Rule::in(array_column(RolesEmployee::cases(), 'Operario'))],
+            'departamento_id' => 'nullable|exists:departamentos,id',
+            'license' => 'nullable|string|max:50',
+            'driver_license' => 'nullable|string|max:50',
+            'license_expiration_date' => 'nullable|date',
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'photograph' => 'nullable|image|max:2048',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+
+        // Subir foto si existe
+        if ($request->hasFile('photograph')) {
+            $validated['photograph'] = $request->file('photograph')->store('photos', 'public');
+        }
+
+        // Generar número de empleado
+        $validated['number_employ'] = User::generateEmployeeNumber();
+
+        // Hashear la contraseña
+        $validated['password'] = Hash::make($validated['password']);
+
+        $user = User::create($validated);
 
         event(new Registered($user));
-
         Auth::login($user);
 
         return to_route('dashboard');

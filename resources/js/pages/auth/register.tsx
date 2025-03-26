@@ -8,10 +8,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { __ , setLanguage} from '../../translate';
+import { __, setLanguage } from '../../translate';
+
 type RegisterForm = {
     name: string;
+    last_name: string;
+    number_employ: string;
+    dni: string;
     email: string;
+    phone: string;
+    address: string;
+    role: string;
+    departamento_id: string;
+    photograph: File | null;
+    license: string;
+    driver_license: string;
+    license_expiration_date: string;
     password: string;
     password_confirmation: string;
 };
@@ -19,7 +31,18 @@ type RegisterForm = {
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
+        last_name: '',
+        number_employ: '',
+        dni: '',
         email: '',
+        phone: '',
+        address: '',
+        role: '',
+        departamento_id: '',
+        photograph: null,
+        license: '',
+        driver_license: '',
+        license_expiration_date: '',
         password: '',
         password_confirmation: '',
     });
@@ -65,6 +88,20 @@ export default function Register() {
                         />
                         <InputError message={errors.name} className="mt-2" />
                     </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="last_name">{__('Last Name')}</Label>
+                        <Input
+                            id="last_name"
+                            type="text"
+                            value={data.last_name}
+                            onChange={(e) => setData('last_name', e.target.value)}
+                            disabled={processing}
+                            placeholder={__('Last name')}
+                        />
+                        <InputError message={errors.last_name} />
+                    </div>
+
 
                     <div className="grid gap-2">
                         <Label htmlFor="email">{__('Email address')}</Label>
@@ -113,6 +150,14 @@ export default function Register() {
                         />
                         <InputError message={errors.password_confirmation} />
                     </div>
+
+
+                    <input
+                        type="file"
+                        onChange={(e) => setData('photograph', e.target.files?.[0] || null)}
+                        accept="image/*"
+                    />
+
 
                     <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
