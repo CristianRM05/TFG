@@ -22,6 +22,25 @@ export default function AdminDashboard() {
     }>().props;
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>;
+    const uploadToImgBB = async (file: File): Promise<string | null> => {
+        const apiKey = import.meta.env.VITE_IMGBB_API_KEY || '6512c2d5a06b884ad74a74727c6e6332';
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            return result.data?.url || null;
+        } catch (error) {
+            console.error('❌ Error al subir la imagen a ImgBB:', error);
+            return null;
+        }
+    };
 
     const user = auth.user;
     const [openProductModal, setOpenProductModal] = useState(false);
@@ -41,10 +60,10 @@ export default function AdminDashboard() {
         weight: '',
         volume: '',
         price: '',
-        photograph: null,
+        image_url: "",
     });
 
-    const submitProduct = (e: React.FormEvent) => {
+    const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const price = parseFloat(productData.price);
@@ -56,15 +75,33 @@ export default function AdminDashboard() {
             return;
         }
 
+        let imageUrl = '';
+
+        if (productData.image_url instanceof File) {
+            const uploadedUrl = await uploadToImgBB(productData.image_url);
+            if (!uploadedUrl) {
+                alert('No se pudo subir la imagen a ImgBB.');
+                return;
+            }
+            imageUrl = uploadedUrl;
+        }
+
+        setProductData({
+            ...productData,
+            image_url: imageUrl,
+        });
+
         postProduct('/products', {
             onSuccess: () => {
                 resetProduct();
                 setOpenProductModal(false);
                 alert('Producto creado con éxito');
             },
-            forceFormData: true,
+            forceFormData: false,
         });
     };
+
+
 
     const {
         data,
@@ -123,8 +160,8 @@ export default function AdminDashboard() {
                 </section>
             </div>
 
-             {/* Modal Crear Empleado */}
-             <Dialog open={openUserModal} onClose={() => setOpenUserModal(false)} className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Modal Crear Empleado */}
+            <Dialog open={openUserModal} onClose={() => setOpenUserModal(false)} className="fixed inset-0 z-50 flex items-center justify-center">
                 <Dialog.Panel className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-2xl overflow-y-auto max-h-screen">
                     <Dialog.Title className="text-xl font-bold mb-4">Registrar nuevo empleado</Dialog.Title>
                     <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -181,7 +218,26 @@ export default function AdminDashboard() {
 
                         <div><Label htmlFor="price">Precio (€)</Label><Input id="price" type="number" step="0.01" min="0" value={productData.price} onChange={e => setProductData('price', e.target.value)} /><InputError message={productErrors.price} /></div>
 
-                        <div><Label htmlFor="image_url">Fotografía</Label><Input id="image_url" type="file" accept="image/*" onChange={e => setProductData('image_url', e.target.files?.[0] ?? null)} /><InputError message={productErrors.image_url} /></div>
+                        <div>
+                            <Label htmlFor="image_url">Fotografía</Label>
+                            <Input
+                                id="image_url"
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const uploadedUrl = await uploadToImgBB(file);
+                                        if (!uploadedUrl) {
+                                            alert('No se pudo subir la imagen a ImgBB.');
+                                            return;
+                                        }
+                                        setProductData('image_url', uploadedUrl); // ✅ guarda string
+                                    }
+                                }}
+                            />
+                            <InputError message={productErrors.image_url} />
+                        </div>
 
                         <div className="flex justify-end gap-2 pt-4">
                             <Button type="button" variant="ghost" onClick={() => setOpenProductModal(false)}>Cancelar</Button>
