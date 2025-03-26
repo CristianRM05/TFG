@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('weight');
             $table->float('volume');
             $table->float('price');
-            $table->string('images')->nullable(); $table->enum ('category', ['refreco','whisky','ron','vodka','ginebra','cerveza','otros']);
+            $table->string('image_url')->nullable(); // Campo para almacenar la URL de la imagen
 
             $table->timestamps();
         });

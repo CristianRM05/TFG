@@ -20,6 +20,11 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
+        'num_reference',
+        'weight',
+        'volume',
+        'price',
+        'image_url', // URL de la imagen del producto
         'num_reference', //
         'weight', // peso en kg, por ejemplo
         'volume', // volumen en metros cúbicos o litros
