@@ -25,6 +25,12 @@ class Product extends Model
         'volume',
         'price',
         'image_url', // URL de la imagen del producto
+        'num_reference', //
+        'weight', // peso en kg, por ejemplo
+        'volume', // volumen en metros cúbicos o litros
+        'price',  // precio unitario (opcional según gestión)
+        'images',
+        'category',
     ];
 
     /**

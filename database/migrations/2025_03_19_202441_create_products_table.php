@@ -20,6 +20,7 @@ return new class extends Migration
             $table->float('volume');
             $table->float('price');
             $table->string('image_url')->nullable(); // Campo para almacenar la URL de la imagen
+
             $table->timestamps();
         });
     }
