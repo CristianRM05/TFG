@@ -11,8 +11,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::paginate(5);
-        return inertia('Products/Index', ['products' => $products]);
-    }
+        return response()->json($products, 200);    }
 
     public function show($id)
     {
@@ -33,12 +32,10 @@ class ProductController extends Controller
             'num_reference' => 'required|string|max:50|unique:products,num_reference',
             'stock' => 'required|numeric|min:0',
             'price' => 'required|numeric|min:0',
-            'photograph' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|string',
         ]);
 
-        if ($request->hasFile('photograph')) {
-            $validated['photograph'] = $request->file('photograph')->store('products', 'public');
-        }
+
 
         Product::create($validated);
 
