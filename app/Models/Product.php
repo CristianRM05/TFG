@@ -37,4 +37,8 @@ class Product extends Model
         'volume' => 'float',
         'price' => 'float',
     ];
+    public function stocks()
+{
+    return $this->hasMany(Stock::class, 'product_id');
+}
 }

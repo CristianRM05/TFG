@@ -6,9 +6,10 @@ use Inertia\Inertia;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
-use App\Http\Middleware\VerifyCsrfToken; // Importar el middleware CSRF
-use App\Http\Middleware\CorsMiddleware;  // Importar el middleware CORS
+use App\Http\Middleware\VerifyCsrfToken; 
+use App\Http\Middleware\CorsMiddleware; 
 
 
 Route::get('/', function () {
@@ -20,7 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    // Middleware CSRF y CORS aplicados a las rutas de productos
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
 
 });
 
@@ -41,8 +42,6 @@ Route::middleware(['auth'])->get('/admin/dashboard', [AdminDashboardController::
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
 });
-
-Route::post('/products', [ProductController::class, 'store'])->name('products.store');
 
 
 require __DIR__.'/settings.php';

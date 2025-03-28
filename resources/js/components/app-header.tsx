@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import type { ReactNode } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -20,30 +21,52 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
-
     },
     {
         title: 'Prueba',
         href: '/dashboard',
         icon: Folder,
-
     },
 ];
 
-const rightNavItems: NavItem[] = [
-
-];
+const rightNavItems: NavItem[] = [];
 
 const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
+    user?: {
+        name: string;
+        email: string;
+        avatar?: string;
+    };
+    header?: ReactNode;
 }
 
-export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
+export function AppHeader({ breadcrumbs = [], user, header }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+
+    // Si hay un header personalizado, lo renderizamos directamente
+    if (header) {
+        return (
+            <>
+                <div className="border-sidebar-border/80 border-b">
+                    {header}
+                </div>
+                {breadcrumbs.length > 1 && (
+                    <div className="border-sidebar-border/70 flex w-full border-b">
+                        <div className="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">
+                            <Breadcrumbs breadcrumbs={breadcrumbs} />
+                        </div>
+                    </div>
+                )}
+            </>
+        );
+    }
+
+    // Header por defecto
     return (
         <>
             <div className="border-sidebar-border/80 border-b">
@@ -124,7 +147,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     <div className="ml-auto flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
-
                             <div className="hidden lg:flex">
                                 {rightNavItems.map((item) => (
                                     <TooltipProvider key={item.title} delayDuration={0}>
