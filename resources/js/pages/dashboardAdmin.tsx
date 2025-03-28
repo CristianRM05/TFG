@@ -57,8 +57,7 @@ export default function AdminDashboard() {
         name: '',
         description: '',
         num_reference: '',
-        weight: '',
-        volume: '',
+        stock: '',
         price: '',
         image_url: "",
     });
@@ -212,9 +211,7 @@ export default function AdminDashboard() {
 
                         <div><Label htmlFor="num_reference">Referencia</Label><Input id="num_reference" value={productData.num_reference} onChange={e => setProductData('num_reference', e.target.value)} /><InputError message={productErrors.num_reference} /></div>
 
-                        <div><Label htmlFor="weight">Peso (kg)</Label><Input id="weight" type="number" step="0.01" min="0" value={productData.weight} onChange={e => setProductData('weight', e.target.value)} /><InputError message={productErrors.weight} /></div>
-
-                        <div><Label htmlFor="volume">Volumen (m³)</Label><Input id="volume" type="number" step="0.01" min="0" value={productData.volume} onChange={e => setProductData('volume', e.target.value)} /><InputError message={productErrors.volume} /></div>
+                        <div><Label htmlFor="stock">Stock</Label><Input id="stock" type="number" step="1" min="0" value={productData.stock} onChange={e => setProductData('stock', e.target.value)} /><InputError message={productErrors.stock} /></div>
 
                         <div><Label htmlFor="price">Precio (€)</Label><Input id="price" type="number" step="0.01" min="0" value={productData.price} onChange={e => setProductData('price', e.target.value)} /><InputError message={productErrors.price} /></div>
 

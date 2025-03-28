@@ -21,8 +21,7 @@ class Product extends Model
         'name',
         'description',
         'num_reference',
-        'weight',
-        'volume',
+        'stock',
         'price',
         'image_url',
     ];
@@ -33,8 +32,6 @@ class Product extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'weight' => 'float',
-        'volume' => 'float',
-        'price' => 'float',
+        'price' => 'float'
     ];
 }
