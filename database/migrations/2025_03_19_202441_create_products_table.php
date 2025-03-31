@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->string('num_reference');
-            $table->float('weight');
-            $table->float('volume');
+            $table->float('stock');
             $table->float('price');
             $table->string('image_url')->nullable(); // Campo para almacenar la URL de la imagen
             $table->foreignId('shelf_id')->nullable()->constrained()->nullOnDelete();

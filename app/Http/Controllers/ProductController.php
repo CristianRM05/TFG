@@ -31,8 +31,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'num_reference' => 'required|string|max:50|unique:products,num_reference',
-            'weight' => 'required|numeric|min:0',
-            'volume' => 'required|numeric|min:0',
+            'stock' => 'required|numeric|min:0',
             'price' => 'required|numeric|min:0',
             'image_url' => 'nullable|string',
         ]);
@@ -101,8 +100,7 @@ public function showShelf(Shelf $shelf)
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'num_reference' => 'sometimes|string|max:50|unique:products,num_reference,' . $product->id,
-            'weight' => 'sometimes|numeric|min:0',
-            'volume' => 'sometimes|numeric|min:0',
+            'stock' => 'sometimes|numeric|min:0',
             'price' => 'sometimes|numeric|min:0',
             'image_url' => 'nullable|image|max:2048',
         ]);
