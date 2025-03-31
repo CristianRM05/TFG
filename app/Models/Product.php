@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
@@ -25,6 +26,7 @@ class Product extends Model
         'volume',
         'price',
         'image_url',
+        'shelf_id'
     ];
 
     /**
@@ -41,4 +43,14 @@ class Product extends Model
 {
     return $this->hasMany(Stock::class, 'product_id');
 }
+
+    public function shelf(): BelongsTo
+    {
+        return $this->belongsTo(Shelf::class);
+    }
+    public function getLocationAttribute(): ?string
+    {
+        return $this->shelf?->location;
+    }
+
 }

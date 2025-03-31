@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
+use App\Models\Shelf; 
+use Inertia\Inertia;
 class ProductController extends Controller
 {
     public function index()
@@ -42,7 +43,56 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
+//shelves
+public function unassignedProducts()
+{
+    $unassignedProducts = Product::whereNull('shelf_id')->with('shelf')->get();
+    $shelves = Shelf::all();
+    
+    return inertia('shelves/index', [
+        'unassignedProducts' => $unassignedProducts,
+        'shelves' => $shelves
+    ]);
+}
+    public function shelvesManagement()
+    {
+        return inertia('shelves/Index', [
+            'unassignedProducts' => Product::query()
+                ->whereNull('shelf_id')
+                ->select(['id', 'name', 'num_reference', 'image_url'])
+                ->get(),
+                
+            'shelves' => Shelf::query()
+                ->orderBy('aisle')
+                ->orderBy('level')
+                ->select(['id', 'name', 'aisle', 'level', 'capacity'])
+                ->get(),
+                
+            'flash' => session()->only(['success', 'error'])
+        ]);
+    }
 
+// Método para asignar estantería
+public function assignShelf(Request $request, Product $product)
+{
+    $request->validate([
+        'shelf_id' => 'required|exists:shelves,id'
+    ]);
+
+    $product->update(['shelf_id' => $request->shelf_id]);
+
+    return back()->with('success', 'Ubicación asignada correctamente');
+}
+
+public function showShelf(Shelf $shelf)
+{
+    return inertia('shelves/show', [
+        'shelf' => $shelf->load(['products' => function($query) {
+            $query->with('shelf:id,location') // Carga la relación shelf solo con location
+                  ->select('id', 'name', 'num_reference', 'image_url', 'shelf_id');
+        }])
+    ]);
+}
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
@@ -69,6 +119,29 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Producto actualizado con éxito');
     }
+
+    public function stockIndex()
+{
+    $products = Product::with(['stocks' => function($query) {
+            $query->where('available_quantity', '>', 0)
+                ->with('shelf');
+        }])
+        ->whereHas('stocks', function($query) {
+            $query->where('available_quantity', '>', 0);
+        })
+        ->get();
+
+    return Inertia::render('stock/index', [
+        'products' => $products,
+        'auth' => [
+            'user' => auth()->user() ? [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email
+            ] : null
+        ]
+    ]);
+}
+
 
     public function destroy($id)
     {
