@@ -24,23 +24,32 @@ class ProductController extends Controller
         return inertia('Products/Show', ['product' => $product]);
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
+        // Validación (sin el campo stock)
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'num_reference' => 'required|string|max:50|unique:products,num_reference',
-            'stock' => 'required|numeric|min:0',
             'price' => 'required|numeric|min:0',
             'image_url' => 'nullable|string',
+            'weight' => 'nullable|numeric|min:0',
+            'volume' => 'nullable|numeric|min:0',
+            'categoria' => 'nullable|string',
         ]);
 
+        // Crear el producto
+        $product = Product::create($validated);
 
-
-        Product::create($validated);
+        // Crear el registro de stock asociado
+        $product->stock()->create([
+            'available_quantity' => $request->stock, // El stock viene del formulario
+            'location' => 'Almacén Principal' // Valor por defecto o podrías recibirlo del request
+        ]);
 
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
+
 
     public function update(Request $request, $id)
     {
