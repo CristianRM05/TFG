@@ -56,15 +56,20 @@ public function unassignedProducts()
     public function shelvesManagement()
 {
     return inertia('shelves/Index', [
-        'unassignedProducts' => Product::query()
-            ->whereNull('shelf_id')
-            ->select(['id', 'name', 'num_reference', 'image_url'])
+        'unassignedProducts' => Product::whereNull('shelf_id')
+            ->select(['id', 'name', 'num_reference', 'image_url', 'stock'])
             ->get(),
             
-        'shelves' => Shelf::query()
-            ->orderBy('location')  // Ordena por location en lugar de aisle
-            ->select(['id', 'code', 'location', 'max_capacity']) // Solo columnas existentes
-            ->get(),
+        'shelves' => Shelf::with(['products' => function($query) {
+                $query->select('id', 'shelf_id', 'stock');
+            }])
+            ->orderBy('location')
+            ->get()
+            ->map(function ($shelf) {
+                // Asegúrate de incluir total_stock en los datos
+                $shelf->total_stock = $shelf->products->sum('stock');
+                return $shelf->only(['id', 'code', 'location', 'max_capacity', 'total_stock']);
+            }),
             
         'flash' => session()->only(['success', 'error'])
     ]);
@@ -86,11 +91,12 @@ public function showShelf(Shelf $shelf)
 {
     return inertia('shelves/show', [
         'shelf' => $shelf->load(['products' => function($query) {
-            $query->with('shelf:id,location') // Carga la relación shelf solo con location
-                  ->select('id', 'name', 'num_reference', 'image_url', 'shelf_id');
+            $query->with('shelf:id,location')
+                  ->select('id', 'name', 'num_reference', 'image_url', 'shelf_id', 'stock'); // Solo añadir stock aquí
         }])
     ]);
 }
+
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);

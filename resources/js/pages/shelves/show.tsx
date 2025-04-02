@@ -31,9 +31,11 @@ export default function ShelfShow({ shelf }: Props) {
                             </p>
                             {shelf.max_capacity && (
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{shelf.code} - {shelf.location}</h2>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                        {shelf.code} - {shelf.location}
+                                    </h2>
                                     <p className="text-gray-600 dark:text-gray-300 mt-4">
-                                        Capacidad: {shelf.total_stock}/{shelf.max_capacity} unidades
+                                        Capacidad: {shelf.products?.reduce((total, p) => total + p.stock, 0) || 0}/{shelf.max_capacity} unidades
                                     </p>
                                 </div>
                             )}

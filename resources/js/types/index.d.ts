@@ -8,6 +8,7 @@ export interface Product {
     num_reference: string;
     description?: string;
     price?: number;
+    stock: number; // <-- Añade esta línea (quitando el ? si es obligatorio)
     weight?: number;
     volume?: number;
     image_url?: string;
