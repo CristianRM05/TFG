@@ -20,17 +20,17 @@ export interface Product {
 
 export interface Shelf {
     id: number;
-    name: string;
-    aisle: string;       // Usado como "pasillo"
-    level: string;       // Usado como "nivel"
-    capacity?: number;   // Equivalente a max_capacity
-    code?: string;       // Añadido para coincidir con tu DB
-    location: string;    // Calculado dinámicamente
+    code: string;
+    location: string;
+    max_capacity: number;
     created_at?: string;
     updated_at?: string;
-    products?: Product[]; // Para la relación
+    total_stock?: number;
     products_count?: number;
+    products?: Product[];
+
 }
+
 
 export interface ShelvesPageProps extends SharedData {
     shelves: Shelf[];
@@ -39,6 +39,16 @@ export interface ShelvesPageProps extends SharedData {
         success?: string;
         error?: string;
     };
+}
+
+export interface Stock {
+    id: number;
+    product_id: number;
+    available_quantity: number;
+    shelf_id?: number;
+    created_at: string;
+    updated_at: string;
+    shelf?: Shelf; 
 }
 
 

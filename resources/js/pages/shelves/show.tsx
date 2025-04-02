@@ -16,7 +16,7 @@ export default function ShelfShow({ shelf }: Props) {
             user={auth.user}
             header={<h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Detalles de Estantería</h2>}
         >
-            <Head title={`Estantería ${shelf.name}`} />
+            <Head title={`Estantería ${shelf.location}`} />
 
             <div className="py-6">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -29,12 +29,14 @@ export default function ShelfShow({ shelf }: Props) {
                             <p className="text-gray-600 dark:text-gray-300 mb-1">
                                 <span className="font-medium">Ubicación:</span> {shelf.location} {/* Usamos location directamente */}
                             </p>
-                            {shelf.capacity && (
-                                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                    <span className="font-medium">Capacidad:</span> {shelf.products?.length || 0}/{shelf.capacity} unidades
-                                </p>
+                            {shelf.max_capacity && (
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{shelf.code} - {shelf.location}</h2>
+                                    <p className="text-gray-600 dark:text-gray-300 mt-4">
+                                        Capacidad: {shelf.total_stock}/{shelf.max_capacity} unidades
+                                    </p>
+                                </div>
                             )}
-
                             {/* Listado de productos */}
                             <h4 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
                                 Productos en esta estantería:

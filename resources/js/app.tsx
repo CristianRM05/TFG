@@ -23,11 +23,12 @@ createInertiaApp({
 // resources/js/types/stock.d.ts
 export interface Shelf {
     id: number;
-    code: string;
-    location: string;
-    max_capacity: number;
-    created_at: string;
-    updated_at: string;
+    code: string;          // Existe en tu tabla
+    location: string;      // Existe en tu tabla
+    max_capacity: number;  // Existe como 'max_capacity' en tu tabla
+    total_stock: number; // Añade esta línea
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface Stock {
@@ -51,10 +52,11 @@ export interface Product {
     image_url?: string | null;
     created_at: string;
     updated_at: string;
+    occupied_capacity?: number; // Añade esta línea
+
 }
 
 export interface StockProduct extends Product {
     stocks: Stock[];
-}
-// This will set light / dark mode on load...
+}// This will set light / dark mode on load...
 initializeTheme();

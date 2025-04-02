@@ -54,22 +54,21 @@ public function unassignedProducts()
     ]);
 }
     public function shelvesManagement()
-    {
-        return inertia('shelves/Index', [
-            'unassignedProducts' => Product::query()
-                ->whereNull('shelf_id')
-                ->select(['id', 'name', 'num_reference', 'image_url'])
-                ->get(),
-                
-            'shelves' => Shelf::query()
-                ->orderBy('aisle')
-                ->orderBy('level')
-                ->select(['id', 'name', 'aisle', 'level', 'capacity'])
-                ->get(),
-                
-            'flash' => session()->only(['success', 'error'])
-        ]);
-    }
+{
+    return inertia('shelves/Index', [
+        'unassignedProducts' => Product::query()
+            ->whereNull('shelf_id')
+            ->select(['id', 'name', 'num_reference', 'image_url'])
+            ->get(),
+            
+        'shelves' => Shelf::query()
+            ->orderBy('location')  // Ordena por location en lugar de aisle
+            ->select(['id', 'code', 'location', 'max_capacity']) // Solo columnas existentes
+            ->get(),
+            
+        'flash' => session()->only(['success', 'error'])
+    ]);
+}
 
 // Método para asignar estantería
 public function assignShelf(Request $request, Product $product)
@@ -118,19 +117,92 @@ public function showShelf(Shelf $shelf)
         return redirect()->back()->with('success', 'Producto actualizado con éxito');
     }
 
-    public function stockIndex()
+public function stockIndex()
 {
+    // 1. Obtenemos productos con stocks y relaciones (manteniendo tu estructura original)
     $products = Product::with(['stocks' => function($query) {
-            $query->where('available_quantity', '>', 0)
-                ->with('shelf');
-        }])
-        ->whereHas('stocks', function($query) {
-            $query->where('available_quantity', '>', 0);
-        })
-        ->get();
+        $query->where('available_quantity', '>', 0)
+              ->with(['product.shelf']); // Relación original
+    }, 'shelf']) 
+    ->whereHas('stocks', function($query) {
+        $query->where('available_quantity', '>', 0);
+    })
+    ->get()
+    ->each(function ($product) {
+        // 2. Mantenemos tu lógica original de relación shelf
+        $product->stocks->each(function ($stock) use ($product) {
+            if (!$stock->relationLoaded('shelf') && $product->relationLoaded('shelf')) {
+                $stock->setRelation('shelf', $product->shelf);
+            }
+        });
+
+        // 3. Cálculos por producto (existente)
+        $product->occupied_capacity = $product->stocks->sum('available_quantity');
+        
+        if ($product->shelf && $product->shelf->max_capacity > 0) {
+            $product->capacity_percentage = round(
+                ($product->occupied_capacity / $product->shelf->max_capacity) * 100, 
+                2
+            );
+        }
+
+        // 4. Mantenemos datos originales para compatibilidad
+        $product->original_stocks = $product->stocks->map(function ($stock) {
+            return [
+                'id' => $stock->id,
+                'quantity' => $stock->available_quantity,
+                'shelf_data' => $stock->shelf ? [
+                    'id' => $stock->shelf->id,
+                    'location' => $stock->shelf->location
+                ] : null
+            ];
+        });
+    });
+
+    // 5. Preparamos datos para vistas (sin perder funcionalidad)
+    $shelvesData = $products->groupBy('shelf.id')->map(function ($products, $shelfId) {
+        $firstProduct = $products->first();
+        $shelf = $firstProduct->shelf;
+        
+        return [
+            'id' => $shelf->id,
+            'location' => $shelf->location,
+            'max_capacity' => $shelf->max_capacity,
+            'total_occupied' => $products->sum('occupied_capacity'),
+            'occupation_percentage' => $shelf->max_capacity > 0 
+                ? round(($products->sum('occupied_capacity') / $shelf->max_capacity) * 100, 2)
+                : 0,
+            'products_count' => $products->count(),
+            'original_shelf' => $shelf, // Mantenemos objeto original
+            'products' => $products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'occupied_capacity' => $product->occupied_capacity,
+                    'percentage' => $product->capacity_percentage,
+                    'stocks' => $product->original_stocks // Datos originales
+                ];
+            })
+        ];
+    })->values();
+
+    // 6. Debug completo (verifica ambos formatos)
+    \Log::debug('Datos StockIndex', [
+        'products_sample' => $products->first() ? [
+            'id' => $products->first()->id,
+            'stocks_count' => $products->first()->stocks->count(),
+            'shelf_data' => $products->first()->shelf,
+            'calculations' => [
+                'occupied' => $products->first()->occupied_capacity,
+                'percentage' => $products->first()->capacity_percentage
+            ]
+        ] : null,
+        'shelves_sample' => $shelvesData->first()
+    ]);
 
     return Inertia::render('stock/index', [
-        'products' => $products,
+        'products' => $products, // Formato original
+        'shelves' => $shelvesData, // Nuevo formato agrupado
         'auth' => [
             'user' => auth()->user() ? [
                 'name' => auth()->user()->name,
@@ -139,8 +211,6 @@ public function showShelf(Shelf $shelf)
         ]
     ]);
 }
-
-
     public function destroy($id)
     {
         $product = Product::findOrFail($id);

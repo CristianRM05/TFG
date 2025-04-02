@@ -81,13 +81,33 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                            <div>{stock.location}</div>
-                                                            {stock.shelf?.max_capacity && (
+                                                            {/* Debug detallado */}
+                                                            {console.log('Datos completos:', {
+                                                                stockId: stock.id,
+                                                                productId: stock.product_id,
+                                                                shelfId: stock.product?.shelf_id, // Shelf del producto
+                                                                shelfLocation: stock.product?.shelf?.location // Location del shelf del producto
+                                                            })}
+
+                                                            {/* Mostramos la ubicación del shelf asociado al PRODUCTO */}
+                                                            <div>
+                                                                {stock.product?.shelf ? (
+                                                                    stock.product.shelf.location
+                                                                ) : (
+                                                                    <span className="text-yellow-500">
+                                                                        Producto no tiene estante asignado (Product ID: {stock.product_id})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Mostramos capacidad si existe */}
+                                                            {stock.product?.shelf?.max_capacity && (
                                                                 <div className="text-xs text-gray-400 dark:text-gray-500">
-                                                                    Capacity: {stock.shelf.max_capacity}
+                                                                    Capacity: {stock.product.shelf.max_capacity}
                                                                 </div>
                                                             )}
                                                         </td>
+
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <div className="flex space-x-2">
                                                                 <Link 

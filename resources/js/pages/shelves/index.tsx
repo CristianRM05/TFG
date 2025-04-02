@@ -87,7 +87,7 @@ export default function ShelvesIndex() {
                                                 <option value="" disabled className="dark:bg-gray-800">Seleccionar estantería...</option>
                                                 {shelves.map((shelf) => (
                                                     <option key={shelf.id} value={shelf.id} className="dark:bg-gray-700">
-                                                        {shelf.name} - {shelf.location} {/* Mostrar location directamente */}
+                                                        {shelf.location} - {shelf.location} {/* Mostrar location directamente */}
                                                     </option>
                                                 ))}
                                             </select>
@@ -111,13 +111,10 @@ export default function ShelvesIndex() {
                                     <div key={shelf.id} className="border dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-700">
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <h4 className="font-bold text-gray-900 dark:text-white">{shelf.name}</h4>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    Ubicación: {shelf.location} {/* Mostrar location directamente */}
-                                                </p>
-                                                {shelf.capacity && (
+                                                <h4 className="font-bold text-gray-900 dark:text-white">{shelf.location}</h4>
+                                                {shelf.max_capacity && (
                                                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                        Capacidad: {shelf.capacity} unidades
+                                                        Stock: {shelf.total_stock || 0}/{shelf.max_capacity} unidades
                                                     </p>
                                                 )}
                                             </div>
