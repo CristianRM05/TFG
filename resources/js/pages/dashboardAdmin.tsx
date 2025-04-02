@@ -148,6 +148,45 @@ export default function AdminDashboard() {
         license_expiration_date: '',
     });
 
+
+    function validarDNI(dni: string): boolean {
+        const letras = 'TRWAGMYFPDXBNJZSQVHLCKE';
+        const dniRegex = /^\d{8}[A-Z]$/;
+        if (!dniRegex.test(dni)) return false;
+
+        const numero = parseInt(dni.substring(0, 8), 10);
+        const letra = dni.charAt(8);
+        return letras.charAt(numero % 23) === letra;
+    }
+
+    function validarTelefono(telefono: string): boolean {
+        return /^(6|7|9)\d{8}$/.test(telefono);
+    }
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!validarDNI(data.dni)) {
+            alert('❌ DNI no válido. Debe tener 8 cifras seguidas de una letra correcta.');
+            return;
+        }
+
+        if (!validarTelefono(data.phone)) {
+            alert('❌ Teléfono no válido. Debe tener 9 cifras y comenzar por 6, 7 o 9.');
+            return;
+        }
+
+        post('/admin/users', {
+            onSuccess: () => {
+                reset();
+                setOpenUserModal(false);
+                alert('Usuario creado con éxito');
+            },
+            forceFormData: true,
+        });
+    };
+
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/admin/users', {

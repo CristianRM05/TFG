@@ -11,6 +11,9 @@ Route::prefix('products')->group(function () {
         Route::post('/', [ProductController::class, 'store']);     // Crear producto
         Route::put('/{id}', [ProductController::class, 'update']); // Actualizar producto
         Route::delete('/{id}', [ProductController::class, 'destroy']); // Eliminar producto
+        Route::get('/api/productos', [ProductController::class, 'apiList']);
+
 
 });
 Route::get('/categorias', [CategoryController::class, 'index']);
+

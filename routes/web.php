@@ -8,7 +8,6 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Middleware\VerifyCsrfToken; // Importar el middleware CSRF
-use App\Http\Middleware\CorsMiddleware;  // Importar el middleware CORS
 
 
 Route::get('/', function () {
@@ -28,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
  * Ruta protegida solo para administradores
  */
 Route::middleware(['auth'])->get('/admin/dashboard', function () {
-    return Inertia::render('dashboardAdmin'); // 👈 esto tiene que existir
+    return Inertia::render('dashboardAdmin');
 })->name('admin.dashboard');
 
 Route::get('/middleware-test', function () {
@@ -42,7 +41,16 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
 });
 
-Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+//para consumir los datos de la base de datos
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/productos', [ProductController::class, 'index']);
+});
+
+//devuelve a una vista
+Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
+    return Inertia::render('ManagerPages/listProducts');
+})->name('almacen.productos');
+
 
 
 require __DIR__.'/settings.php';
