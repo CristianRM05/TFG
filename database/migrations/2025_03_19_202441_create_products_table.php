@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->string('num_reference');
+            $table->integer('stock');
             $table->float('price');
             $table->string('image_url')->nullable(); // Campo para almacenar la URL de la imagen
 

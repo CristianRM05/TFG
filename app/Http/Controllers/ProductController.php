@@ -36,6 +36,7 @@ class ProductController extends Controller
             'weight' => 'nullable|numeric|min:0',
             'volume' => 'nullable|numeric|min:0',
             'categoria' => 'nullable|string',
+            'stock' => 'nullable|numeric|min:0',
         ]);
 
         // Crear el producto
