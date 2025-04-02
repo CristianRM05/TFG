@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\categoryProducts;
 
 return new class extends Migration
 {
@@ -11,17 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('description');
             $table->string('num_reference');
-            $table->float('stock');
+            $table->integer('stock');
             $table->float('price');
             $table->string('image_url')->nullable(); // Campo para almacenar la URL de la imagen
+            $table->enum('categoria', array_column(categoryProducts::cases(), 'value'));
+
             $table->foreignId('shelf_id')->nullable()->constrained()->nullOnDelete();
+
             $table->timestamps();
         });
+
     }
 
     /**

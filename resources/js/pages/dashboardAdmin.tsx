@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
-import type { BreadcrumbItem } from '@/types';
-import { useState } from 'react';
+import type { BreadcrumbItem, User } from '@/types';
+import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,6 +20,14 @@ export default function AdminDashboard() {
         auth: { user: User | null };
         roles: RoleOption[];
     }>().props;
+    const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+    useEffect(() => {
+        fetch('/api/categorias')
+            .then(response => response.json())
+            .then(data => setCategorias(data))
+            .catch(error => console.error('Error al obtener categorías:', error));
+    }, []);
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>;
     const uploadToImgBB = async (file: File): Promise<string | null> => {
@@ -58,24 +66,27 @@ export default function AdminDashboard() {
         description: '',
         num_reference: '',
         stock: '',
+        categoria: '',
         price: '',
         image_url: "",
     });
 
+
+
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Validaciones numéricas
         const price = parseFloat(productData.price);
-        const weight = parseFloat(productData.weight);
-        const volume = parseFloat(productData.volume);
+        const stock = parseInt(productData.stock);
 
-        if (price < 0 || weight < 0 || volume < 0) {
-            alert('El precio, peso y volumen no pueden ser negativos.');
+        if (price < 0 || stock < 0) {
+            alert('El precio y el stock no pueden ser negativos.');
             return;
         }
 
+        // Procesar imagen si se subió
         let imageUrl = '';
-
         if (productData.image_url instanceof File) {
             const uploadedUrl = await uploadToImgBB(productData.image_url);
             if (!uploadedUrl) {
@@ -83,18 +94,30 @@ export default function AdminDashboard() {
                 return;
             }
             imageUrl = uploadedUrl;
+        } else if (typeof productData.image_url === 'string') {
+            imageUrl = productData.image_url;
         }
 
-        setProductData({
+        // Preparar datos para enviar
+        const formData = {
             ...productData,
             image_url: imageUrl,
-        });
+            price: price,
+            stock: stock,
+            categoria: productData.categoria || null,
+        };
 
-        postProduct('/products', {
+        // Enviar al backend
+        postProduct(route('products.store'), {
+            data: formData,
             onSuccess: () => {
+                alert('Producto e inventario creados con éxito');
                 resetProduct();
                 setOpenProductModal(false);
-                alert('Producto creado con éxito');
+            },
+            onError: (errors) => {
+                console.error('Error al crear producto:', errors);
+                alert('Hubo un error al crear el producto');
             },
             forceFormData: false,
         });
@@ -212,6 +235,25 @@ export default function AdminDashboard() {
                         <div><Label htmlFor="num_reference">Referencia</Label><Input id="num_reference" value={productData.num_reference} onChange={e => setProductData('num_reference', e.target.value)} /><InputError message={productErrors.num_reference} /></div>
 
                         <div><Label htmlFor="stock">Stock</Label><Input id="stock" type="number" step="1" min="0" value={productData.stock} onChange={e => setProductData('stock', e.target.value)} /><InputError message={productErrors.stock} /></div>
+
+                        <div>
+                            <Label htmlFor="categoria">Categoría</Label>
+                            <select
+                                id="categoria"
+                                value={productData.categoria || ''}
+                                onChange={e => setProductData('categoria', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                            >
+                                <option value="">Seleccione una categoría</option>
+                                {categorias.map(c => (
+                                    <option key={c.value} value={c.value}>
+                                        {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                                    </option>
+                                ))}
+
+                            </select>
+                            <InputError message={productErrors.categoria} />
+                        </div>
 
                         <div><Label htmlFor="price">Precio (€)</Label><Input id="price" type="number" step="0.01" min="0" value={productData.price} onChange={e => setProductData('price', e.target.value)} /><InputError message={productErrors.price} /></div>
 
