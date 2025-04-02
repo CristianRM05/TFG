@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum categoryProducts: string
 {
-    case refreco = 'refreco';
+    case refresco = 'refresco';
     case whisky = 'whisky';
     case ron = 'ron';
     case vodka = 'vodka';

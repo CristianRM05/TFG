@@ -58,24 +58,27 @@ export default function AdminDashboard() {
         description: '',
         num_reference: '',
         stock: '',
+        categoria: '',
         price: '',
         image_url: "",
     });
 
+    
+
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Validaciones numéricas
         const price = parseFloat(productData.price);
-        const weight = parseFloat(productData.weight);
-        const volume = parseFloat(productData.volume);
+        const stock = parseInt(productData.stock);
 
-        if (price < 0 || weight < 0 || volume < 0) {
-            alert('El precio, peso y volumen no pueden ser negativos.');
+        if (price < 0 || stock < 0) {
+            alert('El precio y el stock no pueden ser negativos.');
             return;
         }
 
+        // Procesar imagen si se subió
         let imageUrl = '';
-
         if (productData.image_url instanceof File) {
             const uploadedUrl = await uploadToImgBB(productData.image_url);
             if (!uploadedUrl) {
@@ -83,18 +86,30 @@ export default function AdminDashboard() {
                 return;
             }
             imageUrl = uploadedUrl;
+        } else if (typeof productData.image_url === 'string') {
+            imageUrl = productData.image_url;
         }
 
-        setProductData({
+        // Preparar datos para enviar
+        const formData = {
             ...productData,
             image_url: imageUrl,
-        });
+            price: price,
+            stock: stock, 
+            categoria: productData.categoria || null,
+        };
 
-        postProduct('/products', {
+        // Enviar al backend
+        postProduct(route('products.store'), {
+            data: formData,
             onSuccess: () => {
+                alert('Producto e inventario creados con éxito');
                 resetProduct();
                 setOpenProductModal(false);
-                alert('Producto creado con éxito');
+            },
+            onError: (errors) => {
+                console.error('Error al crear producto:', errors);
+                alert('Hubo un error al crear el producto');
             },
             forceFormData: false,
         });
@@ -212,6 +227,26 @@ export default function AdminDashboard() {
                         <div><Label htmlFor="num_reference">Referencia</Label><Input id="num_reference" value={productData.num_reference} onChange={e => setProductData('num_reference', e.target.value)} /><InputError message={productErrors.num_reference} /></div>
 
                         <div><Label htmlFor="stock">Stock</Label><Input id="stock" type="number" step="1" min="0" value={productData.stock} onChange={e => setProductData('stock', e.target.value)} /><InputError message={productErrors.stock} /></div>
+
+                        <div>
+                            <Label htmlFor="categoria">Categoría</Label>
+                            <select
+                                id="categoria"
+                                value={productData.categoria || ''}
+                                onChange={e => setProductData('categoria', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                            >
+                                <option value="">Seleccione una categoría</option>
+                                <option value="destiladas">Destiladas</option>
+                                <option value="refresco">Refresco</option>
+                                <option value="zumo">Zumo</option>
+                                <option value="agua">Agua</option>
+                                <option value="cerveza">Cerveza</option>
+                                <option value="vino">Vino</option>
+                                <option value="energetica">Energética</option>
+                            </select>
+                            <InputError message={productErrors.categoria} />
+                        </div>
 
                         <div><Label htmlFor="price">Precio (€)</Label><Input id="price" type="number" step="0.01" min="0" value={productData.price} onChange={e => setProductData('price', e.target.value)} /><InputError message={productErrors.price} /></div>
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
@@ -24,6 +25,7 @@ class Product extends Model
         'stock',
         'price',
         'image_url',
+        'categoria',
     ];
 
     /**
@@ -34,4 +36,10 @@ class Product extends Model
     protected $casts = [
         'price' => 'float'
     ];
+
+        public function stock(): HasOne
+    {
+        return $this->hasOne(Stock::class);
+    }
+
 }
