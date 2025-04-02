@@ -10,5 +10,11 @@ enum categoryProducts: string
     case vodka = 'vodka';
     case ginebra = 'ginebra';
     case cerveza = 'cerveza';
+    case tequila = 'tequila';
+    case vino = 'vino';
+    case licor = 'licor';
+    case agua = 'agua';
+    case energetico = 'energético';
+    case cocktail = 'cocktail';
     case otros = 'otros';
 }
