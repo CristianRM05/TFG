@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
-import type { BreadcrumbItem } from '@/types';
-import { useState } from 'react';
+import type { BreadcrumbItem, User } from '@/types';
+import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,6 +20,14 @@ export default function AdminDashboard() {
         auth: { user: User | null };
         roles: RoleOption[];
     }>().props;
+    const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+    useEffect(() => {
+        fetch('/api/categorias')
+            .then(response => response.json())
+            .then(data => setCategorias(data))
+            .catch(error => console.error('Error al obtener categorías:', error));
+    }, []);
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>;
     const uploadToImgBB = async (file: File): Promise<string | null> => {
@@ -63,7 +71,7 @@ export default function AdminDashboard() {
         image_url: "",
     });
 
-    
+
 
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,7 +103,7 @@ export default function AdminDashboard() {
             ...productData,
             image_url: imageUrl,
             price: price,
-            stock: stock, 
+            stock: stock,
             categoria: productData.categoria || null,
         };
 
@@ -237,13 +245,12 @@ export default function AdminDashboard() {
                                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
                             >
                                 <option value="">Seleccione una categoría</option>
-                                <option value="destiladas">Destiladas</option>
-                                <option value="refresco">Refresco</option>
-                                <option value="zumo">Zumo</option>
-                                <option value="agua">Agua</option>
-                                <option value="cerveza">Cerveza</option>
-                                <option value="vino">Vino</option>
-                                <option value="energetica">Energética</option>
+                                {categorias.map(c => (
+                                    <option key={c.value} value={c.value}>
+                                        {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                                    </option>
+                                ))}
+
                             </select>
                             <InputError message={productErrors.categoria} />
                         </div>

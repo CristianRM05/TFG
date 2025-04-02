@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
-
+use App\Http\Controllers\CategoryController;
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);      // Listar productos
     Route::get('/{id}', [ProductController::class, 'show']);   // Mostrar un solo producto
@@ -13,3 +13,4 @@ Route::prefix('products')->group(function () {
         Route::delete('/{id}', [ProductController::class, 'destroy']); // Eliminar producto
 
 });
+Route::get('/categorias', [CategoryController::class, 'index']);
