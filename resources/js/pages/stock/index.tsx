@@ -50,82 +50,66 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                         {products.length > 0 ? (
                                             products.map(product => (
-                                                product.stocks?.map((stock, index) => (
-                                                    <tr key={`${product.id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <div className="flex items-center">
-                                                                {product.image_url && (
-                                                                    <img 
-                                                                        src={product.image_url} 
-                                                                        alt={product.name} 
-                                                                        className="h-10 w-10 rounded-full object-cover"
-                                                                    />
-                                                                )}
-                                                                <div className="ml-4">
-                                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                                        {product.name}
-                                                                    </div>
-                                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                                        ${product.price?.toFixed(2)}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                            {product.num_reference}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                ${stock.available_quantity > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
-                                                                {stock.available_quantity}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                            {/* Debug detallado */}
-                                                            {console.log('Datos completos:', {
-                                                                stockId: stock.id,
-                                                                productId: stock.product_id,
-                                                                shelfId: stock.product?.shelf_id, // Shelf del producto
-                                                                shelfLocation: stock.product?.shelf?.location // Location del shelf del producto
-                                                            })}
-
-                                                            {/* Mostramos la ubicación del shelf asociado al PRODUCTO */}
-                                                            <div>
-                                                                {stock.product?.shelf ? (
-                                                                    stock.product.shelf.location
-                                                                ) : (
-                                                                    <span className="text-yellow-500">
-                                                                        Producto no tiene estante asignado (Product ID: {stock.product_id})
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Mostramos capacidad si existe */}
-                                                            {stock.product?.shelf?.max_capacity && (
-                                                                <div className="text-xs text-gray-400 dark:text-gray-500">
-                                                                    Capacity: {stock.product.shelf.max_capacity}
-                                                                </div>
+                                                <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center">
+                                                            {product.image_url && (
+                                                                <img
+                                                                    src={product.image_url}
+                                                                    alt={product.name}
+                                                                    className="h-10 w-10 rounded-full object-cover"
+                                                                />
                                                             )}
-                                                        </td>
-
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <div className="flex space-x-2">
-                                                                <Link 
-                                                                    href={`/products/${product.id}`} 
-                                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-                                                                >
-                                                                    View
-                                                                </Link>
-                                                                <Link 
-                                                                    href={`/products/${product.id}/edit`} 
-                                                                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
-                                                                >
-                                                                    Edit
-                                                                </Link>
+                                                            <div className="ml-4">
+                                                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                                    {product.name}
+                                                                </div>
+                                                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                                                    ${product.price?.toFixed(2)}
+                                                                </div>
                                                             </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                        {product.num_reference}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${product.stock > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+                                                            {product.stock}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                        {product.shelf ? (
+                                                            product.shelf.location
+                                                        ) : (
+                                                            <span className="text-yellow-500">
+                                                                Producto no tiene estante asignado (Product ID: {product.id})
+                                                            </span>
+                                                        )}
+                                                        {product.shelf?.max_capacity && (
+                                                            <div className="text-xs text-gray-400 dark:text-gray-500">
+                                                                Capacity: {product.shelf.max_capacity}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <div className="flex space-x-2">
+                                                            <Link
+                                                                href={`/products/${product.id}`}
+                                                                className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                                                            >
+                                                                View
+                                                            </Link>
+                                                            <Link
+                                                                href={`/products/${product.id}/edit`}
+                                                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                                                            >
+                                                                Edit
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             ))
                                         ) : (
                                             <tr>
