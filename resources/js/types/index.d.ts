@@ -40,3 +40,65 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+interface Product {
+    id: number;
+    name: string;
+    num_reference: string;
+    price?: number;
+    discount_percent?: number | null;
+    final_price?: number;
+    image_url?: string;
+    stock: number; 
+    location: string;
+    max_capacity?: number;
+}
+
+interface Props {
+    products: Product[];
+    auth: {
+        user: {
+            name: string;
+            email: string;
+        };
+    };
+}
+
+interface Stock {
+    available_quantity: number;
+    location: string;
+    shelf?: {
+        max_capacity?: number;
+    };
+}
+
+interface StockProduct {
+    id: number;
+    name: string;
+    num_reference: string;
+    price?: number;
+    image_url?: string;
+    stocks: Stock[];
+}
+
+export interface Shelf {
+    id: number;
+    code: string;
+    location: string;
+    max_capacity: number;
+    created_at?: string;
+    updated_at?: string;
+    total_stock?: number;
+    products_count?: number;
+    products?: Product[];
+}
+
+interface Props {
+    products: StockProduct[];
+    auth: {
+        user: {
+            name: string;
+            email: string;
+        };
+    };
+}

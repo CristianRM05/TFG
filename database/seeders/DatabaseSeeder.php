@@ -34,8 +34,10 @@ class DatabaseSeeder extends Seeder
             'license_expiration_date' => '2026-05-20',
         ]);
 
-        dd('Usuario creado:', $user);
-
+        //dd('Usuario creado:', $user);
+        $this->call([
+                    ShelfSeeder::class,
+                ]);
 
     }
 }

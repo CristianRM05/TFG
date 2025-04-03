@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Shelf;
+use Inertia\Inertia;
+
 
 class ProductController extends Controller
 {
@@ -43,10 +46,10 @@ class ProductController extends Controller
         $product = Product::create($validated);
 
         // Crear el registro de stock asociado
-        $product->stock()->create([
-            'available_quantity' => $request->stock, // El stock viene del formulario
-            'location' => 'Almacén Principal' // Valor por defecto o podrías recibirlo del request
-        ]);
+        $product->stock()->create([ 
+        'available_quantity' => $request->stock ?? 0, // Valor por defecto
+        'location' => 'Almacén Principal'
+    ]);
 
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
@@ -77,6 +80,105 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Producto actualizado con éxito');
     }
+
+
+    public function unassignedProducts()
+    {
+        $unassignedProducts = Product::whereNull('shelf_id')->with('shelf')->get();
+        $shelves = Shelf::all();
+        
+        return inertia('shelves/shelvesIndex', [
+            'unassignedProducts' => $unassignedProducts,
+            'shelves' => $shelves
+        ]);
+    }
+
+    public function shelvesManagement()
+    {
+        return inertia('shelves/shelvesIndex', [
+            'unassignedProducts' => Product::whereNull('shelf_id')
+                ->select(['id', 'name', 'num_reference', 'image_url', 'stock'])
+                ->get(),
+                
+            'shelves' => Shelf::with(['products' => function($query) {
+                    $query->select('id', 'shelf_id', 'stock');
+                }])
+                ->orderBy('location')
+                ->get()
+                ->map(function ($shelf) {
+                    $shelf->total_stock = $shelf->products->sum('stock');
+                    return $shelf->only(['id', 'code', 'location', 'max_capacity', 'total_stock']);
+                }),
+                
+            'flash' => session()->only(['success', 'error'])
+        ]);
+    }
+
+    public function assignShelf(Request $request, $productId)
+{
+    $request->validate(['shelf_id' => 'required|exists:shelves,id']);
+    
+    $product = Product::findOrFail($productId);
+    $shelf = Shelf::findOrFail($request->shelf_id);
+    
+    // Calcular el stock total actual en la estantería
+    $currentStockInShelf = Product::where('shelf_id', $shelf->id)->sum('stock');
+    
+    // Verificar si la suma supera la capacidad
+    if (($currentStockInShelf + $product->stock) > $shelf->max_capacity) {
+        return back()->withErrors([
+            'shelf_id' => 'La estantería no tiene suficiente capacidad. '.
+                         'Capacidad máxima: '.$shelf->max_capacity.
+                         ', Stock actual: '.$currentStockInShelf.
+                         ', Stock a añadir: '.$product->stock
+        ]);
+    }
+    
+    $product->shelf_id = $request->shelf_id;
+    $product->save();
+    
+    return back()->with('success', 'Producto asignado correctamente a la estantería');
+}
+
+    public function showShelf(Shelf $shelf)
+    {
+        return inertia('shelves/show', [
+            'shelf' => $shelf->load(['products' => function($query) {
+                $query->with('shelf:id,location')
+                    ->select('id', 'name', 'num_reference', 'image_url', 'shelf_id', 'stock');
+            }])
+        ]);
+    }
+
+public function stockIndex()
+{
+    $products = Product::with(['shelf'])
+        ->select(['id', 'name', 'num_reference', 'price', 'image_url', 'stock', 'shelf_id'])
+        ->get()
+        ->map(function ($product) {
+            // Estructura compatible con el frontend React
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'num_reference' => $product->num_reference,
+                'price' => $product->price,
+                'image_url' => $product->image_url,
+                'stocks' => [ // Mantenemos la estructura de array que espera el frontend
+                    [
+                        'available_quantity' => $product->stock, // Usamos el campo directo
+                        'location' => $product->shelf?->location ?? 'Sin ubicación',
+                        'shelf' => $product->shelf ? [
+                            'max_capacity' => $product->shelf->max_capacity
+                        ] : null
+                    ]
+                ]
+            ];
+        });
+
+    return Inertia::render('stock/stockIndex', [
+        'products' => $products
+    ]);
+}
 
     public function destroy($id)
     {
