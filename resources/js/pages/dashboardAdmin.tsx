@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
-import type { BreadcrumbItem } from '@/types';
-import { useState } from 'react';
+import type { BreadcrumbItem, User } from '@/types';
+import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,6 +20,14 @@ export default function AdminDashboard() {
         auth: { user: User | null };
         roles: RoleOption[];
     }>().props;
+    const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+    useEffect(() => {
+        fetch('/api/categorias')
+            .then(response => response.json())
+            .then(data => setCategorias(data))
+            .catch(error => console.error('Error al obtener categorías:', error));
+    }, []);
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>;
     const uploadToImgBB = async (file: File): Promise<string | null> => {
@@ -58,6 +66,7 @@ export default function AdminDashboard() {
         description: '',
         num_reference: '',
         stock: '',
+        categoria: '',
         price: '',
         image_url: "",
     });
@@ -66,16 +75,14 @@ export default function AdminDashboard() {
         e.preventDefault();
 
         const price = parseFloat(productData.price);
-        const weight = parseFloat(productData.weight);
-        const volume = parseFloat(productData.volume);
+        const stock = parseInt(productData.stock);
 
-        if (price < 0 || weight < 0 || volume < 0) {
-            alert('El precio, peso y volumen no pueden ser negativos.');
+        if (price < 0 || stock < 0) {
+            alert('El precio y el stock no pueden ser negativos.');
             return;
         }
 
         let imageUrl = '';
-
         if (productData.image_url instanceof File) {
             const uploadedUrl = await uploadToImgBB(productData.image_url);
             if (!uploadedUrl) {
@@ -83,24 +90,32 @@ export default function AdminDashboard() {
                 return;
             }
             imageUrl = uploadedUrl;
+        } else if (typeof productData.image_url === 'string') {
+            imageUrl = productData.image_url;
         }
 
-        setProductData({
+        const formData = {
             ...productData,
             image_url: imageUrl,
-        });
+            price: price,
+            stock: stock,
+            categoria: productData.categoria || null,
+        };
 
-        postProduct('/products', {
+        postProduct('/admin/products', {
+            data: formData,
             onSuccess: () => {
+                alert('Producto e inventario creados con éxito');
                 resetProduct();
                 setOpenProductModal(false);
-                alert('Producto creado con éxito');
+            },
+            onError: (errors) => {
+                console.error('Error al crear producto:', errors);
+                alert('Hubo un error al crear el producto');
             },
             forceFormData: false,
         });
     };
-
-
 
     const {
         data,
@@ -125,8 +140,33 @@ export default function AdminDashboard() {
         license_expiration_date: '',
     });
 
-    const submit = (e: React.FormEvent) => {
+    function validarDNI(dni: string): boolean {
+        const letras = 'TRWAGMYFPDXBNJZSQVHLCKE';
+        const dniRegex = /^\d{8}[A-Z]$/;
+        if (!dniRegex.test(dni)) return false;
+
+        const numero = parseInt(dni.substring(0, 8), 10);
+        const letra = dni.charAt(8);
+        return letras.charAt(numero % 23) === letra;
+    }
+
+    function validarTelefono(telefono: string): boolean {
+        return /^(6|7|9)\d{8}$/.test(telefono);
+    }
+
+    const submitUser = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validarDNI(data.dni)) {
+            alert('❌ DNI no válido. Debe tener 8 cifras seguidas de una letra correcta.');
+            return;
+        }
+
+        if (!validarTelefono(data.phone)) {
+            alert('❌ Teléfono no válido. Debe tener 9 cifras y comenzar por 6, 7 o 9.');
+            return;
+        }
+
         post('/admin/users', {
             onSuccess: () => {
                 reset();
@@ -163,7 +203,7 @@ export default function AdminDashboard() {
             <Dialog open={openUserModal} onClose={() => setOpenUserModal(false)} className="fixed inset-0 z-50 flex items-center justify-center">
                 <Dialog.Panel className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-2xl overflow-y-auto max-h-screen">
                     <Dialog.Title className="text-xl font-bold mb-4">Registrar nuevo empleado</Dialog.Title>
-                    <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <form onSubmit={submitUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="col-span-2 text-lg font-medium text-gray-600">Datos personales</div>
                         <div><Label htmlFor="name">Nombre</Label><Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} /><InputError message={errors.name} /></div>
                         <div><Label htmlFor="last_name">Apellido</Label><Input id="last_name" value={data.last_name} onChange={e => setData('last_name', e.target.value)} /><InputError message={errors.last_name} /></div>
@@ -213,6 +253,25 @@ export default function AdminDashboard() {
 
                         <div><Label htmlFor="stock">Stock</Label><Input id="stock" type="number" step="1" min="0" value={productData.stock} onChange={e => setProductData('stock', e.target.value)} /><InputError message={productErrors.stock} /></div>
 
+                        <div>
+                            <Label htmlFor="categoria">Categoría</Label>
+                            <select
+                                id="categoria"
+                                value={productData.categoria || ''}
+                                onChange={e => setProductData('categoria', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                            >
+                                <option value="">Seleccione una categoría</option>
+                                {categorias.map(c => (
+                                    <option key={c.value} value={c.value}>
+                                        {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                                    </option>
+                                ))}
+
+                            </select>
+                            <InputError message={productErrors.categoria} />
+                        </div>
+
                         <div><Label htmlFor="price">Precio (€)</Label><Input id="price" type="number" step="0.01" min="0" value={productData.price} onChange={e => setProductData('price', e.target.value)} /><InputError message={productErrors.price} /></div>
 
                         <div>
@@ -229,7 +288,7 @@ export default function AdminDashboard() {
                                             alert('No se pudo subir la imagen a ImgBB.');
                                             return;
                                         }
-                                        setProductData('image_url', uploadedUrl); // ✅ guarda string
+                                        setProductData('image_url', uploadedUrl);
                                     }
                                 }}
                             />

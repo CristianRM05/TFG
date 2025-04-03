@@ -31,7 +31,6 @@ export default function Dashboard() {
         switch (user.role) {
             case 'Manager':
                 return [
-                    { title: '📦 Productos', link: '/products' },
                     { title: '📈 Movimientos', link: '/warehouse-movements' },
                     { title: '🧾 Pedidos', link: '/orders' },
                     { title: '🗂 Stock actual', link: '/stock' },
