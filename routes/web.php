@@ -40,6 +40,8 @@ Route::middleware(['auth'])->get('/admin/dashboard', [AdminDashboardController::
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
 });
+Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
+
 
 //para consumir los datos de la base de datos
 Route::middleware(['auth'])->group(function () {

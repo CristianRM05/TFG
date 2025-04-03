@@ -71,12 +71,9 @@ export default function AdminDashboard() {
         image_url: "",
     });
 
-
-
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validaciones numéricas
         const price = parseFloat(productData.price);
         const stock = parseInt(productData.stock);
 
@@ -85,7 +82,6 @@ export default function AdminDashboard() {
             return;
         }
 
-        // Procesar imagen si se subió
         let imageUrl = '';
         if (productData.image_url instanceof File) {
             const uploadedUrl = await uploadToImgBB(productData.image_url);
@@ -98,7 +94,6 @@ export default function AdminDashboard() {
             imageUrl = productData.image_url;
         }
 
-        // Preparar datos para enviar
         const formData = {
             ...productData,
             image_url: imageUrl,
@@ -107,8 +102,7 @@ export default function AdminDashboard() {
             categoria: productData.categoria || null,
         };
 
-        // Enviar al backend
-        postProduct(route('products.store'), {
+        postProduct('/admin/products', {
             data: formData,
             onSuccess: () => {
                 alert('Producto e inventario creados con éxito');
@@ -122,8 +116,6 @@ export default function AdminDashboard() {
             forceFormData: false,
         });
     };
-
-
 
     const {
         data,
@@ -148,7 +140,6 @@ export default function AdminDashboard() {
         license_expiration_date: '',
     });
 
-
     function validarDNI(dni: string): boolean {
         const letras = 'TRWAGMYFPDXBNJZSQVHLCKE';
         const dniRegex = /^\d{8}[A-Z]$/;
@@ -163,7 +154,7 @@ export default function AdminDashboard() {
         return /^(6|7|9)\d{8}$/.test(telefono);
     }
 
-    const submit = (e: React.FormEvent) => {
+    const submitUser = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!validarDNI(data.dni)) {
@@ -176,19 +167,6 @@ export default function AdminDashboard() {
             return;
         }
 
-        post('/admin/users', {
-            onSuccess: () => {
-                reset();
-                setOpenUserModal(false);
-                alert('Usuario creado con éxito');
-            },
-            forceFormData: true,
-        });
-    };
-
-
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
         post('/admin/users', {
             onSuccess: () => {
                 reset();
@@ -225,7 +203,7 @@ export default function AdminDashboard() {
             <Dialog open={openUserModal} onClose={() => setOpenUserModal(false)} className="fixed inset-0 z-50 flex items-center justify-center">
                 <Dialog.Panel className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-2xl overflow-y-auto max-h-screen">
                     <Dialog.Title className="text-xl font-bold mb-4">Registrar nuevo empleado</Dialog.Title>
-                    <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <form onSubmit={submitUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="col-span-2 text-lg font-medium text-gray-600">Datos personales</div>
                         <div><Label htmlFor="name">Nombre</Label><Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} /><InputError message={errors.name} /></div>
                         <div><Label htmlFor="last_name">Apellido</Label><Input id="last_name" value={data.last_name} onChange={e => setData('last_name', e.target.value)} /><InputError message={errors.last_name} /></div>
@@ -310,7 +288,7 @@ export default function AdminDashboard() {
                                             alert('No se pudo subir la imagen a ImgBB.');
                                             return;
                                         }
-                                        setProductData('image_url', uploadedUrl); // ✅ guarda string
+                                        setProductData('image_url', uploadedUrl);
                                     }
                                 }}
                             />
