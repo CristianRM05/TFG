@@ -39,4 +39,9 @@ class Stock extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    public function shelf()
+{
+    return $this->belongsTo(Shelf::class, 'location', 'location');
+}
 }

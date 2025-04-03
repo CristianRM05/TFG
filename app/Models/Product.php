@@ -37,9 +37,11 @@ class Product extends Model
         'price' => 'float'
     ];
 
+
         public function stock(): HasOne
     {
         return $this->hasOne(Stock::class);
     }
+
 
 }
