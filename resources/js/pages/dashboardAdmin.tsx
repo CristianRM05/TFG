@@ -23,7 +23,7 @@ export default function AdminDashboard() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);
 
     useEffect(() => {
-        fetch('/api/categorias')
+        fetch('/api/products/categorias')
             .then(response => response.json())
             .then(data => setCategorias(data))
             .catch(error => console.error('Error al obtener categorías:', error));

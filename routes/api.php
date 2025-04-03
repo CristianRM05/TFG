@@ -6,7 +6,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 Route::prefix('products')->group(function () {
 
-use App\Http\Controllers\StockController;
 
 Route::get('/stock', '\App\Http\Controllers\StockController@index');Route::prefix('products')->group(function () {
 
