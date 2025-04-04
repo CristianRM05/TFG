@@ -22,7 +22,12 @@ Route::get('/stock', '\App\Http\Controllers\StockController@index');Route::prefi
 
 });
 Route::get('/categorias', [CategoryController::class, 'index']);
-
+//descuentos
+Route::prefix('api/discounts')->group(function () {
+    Route::get('/products-without-discount', [DiscountController::class, 'apiProductsWithoutDiscount']);
+    Route::post('/', [DiscountController::class, 'store']);
+    Route::delete('/{product}', [DiscountController::class, 'destroy']);
+});
 
 }
 );
