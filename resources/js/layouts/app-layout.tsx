@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface User {
     name: string;
@@ -10,17 +12,39 @@ interface User {
 interface AppLayoutProps {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
-    user?: User; // Propiedad opcional
-    header?: ReactNode; // Propiedad para el header
+    user?: User;
+    header?: ReactNode;
+    initialLoading?: boolean;  
 }
 
-export default ({ children, breadcrumbs, user, header, ...props }: AppLayoutProps) => (
-    <AppLayoutTemplate
-        breadcrumbs={breadcrumbs}
-        user={user}
-        header={header}
-        {...props}
-    >
-        {children}
-    </AppLayoutTemplate>
-);
+const AppLayout = ({
+    children,
+    breadcrumbs,
+    user,
+    header,
+    initialLoading = true,
+    ...props
+}: AppLayoutProps) => {
+    const [isLoading, setIsLoading] = useState(initialLoading);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    return (
+        <>
+            {isLoading && <LoadingSpinner />}
+            <AppLayoutTemplate
+                breadcrumbs={breadcrumbs}
+                user={user}
+                header={header}
+                {...props}
+            >
+                {children}
+            </AppLayoutTemplate>
+        </>
+    );
+};
+
+export default AppLayout;  
