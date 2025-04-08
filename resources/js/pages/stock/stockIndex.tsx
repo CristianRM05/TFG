@@ -76,7 +76,11 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                ${stock.available_quantity > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+        ${stock.available_quantity === 0 ? 'bg-black text-white dark:bg-gray-900 dark:text-gray-100' :
+                                                                    stock.available_quantity <= 10 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                                                        stock.available_quantity <= 20 ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                                                                            stock.available_quantity <= 30 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                                                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>
                                                                 {stock.available_quantity}
                                                             </span>
                                                         </td>

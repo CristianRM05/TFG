@@ -20,12 +20,14 @@ export default function ShelvesIndex() {
         auth
     } = usePage<ShelvesPageProps>().props;
 
-    const [localProducts, setLocalProducts] = useState(unassignedProducts);
+    const [localProducts, setLocalProducts] = useState(
+        unassignedProducts.filter(product => product.stock > 0)
+    );
     const [showSuccess, setShowSuccess] = useState(false);
 
     // Update local products when props change
     useEffect(() => {
-        setLocalProducts(unassignedProducts);
+        setLocalProducts(unassignedProducts.filter(product => product.stock > 0));
     }, [unassignedProducts]);
 
     // Show success message when flash changes
