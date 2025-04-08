@@ -11,6 +11,9 @@ interface Props extends SharedData {
 export default function ShelfShow({ shelf }: Props) {
     const { auth } = usePage<SharedData>().props;
 
+    // Filtrar productos con stock mayor a 0
+    const productsWithStock = shelf.products?.filter(product => product.stock > 0) || [];
+
     return (
         <AppLayout
             user={auth.user}
@@ -24,10 +27,10 @@ export default function ShelfShow({ shelf }: Props) {
                         <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                             {/* Mostramos el código y location directamente */}
                             <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">
-                                {shelf.code} {/* SH-001 */}
+                                {shelf.code}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300 mb-1">
-                                <span className="font-medium">Ubicación:</span> {shelf.location} {/* Usamos location directamente */}
+                                <span className="font-medium">Ubicación:</span> {shelf.location}
                             </p>
                             {shelf.max_capacity && (
                                 <div>
@@ -35,7 +38,7 @@ export default function ShelfShow({ shelf }: Props) {
                                         {shelf.code} - {shelf.location}
                                     </h2>
                                     <p className="text-gray-600 dark:text-gray-300 mt-4">
-                                        Capacidad: {shelf.products?.reduce((total, p) => total + p.stock, 0) || 0}/{shelf.max_capacity} unidades
+                                        Capacidad: {productsWithStock.reduce((total, p) => total + p.stock, 0)}/{shelf.max_capacity} unidades
                                     </p>
                                 </div>
                             )}
@@ -44,9 +47,9 @@ export default function ShelfShow({ shelf }: Props) {
                                 Productos en esta estantería:
                             </h4>
 
-                            {shelf.products?.length ? (
+                            {productsWithStock.length ? (
                                 <div className="space-y-4">
-                                    {shelf.products.map(product => (
+                                    {productsWithStock.map(product => (
                                         <div key={product.id} className="border dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-700">
                                             <div className="flex items-start">
                                                 {product.image_url && (
@@ -59,7 +62,7 @@ export default function ShelfShow({ shelf }: Props) {
                                                 <div>
                                                     <h5 className="font-medium text-gray-900 dark:text-white">{product.name}</h5>
                                                     <p className="text-sm text-gray-600 dark:text-gray-300">Ref: {product.num_reference}</p>
-                                                    {/* Mostrar ubicación desde la relación */}
+                                                    <p className="text-sm text-gray-600 dark:text-gray-300">Stock: {product.stock}</p>
                                                     {product.shelf && (
                                                         <p className="text-sm text-gray-500 dark:text-gray-400">
                                                             Ubicación: {product.shelf.location}
@@ -71,7 +74,7 @@ export default function ShelfShow({ shelf }: Props) {
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-gray-500 dark:text-gray-400 italic">No hay productos en esta estantería</p>
+                                <p className="text-gray-500 dark:text-gray-400 italic">No hay productos con stock disponible en esta estantería</p>
                             )}
                         </div>
                     </div>
