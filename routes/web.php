@@ -80,8 +80,8 @@ Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
 
 //BackOfice
 // Ruta para renderizar la vista de pedidos pendientes (BackOffice)
-Route::middleware(['auth', 'role:Manager'])->get('/orders', function () {
-    return Inertia::render('ManagerPage/backOffice');
+Route::middleware(['auth'])->get('/orders', function () {
+    return Inertia::render('ManagerPages/backOffice');
 });
 
 // API de pedidos para React

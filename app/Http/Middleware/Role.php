@@ -10,20 +10,24 @@ use Symfony\Component\HttpFoundation\Response;
 class Role
 {
     /**
-     * Maneja una solicitud entrante según el rol del usuario.
+     * Maneja una solicitud entrante según uno o varios roles.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @param  string  $role
+     * @param  string  $roles  Roles separados por coma (ej: Manager,Admin)
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string $roles): Response
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        if (Auth::user()->role->value !== $role) {
+        $userRole = Auth::user()->role->value ?? null;
+
+        $allowedRoles = explode(',', $roles);
+
+        if (!in_array($userRole, $allowedRoles)) {
             abort(403, 'No tienes permiso para acceder a esta ruta.');
         }
 

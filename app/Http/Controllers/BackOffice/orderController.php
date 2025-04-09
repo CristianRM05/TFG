@@ -14,7 +14,7 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::where('status', 'Pendiente')->get();
-        return Inertia::render('ManagerPage/backOffice', [
+        return Inertia::render('ManagerPages/backOffice', [
             'orders' => $orders,
         ]);
     }
