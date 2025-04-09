@@ -8,10 +8,11 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
-
 use App\Http\Middleware\VerifyCsrfToken;
-
 use App\Http\Middleware\CorsMiddleware;
+use App\Http\Controllers\BackOffice\OrderController;
+use App\Http\Controllers\BackOffice\RouteController;
+
 
 
 

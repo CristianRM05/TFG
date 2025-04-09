@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoleMiddleware
+class Role
 {
     /**
-     * Handle an incoming request.
+     * Maneja una solicitud entrante según el rol del usuario.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
@@ -20,10 +20,10 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!Auth::check()) {
-            // Usuario no autenticado
             return redirect()->route('login');
         }
-        if (!Auth::check() || Auth::user()->role->value !== $role) {
+
+        if (Auth::user()->role->value !== $role) {
             abort(403, 'No tienes permiso para acceder a esta ruta.');
         }
 

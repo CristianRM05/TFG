@@ -57,11 +57,10 @@ class DatabaseSeeder extends Seeder
             User::create($userData);
         }
 
-        dd('Usuario creado:', $users);
 
-        //dd('Usuario creado:', $user);
         $this->call([
                     ShelfSeeder::class,
+                    ProductSeeder::class,
                 ]);
 
     }

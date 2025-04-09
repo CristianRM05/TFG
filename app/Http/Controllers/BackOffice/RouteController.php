@@ -1,7 +1,7 @@
 <?php
+namespace App\Http\Controllers\BackOffice;
 
-namespace App\Http\Controllers\Backoffice;
-
+use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use App\Models\Route as DeliveryRoute;
 use Illuminate\Http\Request;
@@ -10,8 +10,9 @@ class RouteController extends Controller
 {
     public function index()
     {
-        $routes = DeliveryRoute::with(['truck', 'driver', 'orders'])->get();
-        return view('backoffice.routes.index', compact('routes'));
+        return Inertia::render('ManagerPage/Routes', [
+            'routes' => $routes,
+        ]);
     }
 
     public function store(Request $request)
