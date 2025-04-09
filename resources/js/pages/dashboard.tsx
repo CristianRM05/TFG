@@ -32,7 +32,7 @@ export default function Dashboard() {
             case 'Manager':
                 return [
                     { title: '📈 Movimientos', link: '/warehouse-movements' },
-                    { title: '🧾 Pedidos', link: '/orders' },
+                    { title: '🧾 Pedidos Pendientes', link: '/orders' },
                     { title: '🗂 Stock actual', link: '/stock' },
                     { title: '🏷️ Estanterías', link: '/shelves' },
                     { title: '📍 Rutas asignadas', link: '/routes' },

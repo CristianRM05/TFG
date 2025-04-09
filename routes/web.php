@@ -8,9 +8,9 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
-
+use App\Http\Controllers\Backoffice\OrderController;
+use App\Http\Controllers\Backoffice\RouteController;
 use App\Http\Middleware\VerifyCsrfToken;
-
 use App\Http\Middleware\CorsMiddleware;
 
 
@@ -57,6 +57,21 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
     return Inertia::render('ManagerPages/listProducts');
 })->name('almacen.productos');
+
+
+
+//BackOfice
+// Ruta para renderizar la vista de pedidos pendientes (BackOffice)
+Route::middleware(['auth', 'role:Manager'])->get('/orders', function () {
+    return Inertia::render('ManagerPage/backOffice');
+});
+
+// API de pedidos para React
+Route::prefix('backoffice')->middleware(['auth', 'role:Manager'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::post('/orders/{order}/assign', [OrderController::class, 'assign']);
+});
 
 
 require __DIR__.'/settings.php';
