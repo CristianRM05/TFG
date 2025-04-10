@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Shelf;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB; 
 
 
 class ProductController extends Controller
@@ -83,15 +84,21 @@ class ProductController extends Controller
 
 
     public function unassignedProducts()
-    {
-        $unassignedProducts = Product::whereNull('shelf_id')->with('shelf')->get();
-        $shelves = Shelf::all();
-        
-        return inertia('shelves/shelvesIndex', [
-            'unassignedProducts' => $unassignedProducts,
-            'shelves' => $shelves
-        ]);
-    }
+{
+    return inertia('shelves/shelvesIndex', [
+        'unassignedProducts' => Product::whereNull('shelf_id')
+            ->with('shelf')
+            ->get(),
+            
+        'shelves' => Shelf::with(['products' => function($query) {
+                $query->select('id', 'shelf_id', 'stock');
+            }])
+            ->orderBy('location')
+            ->get(),
+            
+        'flash' => session()->only(['success', 'error'])
+    ]);
+}
 
     public function shelvesManagement()
     {
@@ -178,6 +185,74 @@ public function stockIndex()
     return Inertia::render('stock/stockIndex', [
         'products' => $products
     ]);
+}
+
+public function updateShelf(Product $product, Request $request)
+{
+    $product->update([
+        'shelf_id' => $request->shelf_id 
+    ]);
+    
+    return back()->with('success', 'Producto desasignado correctamente');
+}
+
+public function assignSplitToShelf(Request $request, Product $product)
+{
+    $request->validate([
+        'shelf_id' => 'required|exists:shelves,id',
+        'quantity' => 'required|integer|min:1|max:'.$product->stock
+    ]);
+
+    $shelf = Shelf::find($request->shelf_id);
+    $availableSpace = $shelf->max_capacity - $shelf->products()->sum('stock');
+
+    DB::transaction(function () use ($product, $shelf, $request, $availableSpace) {
+    $assignQuantity = min($request->quantity, $availableSpace);
+
+    if ($assignQuantity < $request->quantity) {
+        $remainingQuantity = $request->quantity - $assignQuantity;
+
+        $newProduct = $product->replicate(['final_price']); // Excluir 'final_price'
+        $newProduct->stock = $remainingQuantity;
+        $newProduct->shelf_id = null;
+        $newProduct->save();
+    }
+
+    $product->stock = $assignQuantity;
+    $product->shelf_id = $shelf->id;
+    $product->save();
+});
+
+
+    return back()->with('success', 'Producto asignado parcialmente');
+}
+
+public function removeAndMergeFromShelf(Product $product)
+{
+    DB::transaction(function () use ($product) {
+        // Primero quitar el producto del estante
+        $product->shelf_id = null;
+        $product->save();
+
+        // Buscar un producto hermano sin shelf_id (que ahora podría ser el recién quitado)
+        $originalProduct = $product->siblingProducts()
+            ->whereNull('shelf_id')
+            ->where('id', '!=', $product->id) // Excluir el producto actual
+            ->first();
+
+        if ($originalProduct) {
+            // Fusionar stocks
+            $originalProduct->stock += $product->stock;
+            $originalProduct->save();
+
+            // Eliminar el duplicado
+            $product->delete();
+        } else {
+            \Log::info('No se encontró producto hermano para fusionar', ['product' => $product->id]);
+        }
+    });
+
+    return back()->with('success', 'Producto desasignado y fusionado cuando fue posible');
 }
 
     public function destroy($id)
