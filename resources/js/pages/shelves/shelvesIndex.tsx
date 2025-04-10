@@ -52,7 +52,6 @@ export default function ShelvesIndex() {
         }, {
             preserveScroll: true,
             onSuccess: () => {
-                // Añade solo esta línea para mostrar el mensaje
                 setShowSuccess(true);
                 setTimeout(() => setShowSuccess(false), 3000);
             },
@@ -62,6 +61,14 @@ export default function ShelvesIndex() {
                 alert('Error al asignar estantería');
             }
         });
+    };
+
+    // Calculate current capacity for each shelf
+    const getShelfCapacityInfo = (shelf: Shelf) => {
+        if (!shelf.max_capacity) return null;
+
+        const currentStock = shelf.products?.reduce((total, p) => total + p.stock, 0) || 0;
+        return `${currentStock}/${shelf.max_capacity} unidades`;
     };
 
     return (
@@ -104,6 +111,7 @@ export default function ShelvesIndex() {
                                             <div>
                                                 <h4 className="font-medium text-gray-900 dark:text-white">{product.name}</h4>
                                                 <p className="text-sm text-gray-600 dark:text-gray-300">Ref: {product.num_reference}</p>
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">Stock: {product.stock} unidades</p>
                                             </div>
                                         </div>
 
@@ -118,8 +126,19 @@ export default function ShelvesIndex() {
                                             >
                                                 <option value="" disabled className="dark:bg-gray-800">Seleccionar estantería...</option>
                                                 {shelves.map((shelf) => (
-                                                    <option key={shelf.id} value={shelf.id} className="dark:bg-gray-700">
+                                                    <option
+                                                        key={shelf.id}
+                                                        value={shelf.id}
+                                                        className="dark:bg-gray-700"
+                                                        disabled={shelf.max_capacity ?
+                                                            (((shelf.products?.reduce((total, p) => total + p.stock, 0) || 0) + product.stock) > shelf.max_capacity) :
+                                                            false
+                                                        }
+                                                    >
                                                         {shelf.code} - {shelf.location}
+                                                        {shelf.max_capacity && (
+                                                            <span> ({getShelfCapacityInfo(shelf)})</span>
+                                                        )}
                                                     </option>
                                                 ))}
                                             </select>
@@ -144,6 +163,11 @@ export default function ShelvesIndex() {
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="font-bold text-gray-900 dark:text-white">{shelf.location}</h4>
+                                                {shelf.max_capacity && (
+                                                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                        Capacidad: {getShelfCapacityInfo(shelf)}
+                                                    </p>
+                                                )}
                                             </div>
                                             <Link
                                                 href={route('shelves.show', shelf.id)}

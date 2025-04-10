@@ -83,15 +83,21 @@ class ProductController extends Controller
 
 
     public function unassignedProducts()
-    {
-        $unassignedProducts = Product::whereNull('shelf_id')->with('shelf')->get();
-        $shelves = Shelf::all();
-        
-        return inertia('shelves/shelvesIndex', [
-            'unassignedProducts' => $unassignedProducts,
-            'shelves' => $shelves
-        ]);
-    }
+{
+    return inertia('shelves/shelvesIndex', [
+        'unassignedProducts' => Product::whereNull('shelf_id')
+            ->with('shelf')
+            ->get(),
+            
+        'shelves' => Shelf::with(['products' => function($query) {
+                $query->select('id', 'shelf_id', 'stock');
+            }])
+            ->orderBy('location')
+            ->get(),
+            
+        'flash' => session()->only(['success', 'error'])
+    ]);
+}
 
     public function shelvesManagement()
     {
