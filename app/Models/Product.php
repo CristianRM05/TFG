@@ -55,8 +55,7 @@ class Product extends Model
 public function siblingProducts()
 {
     return $this->where('num_reference', $this->num_reference)
-               ->where('id', '!=', $this->id)
-               ->whereNull('shelf_id');
+               ->where('id', '!=', $this->id);
 }
 
 public function getFinalPriceAttribute()
