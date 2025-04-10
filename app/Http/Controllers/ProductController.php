@@ -186,6 +186,15 @@ public function stockIndex()
     ]);
 }
 
+public function updateShelf(Product $product, Request $request)
+{
+    $product->update([
+        'shelf_id' => $request->shelf_id 
+    ]);
+    
+    return back()->with('success', 'Producto desasignado correctamente');
+}
+
     public function destroy($id)
     {
         $product = Product::findOrFail($id);

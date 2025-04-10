@@ -61,6 +61,9 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/shelves/{shelf}', [ProductController::class, 'showShelf'])
         ->name('shelves.show');
+
+    Route::put('/products/{product}/update-shelf', [ProductController::class, 'updateShelf'])
+    ->name('products.update-shelf');
 });
 
 Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');

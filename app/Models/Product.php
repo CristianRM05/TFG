@@ -27,6 +27,8 @@ class Product extends Model
         'discount_percent',
         'image_url',
         'categoria',
+            'shelf_id',
+
     ];
 
     /**

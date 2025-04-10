@@ -130,10 +130,7 @@ export default function ShelvesIndex() {
                                                         key={shelf.id}
                                                         value={shelf.id}
                                                         className="dark:bg-gray-700"
-                                                        disabled={shelf.max_capacity ?
-                                                            (((shelf.products?.reduce((total, p) => total + p.stock, 0) || 0) + product.stock) > shelf.max_capacity) :
-                                                            false
-                                                        }
+                                                        
                                                     >
                                                         {shelf.code} - {shelf.location}
                                                         {shelf.max_capacity && (
