@@ -21,13 +21,10 @@ export default function ShelfShow({ shelf }: Props) {
         }
 
         try {
-            await router.put(`/products/${productId}/update-shelf`, {
-                shelf_id: null
-            }, {
+            await router.delete(route('products.remove-merge', { product: productId }), {
                 preserveScroll: true
             });
 
-            // Actualización optimista - eliminar de la lista inmediatamente
             setProducts(prev => prev.filter(p => p.id !== productId));
         } catch (error) {
             alert('Error al desasignar el producto');
@@ -48,7 +45,7 @@ export default function ShelfShow({ shelf }: Props) {
                         <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                             <h3 className="text-lg font-bold mb-2">{shelf.code}</h3>
                             <p className="mb-4">Ubicación: {shelf.location}</p>
-
+                            
                             {shelf.max_capacity && (
                                 <p className="mb-4">
                                     Capacidad: {products.reduce((total, p) => total + p.stock, 0)}/{shelf.max_capacity} unidades

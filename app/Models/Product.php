@@ -52,6 +52,13 @@ class Product extends Model
     return $this->belongsTo(Shelf::class)->withDefault();
 }
 
+public function siblingProducts()
+{
+    return $this->where('num_reference', $this->num_reference)
+               ->where('id', '!=', $this->id)
+               ->whereNull('shelf_id');
+}
+
 public function getFinalPriceAttribute()
 {
     return $this->discount_percent 

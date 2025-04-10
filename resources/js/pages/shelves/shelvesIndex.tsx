@@ -42,13 +42,13 @@ export default function ShelvesIndex() {
     const handleAssignShelf = (productId: number, shelfId: string) => {
         if (!shelfId) return;
 
-        // Optimistic update - remove the product immediately
         setLocalProducts(prev => prev.filter(p => p.id !== productId));
 
-        router.put(route('products.assign-shelf', {
+        router.put(route('products.assign-split', {
             product: productId
         }), {
-            shelf_id: parseInt(shelfId)
+            shelf_id: parseInt(shelfId),
+            quantity: localProducts.find(p => p.id === productId)?.stock || 0
         }, {
             preserveScroll: true,
             onSuccess: () => {
@@ -56,7 +56,6 @@ export default function ShelvesIndex() {
                 setTimeout(() => setShowSuccess(false), 3000);
             },
             onError: () => {
-                // Revert if there's an error
                 setLocalProducts(unassignedProducts);
                 alert('Error al asignar estantería');
             }
@@ -69,6 +68,12 @@ export default function ShelvesIndex() {
 
         const currentStock = shelf.products?.reduce((total, p) => total + p.stock, 0) || 0;
         return `${currentStock}/${shelf.max_capacity} unidades`;
+    };
+
+    const isShelfFull = (shelf: Shelf) => {
+        if (!shelf.max_capacity) return false;
+        const currentStock = shelf.products?.reduce((total, p) => total + p.stock, 0) || 0;
+        return currentStock >= shelf.max_capacity;
     };
 
     return (
@@ -125,19 +130,23 @@ export default function ShelvesIndex() {
                                                 defaultValue=""
                                             >
                                                 <option value="" disabled className="dark:bg-gray-800">Seleccionar estantería...</option>
-                                                {shelves.map((shelf) => (
-                                                    <option
-                                                        key={shelf.id}
-                                                        value={shelf.id}
-                                                        className="dark:bg-gray-700"
-                                                        
-                                                    >
-                                                        {shelf.code} - {shelf.location}
-                                                        {shelf.max_capacity && (
-                                                            <span> ({getShelfCapacityInfo(shelf)})</span>
-                                                        )}
-                                                    </option>
-                                                ))}
+                                                {shelves.map((shelf) => {
+                                                    const full = isShelfFull(shelf);
+                                                    return (
+                                                        <option
+                                                            key={shelf.id}
+                                                            value={shelf.id}
+                                                            className={`dark:bg-gray-700 ${full ? 'text-gray-400' : ''}`}
+                                                            disabled={full}
+                                                        >
+                                                            {shelf.code} - {shelf.location}
+                                                            {shelf.max_capacity && (
+                                                                <span> ({getShelfCapacityInfo(shelf)})</span>
+                                                            )}
+                                                            {full && ' (Llena)'}
+                                                        </option>
+                                                    );
+                                                })}
                                             </select>
                                         </div>
                                     </div>
