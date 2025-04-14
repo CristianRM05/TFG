@@ -24,8 +24,11 @@ class Product extends Model
         'num_reference',
         'stock',
         'price',
+        'discount_percent',
         'image_url',
         'categoria',
+            'shelf_id',
+
     ];
 
     /**
@@ -34,14 +37,34 @@ class Product extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'price' => 'float'
+        'price' => 'float',
+        'discount_percent' => 'float'
     ];
 
 
-        public function stock(): HasOne
-    {
-        return $this->hasOne(Stock::class);
-    }
+       public function stock(): HasOne
+{
+    return $this->hasOne(Stock::class, 'product_id');
+}
+
+    public function shelf()
+{
+    return $this->belongsTo(Shelf::class)->withDefault();
+}
+
+public function siblingProducts()
+{
+    return $this->where('num_reference', $this->num_reference)
+               ->where('id', '!=', $this->id);
+}
+
+public function getFinalPriceAttribute()
+{
+    return $this->discount_percent 
+        ? $this->price - ($this->price * $this->discount_percent / 100)
+        : $this->price;
+}
+
 
 
 }

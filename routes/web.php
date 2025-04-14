@@ -8,11 +8,11 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ManagerDashboardController;
+use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Controllers\DiscountController;
 
-use App\Http\Middleware\VerifyCsrfToken; 
-
-use App\Http\Middleware\VerifyCsrfToken; 
-use App\Http\Middleware\CorsMiddleware; 
+use App\Http\Middleware\CorsMiddleware;
 
 
 
@@ -25,7 +25,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+Route::get('/stock', [ProductController::class, 'stockIndex'])->name('stock.index');
+Route::get('/shelves', [ProductController::class, 'unassignedProducts'])->name('shelves.index');
 
 });
 
@@ -38,7 +39,7 @@ Route::middleware(['auth'])->get('/admin/dashboard', function () {
 
 Route::get('/middleware-test', function () {
     return 'Middleware ejecutado correctamente';
-})->middleware('role:Admin');
+})->middleware('role:Admin,Manager');
 
 
 Route::middleware(['auth'])->get('/admin/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
@@ -46,8 +47,32 @@ Route::middleware(['auth'])->get('/admin/dashboard', [AdminDashboardController::
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
 });
-Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
 
+// Rutas de manager
+Route::middleware(['auth'])->prefix('manager')->group(function () {
+    Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
+    Route::post('/users', [UserController::class, 'store'])->name('manager.users.store');
+});
+
+// Gestión de estanterías
+Route::middleware(['auth'])->group(function () {
+    Route::put('/products/{product}/assign-shelf', [ProductController::class, 'assignShelf'])
+        ->name('products.assign-shelf');
+    
+    Route::put('/products/{product}/assign-split', [ProductController::class, 'assignSplitToShelf'])
+        ->name('products.assign-split');
+        
+    Route::delete('/products/{product}/remove-merge', [ProductController::class, 'removeAndMergeFromShelf'])
+        ->name('products.remove-merge');
+        
+    Route::put('/products/{product}/update-shelf', [ProductController::class, 'updateShelf'])
+        ->name('products.update-shelf');
+        
+    Route::get('/shelves/{shelf}', [ProductController::class, 'showShelf'])
+        ->name('shelves.show');
+});
+
+Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
 
 //para consumir los datos de la base de datos
 Route::middleware(['auth'])->group(function () {
@@ -59,6 +84,17 @@ Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
     return Inertia::render('ManagerPages/listProducts');
 })->name('almacen.productos');
 
+//descuentos
+Route::prefix('discounts')->group(function () {
+    // Ruta GET para mostrar la vista (Inertia)
+    Route::get('/', [DiscountController::class, 'index'])->name('discounts.index');
+    
+    // Ruta POST para aplicar descuentos (API)
+    Route::post('/', [DiscountController::class, 'store'])->name('discounts.store');
+    
+    // Ruta DELETE para eliminar descuentos
+    Route::delete('/{product}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
