@@ -36,6 +36,7 @@ export default function Dashboard() {
                     { title: '🗂 Stock actual', link: '/stock' },
                     { title: '🏷️ Estanterías', link: '/shelves' },
                     { title: '📍 Rutas asignadas', link: '/routes' },
+                    { title: '🚚 Gestión de vehículos', link: '/trucks' },
                 ];
             case 'Operario':
                 return [

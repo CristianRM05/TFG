@@ -12,7 +12,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Controllers\BackOffice\OrderController;
 use App\Http\Controllers\BackOffice\RouteController;
-
+use App\Http\Controllers\TruckController;
 
 
 
@@ -101,6 +101,15 @@ Route::prefix('discounts')->group(function () {
 
     // Ruta DELETE para eliminar descuentos
     Route::delete('/{product}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+});
+
+//rutas para la gestion de vehículos
+Route::middleware(['auth'])->group(function () {
+    Route::get('/trucks', [TruckController::class, 'index'])->name('trucks.index');
+    Route::post('/trucks', [TruckController::class, 'store'])->name('trucks.store');
+    Route::put('/trucks/{truck}', [TruckController::class, 'update'])->name('trucks.update');
+    Route::delete('/trucks/{truck}', [TruckController::class, 'destroy'])->name('trucks.destroy');
+    Route::put('/trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.updateStatus');
 });
 
 require __DIR__.'/settings.php';

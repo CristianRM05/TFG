@@ -61,6 +61,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
                     ShelfSeeder::class,
                     ProductSeeder::class,
+                    TruckSeeder::class,
                 ]);
 
     }
