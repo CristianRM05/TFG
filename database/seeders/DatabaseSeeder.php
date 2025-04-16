@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Enums\RolesEmployee;
 
 class DatabaseSeeder extends Seeder
@@ -15,8 +15,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $users = [
             [
                 'number_employ' => 'EMP001',
@@ -33,6 +31,7 @@ class DatabaseSeeder extends Seeder
                 'license' => 'L12345',
                 'driver_license' => 'B',
                 'license_expiration_date' => '2026-05-20',
+                'remember_token' => Str::random(10),
             ],
             [
                 'number_employ' => 'EMP002',
@@ -49,20 +48,19 @@ class DatabaseSeeder extends Seeder
                 'license' => 'M12345',
                 'driver_license' => 'B',
                 'license_expiration_date' => '2026-05-20',
+                'remember_token' => Str::random(10),
             ]
         ];
-
 
         foreach ($users as $userData) {
             User::create($userData);
         }
 
-
         $this->call([
-                    ShelfSeeder::class,
-                    ProductSeeder::class,
-                    TruckSeeder::class,
-                ]);
-
+            ShelfSeeder::class,
+            ProductSeeder::class,
+            TruckSeeder::class,
+            UserSeeder::class,
+        ]);
     }
 }

@@ -37,6 +37,7 @@ export default function Dashboard() {
                     { title: '🏷️ Estanterías', link: '/shelves' },
                     { title: '📍 Rutas asignadas', link: '/routes' },
                     { title: '🚚 Gestión de vehículos', link: '/trucks' },
+                    { title: '👥 Gestión de empleados', link: '/employees' },
                 ];
             case 'Operario':
                 return [

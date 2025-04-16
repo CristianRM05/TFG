@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Models\User;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
@@ -110,6 +111,16 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/trucks/{truck}', [TruckController::class, 'update'])->name('trucks.update');
     Route::delete('/trucks/{truck}', [TruckController::class, 'destroy'])->name('trucks.destroy');
     Route::put('/trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.updateStatus');
+});
+
+//ruta para listar empleados siendo manager
+Route::middleware(['auth'])->get('/employees', function () {
+    return Inertia::render('ManagerPages/ListEmployee');
+})->name('employees.index');
+Route::middleware(['auth'])->get('/employees-data', function () {
+    return response()->json(
+        User::whereIn('role', ['Operario', 'Repartidor'])->get()
+    );
 });
 
 require __DIR__.'/settings.php';
