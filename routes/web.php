@@ -123,5 +123,16 @@ Route::middleware(['auth'])->get('/employees-data', function () {
     );
 });
 
+//ruta para listar las rutas del repartidor
+Route::middleware(['auth'])->get('/routes', function () {
+    return Inertia::render('DealerPages/DriverRoutes');
+})->name('routes.index');
+
+Route::middleware(['auth', 'verified', 'role:Repartidor'])->group(function () {
+    Route::get('repartidor/rutas', function () {
+        return Inertia::render('DealerPages/DriverRoutes');
+    })->name('dealer.routes');
+});
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
