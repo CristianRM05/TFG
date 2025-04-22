@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum StatusTruck: string
 {
-    case AVAILABLE = 'Disponible';
-    case BUSY = 'Ocupado';
-    case MAINTENANCE = 'Mantenimiento';
+    case Disponible = 'Disponible';
+    case Ocupado = 'Ocupado';
+    case Mantenimiento = 'Mantenimiento';
 }

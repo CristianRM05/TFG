@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('license_plate')->unique();
             $table->float('max_capacity');
-            $table->enum('status', ['in_transit', 'idle', 'under_maintenance']);
+            $table->enum('status', ['Disponible', 'Ocupado', 'Mantenimiento'])->default('Disponible');
             $table->timestamps();
         });
     }
