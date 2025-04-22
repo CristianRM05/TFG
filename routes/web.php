@@ -3,16 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Models\User;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ManagerDashboardController;
 use App\Http\Middleware\VerifyCsrfToken;
-use App\Http\Controllers\DiscountController;
-
 use App\Http\Middleware\CorsMiddleware;
+use App\Http\Controllers\BackOffice\OrderController;
+use App\Http\Controllers\BackOffice\RouteController;
+use App\Http\Controllers\TruckController;
 
 
 
@@ -57,17 +58,18 @@ Route::middleware(['auth'])->prefix('manager')->group(function () {
 // Gestión de estanterías
 Route::middleware(['auth'])->group(function () {
     Route::put('/products/{product}/assign-shelf', [ProductController::class, 'assignShelf'])
-        ->name('products.assign-shelf');
-    
+    ->name('products.assign-shelf');
+
     Route::put('/products/{product}/assign-split', [ProductController::class, 'assignSplitToShelf'])
         ->name('products.assign-split');
-        
+
     Route::delete('/products/{product}/remove-merge', [ProductController::class, 'removeAndMergeFromShelf'])
         ->name('products.remove-merge');
-        
+
     Route::put('/products/{product}/update-shelf', [ProductController::class, 'updateShelf'])
         ->name('products.update-shelf');
-        
+
+
     Route::get('/shelves/{shelf}', [ProductController::class, 'showShelf'])
         ->name('shelves.show');
 });
@@ -84,16 +86,61 @@ Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
     return Inertia::render('ManagerPages/listProducts');
 })->name('almacen.productos');
 
+
+
+//BackOfice
+// Ruta para renderizar la vista de pedidos pendientes (BackOffice)
+Route::middleware(['auth'])->get('/orders', function () {
+    return Inertia::render('ManagerPages/backOffice');
+});
+
+// API de pedidos para React
+Route::prefix('backoffice')->middleware(['auth', 'role:Manager'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::post('/orders/{order}/assign', [OrderController::class, 'assign']);
+});
+
 //descuentos
 Route::prefix('discounts')->group(function () {
     // Ruta GET para mostrar la vista (Inertia)
     Route::get('/', [DiscountController::class, 'index'])->name('discounts.index');
-    
+
     // Ruta POST para aplicar descuentos (API)
     Route::post('/', [DiscountController::class, 'store'])->name('discounts.store');
-    
+
     // Ruta DELETE para eliminar descuentos
     Route::delete('/{product}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+});
+
+//rutas para la gestion de vehículos
+Route::middleware(['auth'])->group(function () {
+    Route::get('/trucks', [TruckController::class, 'index'])->name('trucks.index');
+    Route::post('/trucks', [TruckController::class, 'store'])->name('trucks.store');
+    Route::put('/trucks/{truck}', [TruckController::class, 'update'])->name('trucks.update');
+    Route::delete('/trucks/{truck}', [TruckController::class, 'destroy'])->name('trucks.destroy');
+    Route::put('/trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.updateStatus');
+});
+
+//ruta para listar empleados siendo manager
+Route::middleware(['auth'])->get('/employees', function () {
+    return Inertia::render('ManagerPages/ListEmployee');
+})->name('employees.index');
+Route::middleware(['auth'])->get('/employees-data', function () {
+    return response()->json(
+        User::whereIn('role', ['Operario', 'Repartidor'])->get()
+    );
+});
+
+//ruta para listar las rutas del repartidor
+Route::middleware(['auth'])->get('/routes', function () {
+    return Inertia::render('DealerPages/DriverRoutes');
+})->name('routes.index');
+
+Route::middleware(['auth', 'verified', 'role:Repartidor'])->group(function () {
+    Route::get('repartidor/rutas', function () {
+        return Inertia::render('DealerPages/DriverRoutes');
+    })->name('dealer.routes');
 });
 
 require __DIR__.'/settings.php';

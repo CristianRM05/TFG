@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\TruckStatus;
+use App\Enums\StatusTruck;
 
 class Truck extends Model
 {
@@ -31,7 +31,7 @@ class Truck extends Model
      */
     protected $casts = [
         'max_capacity' => 'float',
-        'status' => TruckStatus::class,
+        'status' => StatusTruck::class,
     ];
 
     /**
