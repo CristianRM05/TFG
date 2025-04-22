@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Shelf;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB; 
 
 
 class ProductController extends Controller
@@ -83,15 +84,21 @@ class ProductController extends Controller
 
 
     public function unassignedProducts()
-    {
-        $unassignedProducts = Product::whereNull('shelf_id')->with('shelf')->get();
-        $shelves = Shelf::all();
-        
-        return inertia('shelves/shelvesIndex', [
-            'unassignedProducts' => $unassignedProducts,
-            'shelves' => $shelves
-        ]);
-    }
+{
+    return inertia('shelves/shelvesIndex', [
+        'unassignedProducts' => Product::whereNull('shelf_id')
+            ->with('shelf')
+            ->get(),
+            
+        'shelves' => Shelf::with(['products' => function($query) {
+                $query->select('id', 'shelf_id', 'stock');
+            }])
+            ->orderBy('location')
+            ->get(),
+            
+        'flash' => session()->only(['success', 'error'])
+    ]);
+}
 
     public function shelvesManagement()
     {
@@ -178,6 +185,146 @@ public function stockIndex()
     return Inertia::render('stock/stockIndex', [
         'products' => $products
     ]);
+}
+
+public function updateShelf(Product $product, Request $request)
+{
+    $product->update([
+        'shelf_id' => $request->shelf_id 
+    ]);
+    
+    return back()->with('success', 'Producto desasignado correctamente');
+}
+
+public function assignSplitToShelf(Request $request, Product $product)
+{
+    $request->validate([
+        'shelf_id' => 'required|exists:shelves,id',
+        'quantity' => 'required|integer|min:1|max:'.$product->stock
+    ]);
+
+    DB::transaction(function () use ($product, $request) {
+        $shelfId = $request->shelf_id;
+        $quantity = $request->quantity;
+
+        // 1. Buscar producto existente con misma referencia en la estantería
+        $existingProduct = Product::where('num_reference', $product->num_reference)
+            ->where('shelf_id', $shelfId)
+            ->where('id', '!=', $product->id)
+            ->first();
+
+        if ($existingProduct) {
+            // 2. Si existe, fusionar
+            $existingProduct->stock += $quantity;
+            $existingProduct->save();
+            
+            // Reducir stock del producto original
+            $product->stock -= $quantity;
+            
+            if ($product->stock <= 0) {
+                $product->delete();
+            } else {
+                $product->save();
+            }
+            
+            \Log::info('Fusión automática al asignar a estantería', [
+                'producto_mantenido' => $existingProduct->id,
+                'producto_origen' => $product->id,
+                'cantidad_fusionada' => $quantity,
+                'shelf_id' => $shelfId
+            ]);
+        } else {
+            // 3. Si no existe producto hermano, verificar capacidad
+            $shelf = Shelf::findOrFail($shelfId);
+            $usedSpace = $shelf->products()->sum('stock');
+            $availableSpace = $shelf->max_capacity - $usedSpace;
+            
+            $assignQuantity = min($quantity, $availableSpace);
+            
+            // 4. Asignar a estantería
+            $product->shelf_id = $shelfId;
+            $product->stock = $assignQuantity;
+            $product->save();
+            
+            // 5. Manejar excedente si no cabe todo
+            if ($quantity > $assignQuantity) {
+                $remainingQuantity = $quantity - $assignQuantity;
+                
+                $newProduct = $product->replicate(['final_price']);
+                $newProduct->stock = $remainingQuantity;
+                $newProduct->shelf_id = null;
+                $newProduct->save();
+                
+                \Log::info('Producto dividido al asignar', [
+                    'producto_original' => $product->id,
+                    'nuevo_producto' => $newProduct->id,
+                    'cantidad_asignada' => $assignQuantity,
+                    'cantidad_restante' => $remainingQuantity
+                ]);
+            }
+        }
+    });
+
+    return back()->with('success', 'Producto asignado correctamente');
+}
+
+public function removeAndMergeFromShelf(Product $product)
+{
+    DB::transaction(function () use ($product) {
+        // Guardar el shelf_id actual antes de modificarlo
+        $currentShelfId = $product->shelf_id;
+        
+        // Buscar productos hermanos con misma referencia y mismo shelf_id
+        $siblingProducts = Product::where('num_reference', $product->num_reference)
+            ->where('shelf_id', $currentShelfId)
+            ->where('id', '!=', $product->id)
+            ->get();
+
+        if ($siblingProducts->isNotEmpty()) {
+            // Fusionar con el primer hermano encontrado
+            $originalProduct = $siblingProducts->first();
+            $originalProduct->stock += $product->stock;
+            $originalProduct->save();
+            $product->delete();
+            
+            \Log::info('Productos fusionados en estantería', [
+                'producto_mantenido' => $originalProduct->id,
+                'producto_eliminado' => $product->id,
+                'shelf_id' => $currentShelfId,
+                'nuevo_stock' => $originalProduct->stock
+            ]);
+        } else {
+            // Si no hay hermanos en la misma estantería, buscar sin estantería
+            $unassignedSibling = Product::where('num_reference', $product->num_reference)
+                ->whereNull('shelf_id')
+                ->where('id', '!=', $product->id)
+                ->first();
+
+            if ($unassignedSibling) {
+                // Fusionar con producto sin estantería
+                $unassignedSibling->stock += $product->stock;
+                $unassignedSibling->save();
+                $product->delete();
+                
+                \Log::info('Productos fusionados sin estantería', [
+                    'producto_mantenido' => $unassignedSibling->id,
+                    'producto_eliminado' => $product->id,
+                    'nuevo_stock' => $unassignedSibling->stock
+                ]);
+            } else {
+                // Si no hay fusión posible, simplemente quitar de la estantería
+                $product->shelf_id = null;
+                $product->save();
+                
+                \Log::info('Producto desasignado sin fusión', [
+                    'product_id' => $product->id,
+                    'shelf_id_anterior' => $currentShelfId
+                ]);
+            }
+        }
+    });
+
+    return back()->with('success', 'Operación completada');
 }
 
     public function destroy($id)

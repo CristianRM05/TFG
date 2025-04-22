@@ -27,6 +27,8 @@ class Product extends Model
         'discount_percent',
         'image_url',
         'categoria',
+            'shelf_id',
+
     ];
 
     /**
@@ -48,6 +50,12 @@ class Product extends Model
     public function shelf()
 {
     return $this->belongsTo(Shelf::class)->withDefault();
+}
+
+public function siblingProducts()
+{
+    return $this->where('num_reference', $this->num_reference)
+               ->where('id', '!=', $this->id);
 }
 
 public function getFinalPriceAttribute()
