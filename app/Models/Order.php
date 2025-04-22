@@ -13,38 +13,36 @@ class Order extends Model
     protected $table = 'orders';
     protected $primaryKey = 'id';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
+        'id',
         'order_date',
         'customer_id',
+        'user_id',
         'status',
         'scheduled_delivery_date',
         'truck_id',
         'delivery_person_id',
         'route_id',
+        'total_amount',
+        'payment_method',
+        'shipping_address',
+        'stripe_session_id',
     ];
 
-    /**
-     * Attribute casts.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'order_date' => 'datetime',
         'scheduled_delivery_date' => 'datetime',
-        'status' => OrderStatus::class,
+        'status' => "string",
     ];
 
-    /**
-     * Relationships
-     */
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function truck()
@@ -60,5 +58,10 @@ class Order extends Model
     public function route()
     {
         return $this->belongsTo(Route::class, 'route_id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

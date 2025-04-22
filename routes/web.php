@@ -58,12 +58,21 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/products/{product}/assign-shelf', [ProductController::class, 'assignShelf'])
     ->name('products.assign-shelf');
 
+    Route::put('/products/{product}/assign-split', [ProductController::class, 'assignSplitToShelf'])
+        ->name('products.assign-split');
+
+    Route::delete('/products/{product}/remove-merge', [ProductController::class, 'removeAndMergeFromShelf'])
+        ->name('products.remove-merge');
+
+    Route::put('/products/{product}/update-shelf', [ProductController::class, 'updateShelf'])
+        ->name('products.update-shelf');
+
+
     Route::get('/shelves/{shelf}', [ProductController::class, 'showShelf'])
         ->name('shelves.show');
 });
 
 Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
-
 
 //para consumir los datos de la base de datos
 Route::middleware(['auth'])->group(function () {
