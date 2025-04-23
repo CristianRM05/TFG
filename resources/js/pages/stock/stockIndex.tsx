@@ -1,7 +1,8 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '../../layouts/app-layout';
 import { StockProduct } from '../../app';
+
 interface Props {
     products: StockProduct[];
     auth: {
@@ -13,6 +14,28 @@ interface Props {
 }
 
 const StockIndex: React.FC<Props> = ({ products, auth }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState<StockProduct[]>([]);
+    const [showResults, setShowResults] = useState(false);
+
+    useEffect(() => {
+        if (searchTerm.trim()) {
+            const results = products.filter(product =>
+                product.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setSearchResults(results);
+            setShowResults(true);
+        } else {
+            setShowResults(false);
+        }
+    }, [searchTerm, products]);
+
+    const navigateToProduct = (productId: number) => {
+        setShowResults(false);
+        setSearchTerm('');
+        router.visit(`/products/${productId}`);
+    };
+
     return (
         <AppLayout
             user={auth.user}
@@ -28,8 +51,51 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                                     Current Inventory
                                 </h3>
-                                <Link 
-                                    href="/products/create" 
+
+                                <div className="flex-1 max-w-md mx-4 relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Search by product name..."
+                                        className="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm py-2 px-4"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onFocus={() => searchTerm && setShowResults(true)}
+                                    />
+
+                                    {showResults && searchResults.length > 0 && (
+                                        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md max-h-60 overflow-auto border border-gray-200 dark:border-gray-700">
+                                            {searchResults.map(product => (
+                                                <div
+                                                    key={product.id}
+                                                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
+                                                    onClick={() => navigateToProduct(product.id)}
+                                                >
+                                                    {product.image_url && (
+                                                        <img
+                                                            src={product.image_url}
+                                                            alt={product.name}
+                                                            className="h-8 w-8 rounded-full object-cover mr-3"
+                                                        />
+                                                    )}
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                            {product.name}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {showResults && searchResults.length === 0 && (
+                                        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                            No products found with that name
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Link
+                                    href="/products/create"
                                     className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                 >
                                     Add Product

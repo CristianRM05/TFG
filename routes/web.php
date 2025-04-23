@@ -14,7 +14,7 @@ use App\Http\Middleware\CorsMiddleware;
 use App\Http\Controllers\BackOffice\OrderController;
 use App\Http\Controllers\BackOffice\RouteController;
 use App\Http\Controllers\TruckController;
-
+use App\Http\Controllers\ManagerDashboardController;
 
 
 Route::get('/', function () {
