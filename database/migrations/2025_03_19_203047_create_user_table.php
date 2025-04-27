@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->rememberToken();
             $table->string('phone');
             $table->string('address');
             $table->enum ('role', ['Admin','Manager', 'Cliente' ])->default('Cliente');

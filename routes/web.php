@@ -3,16 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Models\User;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
-
 use App\Http\Middleware\VerifyCsrfToken;
-
 use App\Http\Middleware\CorsMiddleware;
-
+use App\Http\Controllers\BackOffice\OrderController;
+use App\Http\Controllers\BackOffice\RouteController;
+use App\Http\Controllers\TruckController;
+use App\Http\Controllers\ManagerDashboardController;
 
 
 Route::get('/', function () {
@@ -88,8 +90,8 @@ Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
 
 //BackOfice
 // Ruta para renderizar la vista de pedidos pendientes (BackOffice)
-Route::middleware(['auth', 'role:Manager'])->get('/orders', function () {
-    return Inertia::render('ManagerPage/backOffice');
+Route::middleware(['auth'])->get('/orders', function () {
+    return Inertia::render('ManagerPages/backOffice');
 });
 
 // API de pedidos para React
@@ -109,6 +111,36 @@ Route::prefix('discounts')->group(function () {
 
     // Ruta DELETE para eliminar descuentos
     Route::delete('/{product}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+});
+
+//rutas para la gestion de vehículos
+Route::middleware(['auth'])->group(function () {
+    Route::get('/trucks', [TruckController::class, 'index'])->name('trucks.index');
+    Route::post('/trucks', [TruckController::class, 'store'])->name('trucks.store');
+    Route::put('/trucks/{truck}', [TruckController::class, 'update'])->name('trucks.update');
+    Route::delete('/trucks/{truck}', [TruckController::class, 'destroy'])->name('trucks.destroy');
+    Route::put('/trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.updateStatus');
+});
+
+//ruta para listar empleados siendo manager
+Route::middleware(['auth'])->get('/employees', function () {
+    return Inertia::render('ManagerPages/ListEmployee');
+})->name('employees.index');
+Route::middleware(['auth'])->get('/employees-data', function () {
+    return response()->json(
+        User::whereIn('role', ['Operario', 'Repartidor'])->get()
+    );
+});
+
+//ruta para listar las rutas del repartidor
+Route::middleware(['auth'])->get('/routes', function () {
+    return Inertia::render('DealerPages/DriverRoutes');
+})->name('routes.index');
+
+Route::middleware(['auth', 'verified', 'role:Repartidor'])->group(function () {
+    Route::get('repartidor/rutas', function () {
+        return Inertia::render('DealerPages/DriverRoutes');
+    })->name('dealer.routes');
 });
 
 require __DIR__.'/settings.php';
