@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -25,8 +25,17 @@ export default function Dashboard() {
     }
 
     const user = auth.user;
+    if (auth.user) {
+        const role = auth.user.role?.toLowerCase();
 
-    // Función para determinar qué tarjetas mostrar según el rol
+        if (role === 'admin') {
+            router.visit('/admin/dashboard');
+        } else if (role === 'manager') {
+            router.visit('/manager/dashboard');
+        } else {
+            router.visit('/home');
+        }
+    }
     const getCards = () => {
         switch (user.role) {
             case 'Manager':
