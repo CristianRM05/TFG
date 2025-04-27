@@ -5,8 +5,7 @@ namespace App\Enums;
 enum RolesEmployee: string
 {
     case Manager = 'Manager';
-    case Operator = 'Operario';
-    case Dealer = 'Repartidor';
+    case Client = 'Cliente';
     case Admin = 'Admin';
 
     public function label(): string
@@ -14,7 +13,7 @@ enum RolesEmployee: string
         return match ($this) {
             self::Manager => 'Manager',
             self::Admin => 'Admin',
-            sefl::Client => 'Cliente',
+            self::Client => 'Cliente',
         };
     }
 
