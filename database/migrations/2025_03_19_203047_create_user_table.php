@@ -22,11 +22,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone');
             $table->string('address');
-            $table->enum ('role', ['Admin','Manager', 'Operario', 'Repartidor'])->default('Operario');
-            $table->string('photograph')->nullable();
-            $table->string('license')->nullable();
-            $table->string('driver_license')->nullable();
-            $table->date('license_expiration_date')->nullable();
+            $table->enum ('role', ['Admin','Manager', 'Cliente' ])->default('Cliente');
+            $table->string('photograph')->nullable();;
 
             $table->timestamps();
         });

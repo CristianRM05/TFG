@@ -11,12 +11,12 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->dateTime('order_date');
-            $table->foreignId('truck_id')->constrained('trucks')->onDelete('cascade');
-            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
-            $table->string('status');
             $table->dateTime('scheduled_delivery_date');
             $table->foreignId('delivery_person_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('route_id')->constrained('routes')->onDelete('cascade');
+            $table->double('total_amount');
+            $table->string('payment_method');
+            $table->string('shipping_address');
+            $table->string('stripe_session_id')->nullable();
             $table->timestamps();
         });
     }

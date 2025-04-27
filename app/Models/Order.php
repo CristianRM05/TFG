@@ -16,13 +16,10 @@ class Order extends Model
     protected $fillable = [
         'id',
         'order_date',
-        'customer_id',
         'user_id',
         'status',
         'scheduled_delivery_date',
-        'truck_id',
         'delivery_person_id',
-        'route_id',
         'total_amount',
         'payment_method',
         'shipping_address',
@@ -35,29 +32,9 @@ class Order extends Model
         'status' => "string",
     ];
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function truck()
-    {
-        return $this->belongsTo(Truck::class, 'truck_id');
-    }
-
-    public function deliveryPerson()
-    {
-        return $this->belongsTo(User::class, 'delivery_person_id');
-    }
-
-    public function route()
-    {
-        return $this->belongsTo(Route::class, 'route_id');
     }
 
     public function items()

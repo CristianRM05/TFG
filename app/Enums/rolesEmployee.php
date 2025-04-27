@@ -13,9 +13,8 @@ enum RolesEmployee: string
     {
         return match ($this) {
             self::Manager => 'Manager',
-            self::Operator => 'Operario',
-            self::Dealer => 'Repartidor',
-            self::Admin => 'Administrador',
+            self::Admin => 'Admin',
+            sefl::Client => 'Cliente',
         };
     }
 

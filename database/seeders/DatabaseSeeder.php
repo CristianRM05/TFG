@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        //Creado usuario admin y manager,
+        //admin solo debe tener funcione de soporte
+        //manager subir productos y gestionar stocks y envios 
         $users = [
             [
                 'number_employ' => 'EMP001',

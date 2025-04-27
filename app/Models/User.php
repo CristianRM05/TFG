@@ -32,9 +32,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'address',
         'role',
         'photograph',
-        'license',
-        'driver_license',
-        'license_expiration_date',
     ];
 
     /**
