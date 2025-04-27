@@ -29,9 +29,6 @@ class DatabaseSeeder extends Seeder
                 'address' => 'Calle Falsa 123',
                 'role' => 'Admin',
                 'photograph' => 'profile.jpg',
-                'license' => 'L12345',
-                'driver_license' => 'B',
-                'license_expiration_date' => '2026-05-20',
                 'remember_token' => Str::random(10),
             ],
             [
@@ -45,9 +42,6 @@ class DatabaseSeeder extends Seeder
                 'address' => 'Calle Falsa 123',
                 'role' => 'Manager',
                 'photograph' => 'profile.jpg',
-                'license' => 'M12345',
-                'driver_license' => 'B',
-                'license_expiration_date' => '2026-05-20',
                 'remember_token' => Str::random(10),
             ]
         ];

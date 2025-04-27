@@ -41,9 +41,6 @@ class RegisteredUserController extends Controller
             'address' => 'nullable|string|max:255',
             'role' => [Rule::in(array_column(RolesEmployee::cases(), 'Operario'))],
             'departamento_id' => 'nullable|exists:departamentos,id',
-            'license' => 'nullable|string|max:50',
-            'driver_license' => 'nullable|string|max:50',
-            'license_expiration_date' => 'nullable|date',
             'password' => ['required', 'confirmed', Password::defaults()],
             'photograph' => 'nullable|image|max:2048',
         ]);
