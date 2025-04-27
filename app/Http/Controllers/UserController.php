@@ -26,34 +26,12 @@ class UserController extends Controller
             'address' => 'required|string|max:255',
             'role' => ['required', Rule::in(array_column(RolesEmployee::cases(), 'value'))],
             'photograph' => 'nullable|image|max:2048',
-            'license' => 'nullable|string|max:100',
-            'driver_license' => 'nullable|string|max:100',
-            'license_expiration_date' => 'nullable|date',
         ]);
-
-        // Si es Repartidor, asegurarse de que los campos obligatorios estén presentes
-        if ($validated['role'] === RolesEmployee::Dealer->value) {
-            $request->validate([
-                'license' => 'required|string|max:100',
-                'driver_license' => 'required|string|max:100',
-                'license_expiration_date' => 'required|date',
-            ]);
-        } else {
-            // Si no es repartidor, limpiar los campos por seguridad
-            $validated['license'] = null;
-            $validated['driver_license'] = null;
-            $validated['license_expiration_date'] = null;
-        }
 
         // Procesar fotografía (si se envió)
         if ($request->hasFile('photograph')) {
             $validated['photograph'] = $request->file('photograph')->store('photos', 'public');
         }
-
-        // Generar número de empleado y contraseña
-        $validated['number_employ'] = User::generateEmployeeNumber();
-        $plainPassword = Str::random(12);
-        $validated['password'] = Hash::make($plainPassword);
 
         // Crear usuario
         $user = User::create($validated);

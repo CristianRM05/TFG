@@ -55,7 +55,6 @@ class RegisteredUserController extends Controller
         }
 
         // Generar número de empleado
-        $validated['number_employ'] = User::generateEmployeeNumber();
 
         // Hashear la contraseña
         $validated['password'] = Hash::make($validated['password']);

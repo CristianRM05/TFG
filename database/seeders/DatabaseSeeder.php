@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
 
         $users = [
             [
-                'number_employ' => 'EMP001',
                 'name' => 'Administrador',
                 'last_name' => 'admin',
                 'dni' => '12345678A',
@@ -36,7 +35,6 @@ class DatabaseSeeder extends Seeder
                 'remember_token' => Str::random(10),
             ],
             [
-                'number_employ' => 'EMP002',
                 'name' => 'master',
                 'last_name' => 'manager',
                 'dni' => '12345678B',

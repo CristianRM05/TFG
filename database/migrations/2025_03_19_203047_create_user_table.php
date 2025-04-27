@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -13,14 +14,12 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('number_employ')->unique();
             $table->string('name');
             $table->string('last_name');
             $table->string('dni')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
             $table->string('phone');
             $table->string('address');
             $table->enum ('role', ['Admin','Manager', 'Cliente' ])->default('Cliente');
@@ -29,17 +28,5 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-
-            $table->string('license')->nullable(false);
-            $table->string('driver_license')->nullable(false);
-            $table->date('license_expiration_date')->nullable(false);
-        });
-    }
 };
+
