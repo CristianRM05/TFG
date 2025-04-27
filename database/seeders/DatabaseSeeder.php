@@ -29,7 +29,6 @@ class DatabaseSeeder extends Seeder
                 'address' => 'Calle Falsa 123',
                 'role' => 'Admin',
                 'photograph' => 'profile.jpg',
-                'remember_token' => Str::random(10),
             ],
             [
                 'name' => 'master',
@@ -42,7 +41,6 @@ class DatabaseSeeder extends Seeder
                 'address' => 'Calle Falsa 123',
                 'role' => 'Manager',
                 'photograph' => 'profile.jpg',
-                'remember_token' => Str::random(10),
             ]
         ];
 
@@ -53,8 +51,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ShelfSeeder::class,
             ProductSeeder::class,
-            TruckSeeder::class,
-            UserSeeder::class,
         ]);
     }
 }
