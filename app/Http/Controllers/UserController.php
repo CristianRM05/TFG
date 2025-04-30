@@ -14,6 +14,15 @@ use App\Notifications\NewUserCredentialsNotification;
 
 class UserController extends Controller
 {
+
+        public function index(): JsonResponse
+    {
+        $users = User::all();
+        return response()->json($users);
+    }
+
+
+
     public function store(Request $request)
     {
         // Validar campos comunes
