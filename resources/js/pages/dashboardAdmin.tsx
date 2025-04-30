@@ -23,29 +23,45 @@ export default function AdminDashboard() {
         roles: RoleOption[];
     }>().props;
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+    const [totalUsers, setTotalUsers] = useState(0);
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('/admin/users', {  // Cambiado de /api/users a /admin/users
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include'
-                });
+                const response = await fetch(`/admin/users?page=${currentPage}`);
 
                 if (!response.ok) throw new Error('Error al cargar usuarios');
 
                 const data = await response.json();
-                setUsers(data);
+
+                if (data.success) {
+                    setUsers(data.users);
+                    setTotalPages(data.pagination.last_page);
+                    setPerPage(data.pagination.per_page);
+                    setTotalUsers(data.pagination.total);
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
+                }
             } catch (error) {
                 console.error('Error:', error);
-                // Mantén los datos de prueba como fallback
+                // Datos de prueba como fallback
+                setUsers([
+                    {
+                        id: 1,
+                        name: "Admin",
+                        email: "admin@test.com",
+                        role: "Admin"
+                    }
+                ]);
+                setTotalPages(1);
             }
         };
 
         fetchUsers();
-    }, []);
+    }, [currentPage]); // Se ejecuta cuando cambia currentPage
 
 
     useEffect(() => {
@@ -302,7 +318,55 @@ export default function AdminDashboard() {
                                 )}
                             </tbody>
                         </table>
-                        
+                        {/* Componente de Paginación */}
+                        <div className="flex items-center justify-between mt-6">
+                            <div className="text-sm text-gray-600">
+                                Mostrando {(currentPage - 1) * perPage + 1}-
+                                {Math.min(currentPage * perPage, totalUsers)} de {totalUsers} usuarios
+                            </div>
+
+                            <div className="flex gap-1">
+                                {/* Botón Anterior */}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                >
+                                    &larr; Anterior
+                                </button>
+
+                                {/* Números de página */}
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    const page = currentPage <= 3
+                                        ? i + 1
+                                        : currentPage >= totalPages - 2
+                                            ? totalPages - 4 + i
+                                            : currentPage - 2 + i;
+
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-10 h-10 rounded-md ${currentPage === page
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'border hover:bg-gray-100'
+                                                } transition-colors`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                })}
+
+                                {/* Botón Siguiente */}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                >
+                                    Siguiente &rarr;
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>
