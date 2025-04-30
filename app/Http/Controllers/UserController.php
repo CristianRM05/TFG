@@ -20,17 +20,16 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'dni' => 'required|string|unique:users,dni',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
             'role' => ['required', Rule::in(array_column(RolesEmployee::cases(), 'value'))],
-            'photograph' => 'nullable|image|max:2048',
+            'avatar' => 'nullable|image|max:2048',
         ]);
 
         // Procesar fotografía (si se envió)
-        if ($request->hasFile('photograph')) {
-            $validated['photograph'] = $request->file('photograph')->store('photos', 'public');
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('photos', 'public');
         }
 
         // Crear usuario

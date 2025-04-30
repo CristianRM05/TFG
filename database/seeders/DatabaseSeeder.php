@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Administrador',
                 'last_name' => 'admin',
-                'dni' => '12345678A',
                 'email' => 'admin@admin.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('admin123'),
@@ -35,7 +34,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'master',
                 'last_name' => 'manager',
-                'dni' => '12345678B',
                 'email' => 'manager@manager.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('manager123'),
