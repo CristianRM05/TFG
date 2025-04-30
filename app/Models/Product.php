@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Enums\categoryProducts;
 
 class Product extends Model
 {
@@ -27,7 +28,7 @@ class Product extends Model
         'discount_percent',
         'image_url',
         'categoria',
-            'shelf_id',
+        'shelf_id',
 
     ];
 
@@ -38,7 +39,8 @@ class Product extends Model
      */
     protected $casts = [
         'price' => 'float',
-        'discount_percent' => 'float'
+        'discount_percent' => 'float',
+        'categoria' => categoryProducts::class,
     ];
 
 
@@ -60,7 +62,7 @@ public function siblingProducts()
 
 public function getFinalPriceAttribute()
 {
-    return $this->discount_percent 
+    return $this->discount_percent
         ? $this->price - ($this->price * $this->discount_percent / 100)
         : $this->price;
 }
