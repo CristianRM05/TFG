@@ -17,11 +17,36 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function AdminDashboard() {
+    const [users, setUsers] = useState<User[]>([]);
     const { auth, roles } = usePage<{
         auth: { user: User | null };
         roles: RoleOption[];
     }>().props;
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch('/admin/users', {  // Cambiado de /api/users a /admin/users
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('Error al cargar usuarios');
+
+                const data = await response.json();
+                setUsers(data);
+            } catch (error) {
+                console.error('Error:', error);
+                // Mantén los datos de prueba como fallback
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
 
     useEffect(() => {
         fetch('/api/products/categorias')
@@ -196,6 +221,88 @@ export default function AdminDashboard() {
                     <div className="flex gap-4 mt-6">
                         <Button onClick={() => setOpenUserModal(true)}>➕ Crear empleado</Button>
                         <Button onClick={() => setOpenProductModal(true)}>📦 Crear producto</Button>
+                    </div>
+                </section>
+                <section className="bg-white dark:bg-gray-900 shadow rounded-xl p-6 border border-gray-200 dark:border-gray-700 mt-6">
+                    <h2 className="text-2xl font-bold mb-4">Gestión de Usuarios</h2>
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead className="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">DNI</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                {users.length > 0 ? (
+                                    users.map(user => (
+                                        <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    {user.photograph && (
+                                                        <img
+                                                            src={user.photograph}
+                                                            alt={`${user.name} ${user.last_name}`}
+                                                            className="h-10 w-10 rounded-full object-cover"
+                                                        />
+                                                    )}
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                            {user.name} {user.last_name}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                {user.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                {user.dni}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                {user.phone}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    ${user.role === 'Admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                                                        user.role === 'Manager' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex space-x-2">
+                                                    <button
+                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                                                        onClick={() => {/* Lógica para editar */ }}
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                    <button
+                                                        className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                                        onClick={() => {/* Lógica para eliminar */ }}
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            No hay usuarios registrados
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                        
                     </div>
                 </section>
             </div>
