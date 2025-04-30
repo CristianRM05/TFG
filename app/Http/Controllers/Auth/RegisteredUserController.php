@@ -39,7 +39,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
-            'role' => [Rule::in(array_column(RolesEmployee::cases(), 'Operario'))],
+            'role' => [Rule::in(array_column(RolesEmployee::cases(), 'Cliente'))],
             'departamento_id' => 'nullable|exists:departamentos,id',
             'password' => ['required', 'confirmed', Password::defaults()],
             'photograph' => 'nullable|image|max:2048',
