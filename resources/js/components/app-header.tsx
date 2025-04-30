@@ -28,6 +28,12 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+
+    {
+        title: 'Productos2',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    },
 ];
 
 const rightNavItems: NavItem[] = [];
@@ -154,7 +160,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </svg>
                                         </Button>
                                     </DropdownMenuTrigger>
-                              
+
                                 </DropdownMenu>
                             )}
 

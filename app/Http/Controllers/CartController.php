@@ -13,10 +13,9 @@ class CartController extends Controller
         $user = auth()->user();
 
         // Buscar carrito activo o crearlo si no existe
-        $cart = $user->cart()->firstOrCreate(
-            ['status' => 'active'],
-            [] // valores por defecto si se crea
-        );
+        $cart = $user->cart()->firstOrCreate([
+            'status' => 'active'
+        ]);
 
         // Cargar productos relacionados
         $cart->load('items.product');
