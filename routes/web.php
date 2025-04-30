@@ -26,6 +26,16 @@ Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.a
 Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
 Route::put('updateQuantity/{id}', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
 
+//ruta para redirigir a la vista de login
+Route::get('/login', function () {
+    return Inertia::render('Login');
+})->name('login');
+
+//ruta para redirigir a la vista de registro
+Route::get('/register', function () {
+    return Inertia::render('Register');
+})->name('register');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

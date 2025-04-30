@@ -184,10 +184,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                 </div>
             </div>
 
-            {/* Modal para crear cupón */}
-
-
-
         </div>
     );
 
