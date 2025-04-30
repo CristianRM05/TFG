@@ -211,20 +211,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                 </div>
             </div>
 
-            {/* Modal para crear cupón */}
-            <CreateCouponModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-            />
 
-            <AvailableCouponsModal
-                show={showCouponsModal}
-                handleClose={() => setShowCouponsModal(false)}
-            />
-            <NewsletterModal
-                isOpen={showNewsletterModal}
-                onClose={() => setShowNewsletterModal(false)}
-            />
+
 
         </div>
     );
