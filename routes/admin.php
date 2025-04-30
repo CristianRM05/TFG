@@ -26,10 +26,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     ]);
 })->name('admin.users.index');
     
+
+
     // Ruta existente para crear usuarios (POST)
     Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
     
     // Otras rutas existentes
     Route::post('/create-coupon', [CouponController::class, 'store']);
     Route::post('/send-newsletter', [NewsletterController::class, 'send']);
+    Route::patch('/users/{user}/ban', [AdminDashboardController::class, 'banUser'])
+    ->name('admin.users.ban');
 });

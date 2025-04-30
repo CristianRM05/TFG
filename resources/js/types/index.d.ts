@@ -44,6 +44,8 @@ interface User {
     license_expiration_date?: string;
     created_at: string;
     updated_at: string;
+    banned_at: string | null;
+
 }
 
 interface Product {

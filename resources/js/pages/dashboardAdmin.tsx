@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -292,20 +292,34 @@ export default function AdminDashboard() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <div className="flex space-x-2">
-                                                    <button
-                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-                                                        onClick={() => {/* Lógica para editar */ }}
-                                                    >
-                                                        Editar
-                                                    </button>
-                                                    <button
-                                                        className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                                        onClick={() => {/* Lógica para eliminar */ }}
-                                                    >
-                                                        Eliminar
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(`¿Estás seguro de querer ${user.banned_at ? 'desbanear' : 'banear'} a ${user.name}?`)) {
+                                                            router.patch(`/admin/users/${user.id}/ban`, {
+                                                                banned: !user.banned_at,
+                                                            }, {
+                                                                preserveScroll: true,
+                                                                onSuccess: () => {
+                                                                    // Actualizar el estado local
+                                                                    setUsers(users.map(u =>
+                                                                        u.id === user.id
+                                                                            ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
+                                                                            : u
+                                                                    ));
+                                                                },
+                                                                onError: () => {
+                                                                    alert('Ocurrió un error al intentar cambiar el estado');
+                                                                }
+                                                            });
+                                                        }
+                                                    }}
+                                                    className={`px-3 py-1 rounded-md text-sm font-medium ${user.banned_at
+                                                            ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800'
+                                                            : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800'
+                                                        }`}
+                                                >
+                                                    {user.banned_at ? 'Desbanear' : 'Banear'}
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
