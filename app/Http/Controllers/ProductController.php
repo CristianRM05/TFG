@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Shelf;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\DB;
 
 
 class ProductController extends Controller
@@ -15,7 +15,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::paginate(5);
-        return response()->json($products, 200);    }
+        return response()->json($products, 200);
+    }
 
     public function show($id)
     {
@@ -28,7 +29,7 @@ class ProductController extends Controller
         return inertia('Products/Show', ['product' => $product]);
     }
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
         // Validación (sin el campo stock)
         $validated = $request->validate([
@@ -47,10 +48,10 @@ class ProductController extends Controller
         $product = Product::create($validated);
 
         // Crear el registro de stock asociado
-        $product->stock()->create([ 
-        'available_quantity' => $request->stock ?? 0, // Valor por defecto
-        'location' => 'Almacén Principal'
-    ]);
+        $product->stock()->create([
+            'available_quantity' => $request->stock ?? 0, // Valor por defecto
+            'location' => 'Almacén Principal'
+        ]);
 
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
@@ -84,21 +85,21 @@ class ProductController extends Controller
 
 
     public function unassignedProducts()
-{
-    return inertia('shelves/shelvesIndex', [
-        'unassignedProducts' => Product::whereNull('shelf_id')
-            ->with('shelf')
-            ->get(),
-            
-        'shelves' => Shelf::with(['products' => function($query) {
+    {
+        return inertia('shelves/shelvesIndex', [
+            'unassignedProducts' => Product::whereNull('shelf_id')
+                ->with('shelf')
+                ->get(),
+
+            'shelves' => Shelf::with(['products' => function ($query) {
                 $query->select('id', 'shelf_id', 'stock');
             }])
-            ->orderBy('location')
-            ->get(),
-            
-        'flash' => session()->only(['success', 'error'])
-    ]);
-}
+                ->orderBy('location')
+                ->get(),
+
+            'flash' => session()->only(['success', 'error'])
+        ]);
+    }
 
     public function shelvesManagement()
     {
@@ -106,226 +107,179 @@ class ProductController extends Controller
             'unassignedProducts' => Product::whereNull('shelf_id')
                 ->select(['id', 'name', 'num_reference', 'image_url', 'stock'])
                 ->get(),
-                
-            'shelves' => Shelf::with(['products' => function($query) {
-                    $query->select('id', 'shelf_id', 'stock');
-                }])
+
+            'shelves' => Shelf::with(['products' => function ($query) {
+                $query->select('id', 'shelf_id', 'stock');
+            }])
                 ->orderBy('location')
                 ->get()
                 ->map(function ($shelf) {
                     $shelf->total_stock = $shelf->products->sum('stock');
                     return $shelf->only(['id', 'code', 'location', 'max_capacity', 'total_stock']);
                 }),
-                
+
             'flash' => session()->only(['success', 'error'])
         ]);
     }
 
     public function assignShelf(Request $request, $productId)
-{
-    $request->validate(['shelf_id' => 'required|exists:shelves,id']);
-    
-    $product = Product::findOrFail($productId);
-    $shelf = Shelf::findOrFail($request->shelf_id);
-    
-    // Calcular el stock total actual en la estantería
-    $currentStockInShelf = Product::where('shelf_id', $shelf->id)->sum('stock');
-    
-    // Verificar si la suma supera la capacidad
-    if (($currentStockInShelf + $product->stock) > $shelf->max_capacity) {
-        return back()->withErrors([
-            'shelf_id' => 'La estantería no tiene suficiente capacidad. '.
-                         'Capacidad máxima: '.$shelf->max_capacity.
-                         ', Stock actual: '.$currentStockInShelf.
-                         ', Stock a añadir: '.$product->stock
-        ]);
+    {
+        $request->validate(['shelf_id' => 'required|exists:shelves,id']);
+
+        $product = Product::findOrFail($productId);
+        $shelf = Shelf::findOrFail($request->shelf_id);
+
+        $currentStockInShelf = Product::where('shelf_id', $shelf->id)->sum('stock');
+
+        if (($currentStockInShelf + $product->stock) > $shelf->max_capacity) {
+            return back()->withErrors([
+                'shelf_id' => 'La estantería no tiene suficiente capacidad. ' .
+                    'Capacidad máxima: ' . $shelf->max_capacity .
+                    ', Stock actual: ' . $currentStockInShelf .
+                    ', Stock a añadir: ' . $product->stock
+            ]);
+        }
+
+        $product->shelf_id = $request->shelf_id;
+        $product->save();
+
+        return back()->with('success', 'Producto asignado correctamente a la estantería');
     }
-    
-    $product->shelf_id = $request->shelf_id;
-    $product->save();
-    
-    return back()->with('success', 'Producto asignado correctamente a la estantería');
-}
 
     public function showShelf(Shelf $shelf)
     {
         return inertia('shelves/show', [
-            'shelf' => $shelf->load(['products' => function($query) {
+            'shelf' => $shelf->load(['products' => function ($query) {
                 $query->with('shelf:id,location')
                     ->select('id', 'name', 'num_reference', 'image_url', 'shelf_id', 'stock');
             }])
         ]);
     }
 
-public function stockIndex()
-{
-    $products = Product::with(['shelf'])
-        ->select(['id', 'name', 'num_reference', 'price', 'image_url', 'stock', 'shelf_id'])
-        ->get()
-        ->map(function ($product) {
-            // Estructura compatible con el frontend React
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'num_reference' => $product->num_reference,
-                'price' => $product->price,
-                'image_url' => $product->image_url,
-                'stocks' => [ // Mantenemos la estructura de array que espera el frontend
-                    [
-                        'available_quantity' => $product->stock, // Usamos el campo directo
-                        'location' => $product->shelf?->location ?? 'Sin ubicación',
-                        'shelf' => $product->shelf ? [
-                            'max_capacity' => $product->shelf->max_capacity
-                        ] : null
+    public function stockIndex()
+    {
+        $products = Product::with(['shelf'])
+            ->select(['id', 'name', 'num_reference', 'price', 'image_url', 'stock', 'shelf_id'])
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'num_reference' => $product->num_reference,
+                    'price' => $product->price,
+                    'image_url' => $product->image_url,
+                    'stocks' => [ // Mantenemos la estructura de array que espera el frontend
+                        [
+                            'available_quantity' => $product->stock, // Usamos el campo directo
+                            'location' => $product->shelf?->location ?? 'Sin ubicación',
+                            'shelf' => $product->shelf ? [
+                                'max_capacity' => $product->shelf->max_capacity
+                            ] : null
+                        ]
                     ]
-                ]
-            ];
-        });
+                ];
+            });
 
-    return Inertia::render('stock/stockIndex', [
-        'products' => $products
-    ]);
-}
+        return Inertia::render('stock/stockIndex', [
+            'products' => $products
+        ]);
+    }
 
-public function updateShelf(Product $product, Request $request)
-{
-    $product->update([
-        'shelf_id' => $request->shelf_id 
-    ]);
-    
-    return back()->with('success', 'Producto desasignado correctamente');
-}
+    public function updateShelf(Product $product, Request $request)
+    {
+        $product->update([
+            'shelf_id' => $request->shelf_id
+        ]);
 
-public function assignSplitToShelf(Request $request, Product $product)
-{
-    $request->validate([
-        'shelf_id' => 'required|exists:shelves,id',
-        'quantity' => 'required|integer|min:1|max:'.$product->stock
-    ]);
+        return back()->with('success', 'Producto desasignado correctamente');
+    }
 
-    DB::transaction(function () use ($product, $request) {
-        $shelfId = $request->shelf_id;
-        $quantity = $request->quantity;
+    public function assignSplitToShelf(Request $request, Product $product)
+    {
+        $request->validate([
+            'shelf_id' => 'required|exists:shelves,id',
+            'quantity' => 'required|integer|min:1|max:' . $product->stock
+        ]);
 
-        // 1. Buscar producto existente con misma referencia en la estantería
-        $existingProduct = Product::where('num_reference', $product->num_reference)
-            ->where('shelf_id', $shelfId)
-            ->where('id', '!=', $product->id)
-            ->first();
+        DB::transaction(function () use ($product, $request) {
+            $shelfId = $request->shelf_id;
+            $quantity = $request->quantity;
 
-        if ($existingProduct) {
-            // 2. Si existe, fusionar
-            $existingProduct->stock += $quantity;
-            $existingProduct->save();
-            
-            // Reducir stock del producto original
-            $product->stock -= $quantity;
-            
-            if ($product->stock <= 0) {
-                $product->delete();
-            } else {
-                $product->save();
-            }
-            
-            \Log::info('Fusión automática al asignar a estantería', [
-                'producto_mantenido' => $existingProduct->id,
-                'producto_origen' => $product->id,
-                'cantidad_fusionada' => $quantity,
-                'shelf_id' => $shelfId
-            ]);
-        } else {
-            // 3. Si no existe producto hermano, verificar capacidad
-            $shelf = Shelf::findOrFail($shelfId);
-            $usedSpace = $shelf->products()->sum('stock');
-            $availableSpace = $shelf->max_capacity - $usedSpace;
-            
-            $assignQuantity = min($quantity, $availableSpace);
-            
-            // 4. Asignar a estantería
-            $product->shelf_id = $shelfId;
-            $product->stock = $assignQuantity;
-            $product->save();
-            
-            // 5. Manejar excedente si no cabe todo
-            if ($quantity > $assignQuantity) {
-                $remainingQuantity = $quantity - $assignQuantity;
-                
-                $newProduct = $product->replicate(['final_price']);
-                $newProduct->stock = $remainingQuantity;
-                $newProduct->shelf_id = null;
-                $newProduct->save();
-                
-                \Log::info('Producto dividido al asignar', [
-                    'producto_original' => $product->id,
-                    'nuevo_producto' => $newProduct->id,
-                    'cantidad_asignada' => $assignQuantity,
-                    'cantidad_restante' => $remainingQuantity
-                ]);
-            }
-        }
-    });
-
-    return back()->with('success', 'Producto asignado correctamente');
-}
-
-public function removeAndMergeFromShelf(Product $product)
-{
-    DB::transaction(function () use ($product) {
-        // Guardar el shelf_id actual antes de modificarlo
-        $currentShelfId = $product->shelf_id;
-        
-        // Buscar productos hermanos con misma referencia y mismo shelf_id
-        $siblingProducts = Product::where('num_reference', $product->num_reference)
-            ->where('shelf_id', $currentShelfId)
-            ->where('id', '!=', $product->id)
-            ->get();
-
-        if ($siblingProducts->isNotEmpty()) {
-            // Fusionar con el primer hermano encontrado
-            $originalProduct = $siblingProducts->first();
-            $originalProduct->stock += $product->stock;
-            $originalProduct->save();
-            $product->delete();
-            
-            \Log::info('Productos fusionados en estantería', [
-                'producto_mantenido' => $originalProduct->id,
-                'producto_eliminado' => $product->id,
-                'shelf_id' => $currentShelfId,
-                'nuevo_stock' => $originalProduct->stock
-            ]);
-        } else {
-            // Si no hay hermanos en la misma estantería, buscar sin estantería
-            $unassignedSibling = Product::where('num_reference', $product->num_reference)
-                ->whereNull('shelf_id')
+            $existingProduct = Product::where('num_reference', $product->num_reference)
+                ->where('shelf_id', $shelfId)
                 ->where('id', '!=', $product->id)
                 ->first();
 
-            if ($unassignedSibling) {
-                // Fusionar con producto sin estantería
-                $unassignedSibling->stock += $product->stock;
-                $unassignedSibling->save();
-                $product->delete();
-                
-                \Log::info('Productos fusionados sin estantería', [
-                    'producto_mantenido' => $unassignedSibling->id,
-                    'producto_eliminado' => $product->id,
-                    'nuevo_stock' => $unassignedSibling->stock
-                ]);
-            } else {
-                // Si no hay fusión posible, simplemente quitar de la estantería
-                $product->shelf_id = null;
-                $product->save();
-                
-                \Log::info('Producto desasignado sin fusión', [
-                    'product_id' => $product->id,
-                    'shelf_id_anterior' => $currentShelfId
-                ]);
-            }
-        }
-    });
+            if ($existingProduct) {
+                $existingProduct->stock += $quantity;
+                $existingProduct->save();
 
-    return back()->with('success', 'Operación completada');
-}
+                $product->stock -= $quantity;
+
+                if ($product->stock <= 0) {
+                    $product->delete();
+                } else {
+                    $product->save();
+                }
+            } else {
+                $shelf = Shelf::findOrFail($shelfId);
+                $usedSpace = $shelf->products()->sum('stock');
+                $availableSpace = $shelf->max_capacity - $usedSpace;
+
+                $assignQuantity = min($quantity, $availableSpace);
+
+                $product->shelf_id = $shelfId;
+                $product->stock = $assignQuantity;
+                $product->save();
+
+                if ($quantity > $assignQuantity) {
+                    $remainingQuantity = $quantity - $assignQuantity;
+
+                    $newProduct = $product->replicate(['final_price']);
+                    $newProduct->stock = $remainingQuantity;
+                    $newProduct->shelf_id = null;
+                    $newProduct->save();
+                }
+            }
+        });
+
+        return back()->with('success', 'Producto asignado correctamente');
+    }
+
+    public function removeAndMergeFromShelf(Product $product)
+    {
+        DB::transaction(function () use ($product) {
+            $currentShelfId = $product->shelf_id;
+
+            $siblingProducts = Product::where('num_reference', $product->num_reference)
+                ->where('shelf_id', $currentShelfId)
+                ->where('id', '!=', $product->id)
+                ->get();
+
+            if ($siblingProducts->isNotEmpty()) {
+                $originalProduct = $siblingProducts->first();
+                $originalProduct->stock += $product->stock;
+                $originalProduct->save();
+                $product->delete();
+            } else {
+                $unassignedSibling = Product::where('num_reference', $product->num_reference)
+                    ->whereNull('shelf_id')
+                    ->where('id', '!=', $product->id)
+                    ->first();
+
+                if ($unassignedSibling) {
+                    $unassignedSibling->stock += $product->stock;
+                    $unassignedSibling->save();
+                    $product->delete();
+                } else {
+                    $product->shelf_id = null;
+                    $product->save();
+                }
+            }
+        });
+
+        return back()->with('success', 'Operación completada');
+    }
 
     public function destroy($id)
     {

@@ -11,7 +11,7 @@ class ImagenController extends Controller
     {
         try {
             $request->validate([
-                'imagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:32000' 
+                'imagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:32000'
             ]);
 
             $imagen = $request->file('imagen');
@@ -30,7 +30,7 @@ class ImagenController extends Controller
             $data = $response->json();
 
             if (isset($data['data']['url'])) {
-                return response($data['data']['url']);  
+                return response($data['data']['url']);
             } else {
                 return response()->json([
                     'error' => 'Error al subir la imagen.',

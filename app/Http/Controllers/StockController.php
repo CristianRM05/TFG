@@ -18,9 +18,7 @@ class StockController extends Controller
             })
             ->get();
 
-        // Debug: Verifica los datos antes de enviar
-        logger()->info('Products data:', ['count' => $products->count()]);
-
+     
         return Inertia::render('stock/stockIndex', [
             'products' => $products,
             'auth' => [

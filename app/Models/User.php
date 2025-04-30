@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\StatusTruck;
 use App\Enums\RolesEmployee;
-
+use Illuminate\Database\Eloquent\Relations\HasOne;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
@@ -64,5 +64,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
 }
+public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class)->where('status', 'active');
+    }
+
 
 }
