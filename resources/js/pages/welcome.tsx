@@ -1,316 +1,214 @@
+// resources/js/Pages/PaginaBebidas.tsx
 import React, { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
 export default function PaginaBebidas() {
-    const { auth } = usePage<{ auth: { user?: { name: string } } }>().props;
-    const [modalNewsletter, setModalNewsletter] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const [email, setEmail] = useState('');
+  const { auth } = usePage<{ auth: { user?: { name: string } } }>().props;
+  const [modalNewsletter, setModalNewsletter] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [email, setEmail] = useState('');
 
-    const toggleDarkMode = () => {
-        setIsDarkMode(!isDarkMode);
-    };
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
-    const handleSubscribe = async () => {
-        try {
-            await axios.post('/api/subscribe', { email });
-            Swal.fire('¡Listo!', 'Te has suscrito con éxito 🎉', 'success');
-            setEmail('');
-            setModalNewsletter(false);
-        } catch (error: any) {
-            const message = error.response?.data?.message || 'Hubo un error al suscribirte';
-            Swal.fire('Error', message, 'error');
-        }
-    };
+  const handleSubscribe = async () => {
+    try {
+      await axios.post('/api/subscribe', { email });
+      Swal.fire('¡Listo!', 'Te has suscrito con éxito 🎉', 'success');
+      setEmail('');
+      setModalNewsletter(false);
+    } catch (e: any) {
+      Swal.fire('Error', e.response?.data?.message ?? 'Algo salió mal', 'error');
+    }
+  };
 
-    const categoriasBebidas = [
-        {
-            nombre: 'Bebidas Alcohólicas',
-            descripcion: 'Licores premium, cervezas artesanales y vinos selectos',
-            icono: '🍸',
-            color: isDarkMode ? 'bg-yellow-900/20' : 'bg-amber-100',
-            productos: [
-                {
-                    nombre: 'Colección de Whiskies Añejos',
-                    precio: '49.990 CLP',
-                    imagen: '/whisky-coleccion.jpg',
-                    descripcion: 'Selección de whiskies de las mejores destilerías'
-                },
-                {
-                    nombre: 'Pack Cervezas Artesanales',
-                    precio: '25.000 CLP',
-                    imagen: '/cervezas-artesanales.jpg',
-                    descripcion: 'Las mejores cervezas craft de la región'
-                },
-                {
-                    nombre: 'Vinos Reserva Especial',
-                    precio: '39.990 CLP',
-                    imagen: '/vinos-reserva.jpg',
-                    descripcion: 'Vinos seleccionados de viñedos premium'
-                }
-            ]
-        },
-        {
-            nombre: 'Bebidas Sin Alcohol',
-            descripcion: 'Refrescantes jugos, sodas y bebidas especiales',
-            icono: '🥤',
-            color: isDarkMode ? 'bg-lime-900/20' : 'bg-lime-100',
-            productos: [
-                {
-                    nombre: 'Pack de Smoothies Orgánicos',
-                    precio: '15.000 CLP',
-                    imagen: '/smoothies.jpg',
-                    descripcion: 'Smoothies 100% naturales y saludables'
-                },
-                {
-                    nombre: 'Aguas Saborizadas Gourmet',
-                    precio: '10.000 CLP',
-                    imagen: '/aguas-saborizadas.jpg',
-                    descripcion: 'Hidratación con sabores únicos'
-                },
-                {
-                    nombre: 'Té Frío Artesanal',
-                    precio: '8.000 CLP',
-                    imagen: '/te-frio.jpg',
-                    descripcion: 'Refrescantes variedades de té'
-                }
-            ]
-        }
-    ];
+  const categoriasBebidas = [
+    {
+      nombre: 'Bebidas Alcohólicas',
+      descripcion: 'Licores premium, cervezas y vinos selectos',
+      icono: '/images/icon-alcohol.svg',
+      productos: [
+        { nombre: 'Whisky Añejo', precio: '49.990 CLP', imagen: '/images/whisky.png' },
+        { nombre: 'Cervezas Artesanales', precio: '25.000 CLP', imagen: '/images/cerveza.png' },
+        { nombre: 'Vino Reserva', precio: '39.990 CLP', imagen: '/images/vino.png' },
+      ],
+    },
+    {
+      nombre: 'Bebidas Sin Alcohol',
+      descripcion: 'Jugos naturales, sodas y smoothies',
+      icono: '/images/icon-nalcohol.svg',
+      productos: [
+        { nombre: 'Smoothies Orgánicos', precio: '15.000 CLP', imagen: '/images/smoothie.png' },
+        { nombre: 'Aguas Saborizadas', precio: '10.000 CLP', imagen: '/images/agua.png' },
+        { nombre: 'Té Frío Artesanal', precio: '8.000 CLP', imagen: '/images/te.png' },
+      ],
+    },
+  ];
 
-    const beneficios = [
-        {
-            icono: '🚚',
-            titulo: 'Envío Gratis',
-            descripcion: 'En compras sobre > 1200€'
-        },
-        {
-            icono: '🍷',
-            titulo: 'Asesoría de Expertos',
-            descripcion: 'Recomendaciones personalizadas'
-        },
-        {
-            icono: '🏆',
-            titulo: 'Calidad Garantizada',
-            descripcion: 'Productos seleccionados'
-        }
-    ];
+  const beneficios = [
+    { icono: '🚚', titulo: 'Envío Gratis', descripcion: 'En compras sobre 1200€' },
+    { icono: '🍷', titulo: 'Asesoría', descripcion: 'Recomendaciones de expertos' },
+    { icono: '🏆', titulo: 'Calidad', descripcion: 'Productos seleccionados' },
+  ];
 
-    const testimonios = [
-        {
-            nombre: 'María Fernández',
-            comentario: 'La mejor selección de bebidas que he encontrado. ¡Increíble variedad!',
-            avatar: '/avatar-maria.jpg'
-        },
-        {
-            nombre: 'Carlos Mendoza',
-            comentario: 'Servicio impecable y productos de primera calidad.',
-            avatar: '/avatar-carlos.jpg'
-        }
-    ];
+  const testimonios = [
+    {
+      nombre: 'María Fernández',
+      comentario: 'La mejor selección de bebidas que he encontrado. ¡Increíble variedad!',
+      avatar: '/images/avatar-maria.jpg',
+    },
+    {
+      nombre: 'Carlos Mendoza',
+      comentario: 'Servicio impecable y productos de primera calidad.',
+      avatar: '/images/avatar-carlos.jpg',
+    },
+  ];
 
-    return (
-        <div className={`
-            min-h-screen relative
-            ${isDarkMode
-                ? 'bg-gradient-to-br from-stone-900 to-stone-800 text-gray-100'
-                : 'bg-gradient-to-br from-amber-50 to-yellow-100 text-gray-800'
-            }
-        `}>
-            {/* Botón de modo claro/oscuro */}
-            <div className="fixed bottom-4 right-4 z-50">
-                <button
-                    onClick={toggleDarkMode}
-                    className={`
-                        p-3 rounded-full shadow-lg
-                        ${isDarkMode
-                            ? 'bg-stone-700 text-yellow-400'
-                            : 'bg-yellow-200 text-stone-800'}
-                    `}
-                >
-                    {isDarkMode ? '☀️' : '🌙'}
-                </button>
-            </div>
+  return (
+    <div className={`${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-800'} min-h-screen`}>
+      <Head title="BebidasPro" />
 
-            {/* Botón de Newsletter fijo */}
-            <div className="fixed bottom-20 right-4 z-50">
-                <button
-                    onClick={() => setModalNewsletter(true)}
-                    className="bg-orange-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-orange-700 transition"
-                >
-                    📩 ¡No perderse nada!
-                </button>
-            </div>
+      {/* Toggle Dark/Light */}
+      <button
+        onClick={toggleDarkMode}
+        className="fixed bottom-4 right-4 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20"
+      >
+        {isDarkMode ? '☀️' : '🌙'}
+      </button>
 
-            {/* Navegación */}
-            <nav className={`
-                sticky top-0 z-40
-                ${isDarkMode
-                    ? 'bg-stone-800/90 border-b border-stone-700'
-                    : 'bg-white/90 shadow-md'}
-            `}>
-                <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <span className="text-3xl font-bold text-amber-700">🍹 BebidasPro</span>
-                    </div>
-                    <div className="space-x-4">
-                        {auth.user ? (
-                            <Link
-                                href={route('dashboard')}
-                                className={`
-                                    px-4 py-2 rounded-full
-                                    ${isDarkMode
-                                        ? 'bg-yellow-800 text-white hover:bg-yellow-700'
-                                        : 'bg-yellow-500 text-white hover:bg-yellow-600'}
-                                `}
-                            >
-                                Panel de Control
-                            </Link>
-                        ) : (
-                            <>
-                                <Link
-                                    href={route('login')}
-                                    className={`
-                                        px-4 py-2 rounded-full
-                                        ${isDarkMode
-                                            ? 'text-yellow-300 hover:bg-stone-700'
-                                            : 'text-yellow-700 hover:bg-yellow-100'}
-                                    `}
-                                >
-                                    Iniciar Sesión
-                                </Link>
-                                <Link
-                                    href={route('register')}
-                                    className={`
-                                        px-4 py-2 rounded-full
-                                        ${isDarkMode
-                                            ? 'bg-yellow-800 text-white hover:bg-yellow-700'
-                                            : 'bg-yellow-500 text-white hover:bg-yellow-600'}
-                                    `}
-                                >
-                                    Registrarse
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </nav>
+      {/* Newsletter */}
+      <button
+        onClick={() => setModalNewsletter(true)}
+        className="fixed bottom-20 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg"
+      >
+        📩 Newsletter
+      </button>
 
-            {/* Sección Hero */}
-            <header className="container mx-auto px-4 py-16 grid md:grid-cols-2 items-center">
-                <div>
-                    <h1 className={`text-5xl font-bold mb-4 ${isDarkMode ? 'text-gray-100' : 'text-amber-800'}`}>
-                        Descubre el Mundo de las
-                        <br />
-                        <span className="text-orange-700">Mejores Bebidas</span>
-                    </h1>
-                    <p className={`text-xl mb-6 ${isDarkMode ? 'text-gray-300' : 'text-stone-600'}`}>
-                        Selección premium de bebidas para cada momento y ocasión
-                    </p>
-                    <div className="space-x-4">
-                        <Link
-                            href={route('dashboard')}
-                            className={`
-                                inline-block px-6 py-3 rounded-full
-                                ${isDarkMode
-                                    ? 'bg-amber-800 text-white hover:bg-amber-700'
-                                    : 'bg-amber-600 text-white hover:bg-amber-700'}
-                            `}
-                        >
-                            Ver Catálogo
-                        </Link>
-                    </div>
-                </div>
-                <div className="hidden md:block">
-                    <img
-                        src="https://gestoriapastor.org/wp-content/uploads/2021/01/the-refrescos.jpg"
-                        alt="Colección de Bebidas"
-                        className="w-full rounded-xl shadow-2xl"
-                    />
-                </div>
-            </header>
-
-            {/* Sección Beneficios */}
-            <section className={`container mx-auto px-4 py-16 ${isDarkMode ? 'bg-stone-800/50' : 'bg-amber-100/60'}`}>
-                <div className="grid md:grid-cols-3 gap-8">
-                    {beneficios.map((beneficio, index) => (
-                        <div
-                            key={index}
-                            className={`text-center p-6 rounded-xl hover:shadow-lg transition-all ${isDarkMode ? 'bg-stone-700/80' : 'bg-white/80'}`}
-                        >
-                            <div className="text-5xl mb-4">{beneficio.icono}</div>
-                            <h3 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-gray-100' : 'text-stone-800'}`}>
-                                {beneficio.titulo}
-                            </h3>
-                            <p className={`${isDarkMode ? 'text-gray-300' : 'text-stone-600'}`}>
-                                {beneficio.descripcion}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Sección Testimonios */}
-            <section className={`container mx-auto px-4 py-16 ${isDarkMode ? 'bg-stone-800/50' : 'bg-amber-100/60'}`}>
-                <h2 className={`text-3xl font-bold text-center mb-12 ${isDarkMode ? 'text-gray-100' : 'text-stone-800'}`}>
-                    Lo Que Dicen Nuestros Clientes
-                </h2>
-                <div className="grid md:grid-cols-2 gap-8">
-                    {testimonios.map((testimonio, index) => (
-                        <div
-                            key={index}
-                            className={`rounded-xl p-6 shadow-lg ${isDarkMode ? 'bg-stone-700/80 text-gray-100' : 'bg-white/80 text-stone-800'}`}
-                        >
-                            <div className="flex items-center mb-4">
-                                <div>
-                                    <h3 className="font-semibold">{testimonio.nombre}</h3>
-                                </div>
-                            </div>
-                            <p className={`italic ${isDarkMode ? 'text-gray-300' : 'text-stone-600'}`}>
-                                "{testimonio.comentario}"
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Modal Newsletter */}
-            {modalNewsletter && (
-                <div className="fixed inset-0 z-50 bg-opacity-40 backdrop-blur-sm flex items-center justify-center">
-                    <div className={`p-8 rounded-xl max-w-md w-full ${isDarkMode ? 'bg-stone-700 text-gray-100' : 'bg-white text-stone-800'}`}>
-                        <h2 className="text-2xl font-bold mb-4 text-center">¡Suscríbete y Recibe Ofertas!</h2>
-                        <p className="text-center mb-6">Recibe las mejores promociones en tu correo</p>
-                        <input
-                            type="email"
-                            placeholder="Ingresa tu correo electrónico"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className={`
-                                w-full px-4 py-2 rounded-full mb-4
-                                ${isDarkMode
-                                    ? 'bg-stone-600 text-gray-100 placeholder-gray-400'
-                                    : 'bg-stone-100 text-stone-800'}
-                            `}
-                        />
-                        <div className="flex justify-center space-x-4">
-                            <button
-                                className="bg-orange-600 text-white px-6 py-2 rounded-full hover:bg-orange-700"
-                                onClick={handleSubscribe}
-                            >
-                                Suscribirme
-                            </button>
-                            <button
-                                className="bg-stone-300 text-stone-700 px-6 py-2 rounded-full hover:bg-stone-400"
-                                onClick={() => setModalNewsletter(false)}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+      {/* Navbar */}
+      <nav className="absolute top-0 w-full py-6 px-8 flex justify-between items-center">
+        <span className="text-4xl font-bold">🍹 BebidasPro</span>
+        <div className="space-x-4">
+          {auth.user ? (
+            <Link href={route('dashboard')} className="px-4 py-2 bg-amber-600 rounded-full">
+              Panel
+            </Link>
+          ) : (
+            <>
+              <Link href={route('login')} className="px-4 py-2 hover:underline">
+                Iniciar Sesión
+              </Link>
+              <Link href={route('register')} className="px-4 py-2 bg-amber-600 rounded-full">
+                Registrarse
+              </Link>
+            </>
+          )}
         </div>
-    );
+      </nav>
+
+      {/* Hero */}
+      <header className="relative flex items-center justify-center h-screen px-8">
+        <img
+          src="/images/botella-tequila.png"
+          alt="Tequila"
+          className="absolute bottom-0 w-1/2 opacity-90"
+        />
+        <div className="z-10 text-center max-w-xl">
+          <h1 className="text-6xl font-extrabold mb-4">
+            TRADITIONAL MEXICAN<br />TEQUILA<br /><span className="text-amber-400">Derbi Raho</span>
+          </h1>
+          <p className="mb-8 text-lg">100% Blue Agave | Crafted in Mexico | 40% ALC/VOL</p>
+          <Link
+            href={route('dashboard')}
+            className="px-8 py-4 bg-amber-600 rounded-full uppercase tracking-wide"
+          >
+            Ver Catálogo
+          </Link>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+      </header>
+
+      {/* Beneficios */}
+      <section className="py-20 px-8 grid md:grid-cols-3 gap-8 text-center">
+        {beneficios.map((b, i) => (
+          <div key={i} className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
+            <div className="text-5xl mb-4">{b.icono}</div>
+            <h3 className="text-2xl font-semibold mb-2">{b.titulo}</h3>
+            <p>{b.descripcion}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* Categorías */}
+      <section className="py-20 px-8">
+        {categoriasBebidas.map((cat, i) => (
+          <div key={i} className="mb-16">
+            <div className="flex items-center mb-6">
+              <img src={cat.icono} alt="" className="w-12 h-12 mr-4" />
+              <div>
+                <h2 className="text-3xl font-bold">{cat.nombre}</h2>
+                <p className="text-sm">{cat.descripcion}</p>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {cat.productos.map((p, j) => (
+                <div key={j} className="bg-white/10 rounded-xl overflow-hidden shadow-lg">
+                  <img src={p.imagen} alt={p.nombre} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h3 className="font-semibold text-xl">{p.nombre}</h3>
+                    <p className="text-amber-400 font-bold">{p.precio}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Testimonios */}
+      <section className="py-20 px-8 bg-white/10">
+        <h2 className="text-4xl font-bold text-center mb-12">Lo que dicen nuestros clientes</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          {testimonios.map((t, i) => (
+            <div
+              key={i}
+              className="bg-black/50 rounded-xl p-8 text-center backdrop-blur-md"
+            >
+              <img
+                src={t.avatar}
+                alt={t.nombre}
+                className="mx-auto w-16 h-16 rounded-full mb-4"
+              />
+              <p className="italic mb-4">“{t.comentario}”</p>
+              <strong>{t.nombre}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Modal Newsletter */}
+      {modalNewsletter && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white text-gray-800 p-8 rounded-xl max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-center">¡Suscríbete y recibe ofertas!</h2>
+            <input
+              type="email"
+              placeholder="Tu correo"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full px-4 py-2 mb-4 border rounded-full"
+            />
+            <div className="flex justify-center space-x-4">
+              <button onClick={handleSubscribe} className="px-6 py-2 bg-orange-600 text-white rounded-full">
+                Suscribirme
+              </button>
+              <button onClick={() => setModalNewsletter(false)} className="px-6 py-2 bg-gray-200 rounded-full">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

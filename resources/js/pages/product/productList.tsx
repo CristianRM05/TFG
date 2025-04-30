@@ -69,10 +69,7 @@ const ProductList: React.FC = () => {
 
     return (
         <div className="container mx-auto mt-5 p-4 min-h-screen">
-            <h2 className="text-center text-3xl font-bold mb-8 text-blue-800 relative">
-                <span className="relative z-10">Refréscate con Nuestros Productos</span>
-                <span className="absolute w-32 h-3 bg-red-400 bottom-0 left-1/2 transform -translate-x-1/2 -z-0 opacity-50"></span>
-            </h2>
+
 
             {products.length === 0 ? (
                 <p className="text-center text-blue-800 text-lg">No hay productos disponibles.</p>

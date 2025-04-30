@@ -154,7 +154,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </svg>
                                         </Button>
                                     </DropdownMenuTrigger>
-                              
+
                                 </DropdownMenu>
                             )}
 
