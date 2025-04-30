@@ -26,7 +26,7 @@ export const deleteProduct = async (id: number) => {
 };
 
 export const applyCouponToCart = async (couponCode: string) => {
-    return await axios.post('http://localhost:8001/apply-coupon', {
+    return await axios.post('http://localhost:8000/apply-coupon', {
         code: couponCode
     }, {
         withCredentials: true,

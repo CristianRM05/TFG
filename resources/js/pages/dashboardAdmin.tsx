@@ -15,6 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+
 export default function AdminDashboard() {
     const { auth, roles } = usePage<{
         auth: { user: User | null };

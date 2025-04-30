@@ -1,3 +1,4 @@
+import {  router } from '@inertiajs/react';
 // resources/js/pages/dashboard.tsx
 
 import React from 'react';
@@ -11,7 +12,21 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-  const { auth } = usePage<{ auth: { user: User | null } }>().props;
+    const { auth } = usePage<{ auth: { user: User | null } }>().props;
+    const user = auth.user;
+
+    if (!auth?.user) {
+        return <div className="p-6 text-center text-gray-500">Cargando datos del usuario...</div>;
+    }
+    if (auth.user) {
+        const role = auth.user.role?.toString().toLowerCase() || '';
+        if (role === 'admin') {
+            router.visit('/admin/dashboard');
+        } else if (role === 'manager') {
+            router.visit('/manager/dashboard');
+        } else {
+        }
+    }
 
   if (!auth?.user) {
     return (
