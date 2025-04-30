@@ -14,7 +14,7 @@ export default function PaginaBebidas() {
 
   const handleSubscribe = async () => {
     try {
-      await axios.post('/api/subscribe', { email });
+      await axios.post('/subscribe', { email });
       Swal.fire('¡Listo!', 'Te has suscrito con éxito 🎉', 'success');
       setEmail('');
       setModalNewsletter(false);
@@ -80,25 +80,25 @@ export default function PaginaBebidas() {
       {/* Newsletter */}
       <button
         onClick={() => setModalNewsletter(true)}
-        className="fixed bottom-20 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg"
+        className="fixed bottom-20 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-white/20 cursor-pointer"
       >
         📩 Newsletter
       </button>
 
       {/* Navbar */}
-      <nav className="absolute top-0 w-full py-6 px-8 flex justify-between items-center">
+      <nav className="absolute top-0 w-full py-6 px-8 flex justify-between items-center z-20">
         <span className="text-4xl font-bold">🍹 BebidasPro</span>
         <div className="space-x-4">
           {auth.user ? (
-            <Link href={route('dashboard')} className="px-4 py-2 bg-amber-600 rounded-full">
+            <Link href={route('dashboard')} className="inline-block px-4 py-2 bg-amber-600 rounded-full text-white hover:bg-amber-700 transition-colors">
               Panel
             </Link>
           ) : (
             <>
-              <Link href={route('login')} className="px-4 py-2 hover:underline">
+              <Link href={route('login')} className="inline-block px-4 py-2 hover:underline">
                 Iniciar Sesión
               </Link>
-              <Link href={route('register')} className="px-4 py-2 bg-amber-600 rounded-full">
+              <Link href={route('register')} className="inline-block px-4 py-2 bg-amber-600 rounded-full text-white hover:bg-amber-700 transition-colors">
                 Registrarse
               </Link>
             </>
@@ -106,7 +106,7 @@ export default function PaginaBebidas() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* Hero Section */}
       <header className="relative flex items-center justify-center h-screen px-8">
         <img
           src="/images/botella-tequila.png"
@@ -120,7 +120,7 @@ export default function PaginaBebidas() {
           <p className="mb-8 text-lg">100% Blue Agave | Crafted in Mexico | 40% ALC/VOL</p>
           <Link
             href={route('dashboard')}
-            className="px-8 py-4 bg-amber-600 rounded-full uppercase tracking-wide"
+            className="inline-block px-8 py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors"
           >
             Ver Catálogo
           </Link>
@@ -179,7 +179,7 @@ export default function PaginaBebidas() {
                 alt={t.nombre}
                 className="mx-auto w-16 h-16 rounded-full mb-4"
               />
-              <p className="italic mb-4">“{t.comentario}”</p>
+              <p className="italic mb-4">"{t.comentario}"</p>
               <strong>{t.nombre}</strong>
             </div>
           ))}
@@ -199,10 +199,10 @@ export default function PaginaBebidas() {
               className="w-full px-4 py-2 mb-4 border rounded-full"
             />
             <div className="flex justify-center space-x-4">
-              <button onClick={handleSubscribe} className="px-6 py-2 bg-orange-600 text-white rounded-full">
+              <button onClick={handleSubscribe} className="px-6 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors">
                 Suscribirme
               </button>
-              <button onClick={() => setModalNewsletter(false)} className="px-6 py-2 bg-gray-200 rounded-full">
+              <button onClick={() => setModalNewsletter(false)} className="px-6 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors">
                 Cancelar
               </button>
             </div>

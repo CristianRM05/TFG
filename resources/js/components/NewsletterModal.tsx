@@ -17,7 +17,7 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({ isOpen, onClose }) =>
   const handleSend = async () => {
     setSending(true);
     try {
-      await axios.post('http://localhost:8000/admin/send-newsletter', {
+      await axios.post('/admin/send-newsletter', {
         subject,
         message,
       });

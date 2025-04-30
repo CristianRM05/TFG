@@ -15,7 +15,9 @@ import { Link, usePage } from '@inertiajs/react';
 import { Ticket, Home, LayoutGrid, Menu, Search, ShoppingCart } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
-
+import AvailableCouponsModal from './AvailableCouponsModal';
+import NewsletterModal from './NewsletterModal';
+import CreateCouponModal from './CreateCoupon';
 
 const mainNavItems: NavItem[] = [
     {
@@ -25,12 +27,6 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Productos',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-
-    {
-        title: 'Productos2',
         href: '/dashboard',
         icon: LayoutGrid,
     },
@@ -48,7 +44,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+    //MODALES
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showNewsletterModal, setShowNewsletterModal] = useState(false);
 
+    const [showCouponsModal, setShowCouponsModal] = useState(false);
 
 
 
@@ -150,7 +150,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             </TooltipProvider>
 
 
-                            {auth.user.role_id === 1 && (
+                            {auth.user.role==="Admin" && (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="icon" className="h-10 w-10">
@@ -160,7 +160,21 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </svg>
                                         </Button>
                                     </DropdownMenuTrigger>
-
+                                    <DropdownMenuContent className="w-52" align="end">
+                                        <div className="px-2 py-1 text-xs text-gray-500">Opciones de administrador</div>
+                                        <button
+                                            onClick={() => setIsModalOpen(true)}
+                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm rounded-md transition"
+                                        >
+                                            ➕ Crear Cupón
+                                        </button>
+                                        <button
+                                            onClick={() => setShowNewsletterModal(true)}
+                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm rounded-md transition"
+                                        >
+                                            📨 Enviar Newsletter
+                                        </button>
+                                    </DropdownMenuContent>
                                 </DropdownMenu>
                             )}
 
@@ -181,7 +195,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                                 <DropdownMenuContent className="w-56" align="end">
                                     <UserMenuContent user={auth.user} />
-
+                                    <div className="px-2 py-1">
+                                        <button
+                                            onClick={() => setShowCouponsModal(true)}
+                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md transition text-gray-800"
+                                        >
+                                        🎟️ Ver mis cupones
+                                        </button>
+                                    </div>
 
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -189,6 +210,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
                 </div>
             </div>
+
+
 
         </div>
     );
