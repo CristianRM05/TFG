@@ -26,9 +26,11 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
                 'password' => Hash::make('admin123'),
                 'phone' => '123456789',
-                'address' => 'Calle Falsa 123',
+                'location' => 'Calle Falsa 123',
                 'role' => 'Admin',
-                'photograph' => 'profile.jpg',
+                'avatar' => 'profile.jpg', // cambiado de 'photograph' a 'avatar'
+                'external_id' => null,
+                'external_auth' => null,
             ],
             [
                 'name' => 'master',
@@ -38,9 +40,11 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
                 'password' => Hash::make('manager123'),
                 'phone' => '123456780',
-                'address' => 'Calle Falsa 123',
+                'location' => 'Calle Falsa 123',
                 'role' => 'Manager',
-                'photograph' => 'profile.jpg',
+                'avatar' => 'profile.jpg', // cambiado
+                'external_id' => null,
+                'external_auth' => null,
             ]
         ];
 

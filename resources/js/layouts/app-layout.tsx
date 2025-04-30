@@ -14,7 +14,9 @@ interface AppLayoutProps {
     breadcrumbs?: BreadcrumbItem[];
     user?: User;
     header?: ReactNode;
-    initialLoading?: boolean;  
+    initialLoading?: boolean;
+    className?: string;
+
 }
 
 const AppLayout = ({
@@ -39,6 +41,7 @@ const AppLayout = ({
                 breadcrumbs={breadcrumbs}
                 user={user}
                 header={header}
+                className={props.className}
                 {...props}
             >
                 {children}
@@ -47,4 +50,4 @@ const AppLayout = ({
     );
 };
 
-export default AppLayout;  
+export default AppLayout;

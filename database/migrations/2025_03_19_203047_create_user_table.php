@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -19,14 +18,15 @@ return new class extends Migration
             $table->string('dni')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('phone');
-            $table->string('address');
-            $table->enum ('role', ['Admin','Manager', 'Cliente' ])->default('Cliente');
-            $table->string('photograph')->nullable();;
-
+            $table->string('password')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('location')->nullable();
+            $table->enum('role', ['Admin', 'Manager', 'Cliente'])->default('Cliente');
+            $table->text('avatar')->nullable(); // Actualizado: tu modelo usa 'avatar', no 'photograph'
+            $table->string('external_id')->nullable();
+            $table->string('external_auth')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
     }
 };
-

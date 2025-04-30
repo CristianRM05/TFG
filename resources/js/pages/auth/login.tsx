@@ -9,7 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { __ } from '../../translate';
+import { GoogleIcon } from '@/components/icons/google';
+
 type LoginForm = {
     email: string;
     password: string;
@@ -34,14 +35,15 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             onFinish: () => reset('password'),
         });
     };
+
     return (
-        <AuthLayout title={__('Log in to your account')} description={__('Enter your email and password below to log in')}>
-            <Head title={__('Log in')} />
+        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+            <Head title="Log in" />
 
             <form className="flex flex-col gap-6" onSubmit={submit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">{__('Email address')}</Label>
+                        <Label htmlFor="email">Email address</Label>
                         <Input
                             id="email"
                             type="email"
@@ -51,17 +53,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoComplete="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder={__('email@example.com')}
+                            placeholder="email@example.com"
                         />
                         <InputError message={errors.email} />
                     </div>
 
                     <div className="grid gap-2">
                         <div className="flex items-center">
-                            <Label htmlFor="password">{__('Password')}</Label>
+                            <Label htmlFor="password">Password</Label>
                             {canResetPassword && (
                                 <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    {__('Forgot password?')}
+                                    Forgot password?
                                 </TextLink>
                             )}
                         </div>
@@ -73,7 +75,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoComplete="current-password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            placeholder={__('Password')}
+                            placeholder="Password"
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -86,19 +88,41 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             onClick={() => setData('remember', !data.remember)}
                             tabIndex={3}
                         />
-                        <Label htmlFor="remember">{__('Remember me')}</Label>
+                        <Label htmlFor="remember">Remember me</Label>
                     </div>
 
                     <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        {__('Log in')}
+                        Log in
                     </Button>
                 </div>
 
+                <div className="relative my-2">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                            Or
+                        </span>
+                    </div>
+                </div>
+
+                {/* Botón de Google */}
+                <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    type="button"
+                    onClick={() => window.location.href = route('login-google')}
+                >
+                    <GoogleIcon className="h-4 w-4" />
+                    Continue with Google
+                </Button>
+
                 <div className="text-muted-foreground text-center text-sm">
-                    {__("Don't have an account?")}{' '}
+                    Don't have an account?{' '}
                     <TextLink href={route('register')} tabIndex={5}>
-                        {__('Sign up')}
+                        Sign up
                     </TextLink>
                 </div>
             </form>
