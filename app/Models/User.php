@@ -34,6 +34,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar',
         'external_id',
         'external_auth',
+        'banned_at'
+
+        
     ];
 
     /**
@@ -55,6 +58,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'role' => RolesEmployee::class,
+        'banned_at' => 'datetime'
+
     ];
 
     protected static function boot()
@@ -68,5 +73,21 @@ public function cart(): HasOne
         return $this->hasOne(Cart::class)->where('status', 'active');
     }
 
+public function ban()
+{
+    $this->update(['banned_at' => now()]);
+    return $this;
+}
+
+public function unban()
+{
+    $this->update(['banned_at' => null]);
+    return $this;
+}
+
+public function isBanned(): bool
+{
+    return !is_null($this->banned_at);
+}
 
 }

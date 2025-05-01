@@ -29,15 +29,22 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
-export interface User {
+interface User {
     id: number;
     name: string;
+    last_name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
+    dni: string;
+    phone: string;
+    address: string;
+    role: string;
+    photograph: string | null;
+    license?: string;
+    driver_license?: string;
+    license_expiration_date?: string;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
+    banned_at: string | null;
 
 }
 

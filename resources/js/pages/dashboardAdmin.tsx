@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +17,52 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function AdminDashboard() {
+    const [users, setUsers] = useState<User[]>([]);
     const { auth, roles } = usePage<{
         auth: { user: User | null };
         roles: RoleOption[];
     }>().props;
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+    const [totalUsers, setTotalUsers] = useState(0);
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch(`/admin/users?page=${currentPage}`);
+
+                if (!response.ok) throw new Error('Error al cargar usuarios');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    setUsers(data.users);
+                    setTotalPages(data.pagination.last_page);
+                    setPerPage(data.pagination.per_page);
+                    setTotalUsers(data.pagination.total);
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Datos de prueba como fallback
+                setUsers([
+                    {
+                        id: 1,
+                        name: "Admin",
+                        email: "admin@test.com",
+                        role: "Admin"
+                    }
+                ]);
+                setTotalPages(1);
+            }
+        };
+
+        fetchUsers();
+    }, [currentPage]); // Se ejecuta cuando cambia currentPage
+
 
     useEffect(() => {
         fetch('/api/products/categorias')
@@ -196,6 +237,150 @@ export default function AdminDashboard() {
                     <div className="flex gap-4 mt-6">
                         <Button onClick={() => setOpenUserModal(true)}>➕ Crear empleado</Button>
                         <Button onClick={() => setOpenProductModal(true)}>📦 Crear producto</Button>
+                    </div>
+                </section>
+                <section className="bg-white dark:bg-gray-900 shadow rounded-xl p-6 border border-gray-200 dark:border-gray-700 mt-6">
+                    <h2 className="text-2xl font-bold mb-4">Gestión de Usuarios</h2>
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead className="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">DNI</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                {users.length > 0 ? (
+                                    users.map(user => (
+                                        <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    {user.photograph && (
+                                                        <img
+                                                            src={user.photograph}
+                                                            alt={`${user.name} ${user.last_name}`}
+                                                            className="h-10 w-10 rounded-full object-cover"
+                                                        />
+                                                    )}
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                            {user.name} {user.last_name}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                {user.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                {user.dni}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                {user.phone}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    ${user.role === 'Admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                                                        user.role === 'Manager' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(`¿Estás seguro de querer ${user.banned_at ? 'desbanear' : 'banear'} a ${user.name}?`)) {
+                                                            router.patch(`/admin/users/${user.id}/ban`, {
+                                                                banned: !user.banned_at,
+                                                            }, {
+                                                                preserveScroll: true,
+                                                                onSuccess: () => {
+                                                                    // Actualizar el estado local
+                                                                    setUsers(users.map(u =>
+                                                                        u.id === user.id
+                                                                            ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
+                                                                            : u
+                                                                    ));
+                                                                },
+                                                                onError: () => {
+                                                                    alert('Ocurrió un error al intentar cambiar el estado');
+                                                                }
+                                                            });
+                                                        }
+                                                    }}
+                                                    className={`px-3 py-1 rounded-md text-sm font-medium ${user.banned_at
+                                                            ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800'
+                                                            : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800'
+                                                        }`}
+                                                >
+                                                    {user.banned_at ? 'Desbanear' : 'Banear'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            No hay usuarios registrados
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                        {/* Componente de Paginación */}
+                        <div className="flex items-center justify-between mt-6">
+                            <div className="text-sm text-gray-600">
+                                Mostrando {(currentPage - 1) * perPage + 1}-
+                                {Math.min(currentPage * perPage, totalUsers)} de {totalUsers} usuarios
+                            </div>
+
+                            <div className="flex gap-1">
+                                {/* Botón Anterior */}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                >
+                                    &larr; Anterior
+                                </button>
+
+                                {/* Números de página */}
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    const page = currentPage <= 3
+                                        ? i + 1
+                                        : currentPage >= totalPages - 2
+                                            ? totalPages - 4 + i
+                                            : currentPage - 2 + i;
+
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-10 h-10 rounded-md ${currentPage === page
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'border hover:bg-gray-100'
+                                                } transition-colors`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                })}
+
+                                {/* Botón Siguiente */}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                >
+                                    Siguiente &rarr;
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>
