@@ -107,26 +107,39 @@ export default function PaginaBebidas() {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative flex items-center justify-center h-screen px-8">
-        <img
-          src="/images/botella-tequila.png"
-          alt="Tequila"
-          className="absolute bottom-0 w-1/2 opacity-90"
-        />
-        <div className="z-10 text-center max-w-xl">
-          <h1 className="text-6xl font-extrabold mb-4">
-            TRADITIONAL MEXICAN<br />TEQUILA<br /><span className="text-amber-400">Derbi Raho</span>
-          </h1>
-          <p className="mb-8 text-lg">100% Blue Agave | Crafted in Mexico | 40% ALC/VOL</p>
-          <Link
-            href={route('dashboard')}
-            className="inline-block px-8 py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors"
-          >
-            Ver Catálogo
-          </Link>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-      </header>
+      <header className="relative flex items-center justify-center h-screen overflow-hidden">
+  {/* Fondo de botella como background */}
+  <div
+    className="absolute inset-0 bg-no-repeat bg-right bg-cover"
+    style={{ backgroundImage: `url('fondoLandingPage.png')`,
+        backgroundSize: '95%',
+        backgroundPosition: 'center',
+     }}
+  />
+
+  {/* Gradiente oscuro para mejorar legibilidad */}
+  <div className="absolute inset-0 bg-gradient-to-t from-black to-black/0" />
+
+  {/* Contenido principal */}
+  <div className="relative z-10 text-center max-w-xl px-6">
+    <h1 className="text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-4">
+      TRADITIONAL <br />
+      MEXICAN <br />
+      TEQUILA <br />
+      <span className="text-amber-400">Derbi Raho</span>
+    </h1>
+    <p className="text-lg text-gray-200 mb-8">
+      100% Blue Agave | Crafted in Mexico | 40% ALC/VOL
+    </p>
+    <Link
+      href={route('dashboard')}
+      className="inline-block px-8 py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors"
+    >
+      Ver Catálogo
+    </Link>
+  </div>
+</header>
+
 
       {/* Beneficios */}
       <section className="py-20 px-8 grid md:grid-cols-3 gap-8 text-center">

@@ -7,6 +7,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\StockController;
+
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -31,6 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/apply-coupon', [CouponController::class, 'apply']);
     Route::get('coupons/available ', [CouponController::class, 'getAvailableCoupons']);
 });
+
+
+
 
 //NEWSLETTER
 Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
