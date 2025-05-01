@@ -34,14 +34,10 @@ interface User {
     name: string;
     last_name: string;
     email: string;
-    dni: string;
     phone: string;
-    address: string;
+    location: string;
     role: string;
-    photograph: string | null;
-    license?: string;
-    driver_license?: string;
-    license_expiration_date?: string;
+    avatar: string | null;
     created_at: string;
     updated_at: string;
     banned_at: string | null;
