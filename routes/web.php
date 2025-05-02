@@ -7,8 +7,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\NewsletterController;
-use App\Http\Controllers\StockController;
-
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutSuccessController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -38,8 +38,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //NEWSLETTER
 Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
+//PEDIDOS
+Route::post('/checkout', action: [OrderController::class, 'checkout'])->name('checkout');
+Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
+Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';
 require __DIR__ . '/manager.php';
-

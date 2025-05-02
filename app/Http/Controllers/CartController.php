@@ -6,11 +6,13 @@ use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+
 class CartController extends Controller
 {
     public function show()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Buscar carrito activo o crearlo si no existe
         $cart = $user->cart()->firstOrCreate([
@@ -29,11 +31,11 @@ class CartController extends Controller
     {
         $quantity = $request->input('quantity');
 
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return response()->json(['error' => 'No autenticado'], 401);
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Aseguramos que el ítem pertenezca al carrito activo del usuario
         $cart = $user->cart()->where('status', 'active')->first();
@@ -59,7 +61,7 @@ class CartController extends Controller
             return response()->json(['error' => 'No autenticado'], 401);
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         $cart = $user->cart()->firstOrCreate(['status' => 'active']);
 
@@ -79,8 +81,6 @@ class CartController extends Controller
 
         return response()->json(['message' => 'Producto añadido correctamente.']);
     }
-
-
 
     public function remove($cartItemId)
     {

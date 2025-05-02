@@ -30,11 +30,18 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
+                <Link href="/my-orders" className="nav-link">
+                    Mis Pedidos
+                </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />   <DropdownMenuItem asChild>
                 <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={cleanup}>
                     <LogOut className="mr-2" />
                     Log out
                 </Link>
             </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
         </>
     );
 }
