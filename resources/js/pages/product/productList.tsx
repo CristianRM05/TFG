@@ -68,109 +68,107 @@ const ProductList: React.FC = () => {
     );
 
     return (
-        <div className="container mx-auto mt-5 p-4 min-h-screen">
-
-
+        <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white py-12 px-6 flex flex-col">
+          {/* Paneles de productos */}
+          <div className="max-w-7xl mx-auto flex-grow">
             {products.length === 0 ? (
-                <p className="text-center text-blue-800 text-lg">No hay productos disponibles.</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 text-lg">
+                No hay productos disponibles.
+              </p>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {products.map((product) => (
-                        <div
-                            className="bg-white shadow-lg rounded-lg overflow-hidden transform transition-transform hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between"
-                            key={product.id}
-                        >
-                            <div className="relative h-56 bg-gradient-to-r from-blue-100 to-blue-50">
-                                {product.image_url ? (
-                                    <img
-                                        src={product.image_url}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.src = "https://img.freepik.com/vector-premium/signo-interrogacion-rojo-grande_122818-781.jpg";
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-blue-300 text-xl">🥤</span>
-                                    </div>
-                                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+                {products.map((product, index) => (
+                  <div
+                    key={product.id}
+                    className={`
+                      flex flex-col justify-end p-8
+                      bg-white dark:bg-black
+                      text-gray-900 dark:text-white
+                    `}
+                  >
+                    {/* Imagen centrada */}
+                    <div className="flex-1 flex items-center justify-center">
+                      <img
+                        src={
+                          product.image_url ||
+                          'https://img.freepik.com/vector-premium/signo-interrogacion-rojo-grande_122818-781.jpg'
+                        }
+                        alt={product.name}
+                        className="max-h-80 object-contain"
+                        onError={e =>
+                          (e.currentTarget.src =
+                            'https://img.freepik.com/vector-premium/signo-premium_981.png')
+                        }
+                      />
+                    </div>
 
-                                {/* Precio debajo de la imagen */}
-                                <div className="absolute bottom-0 left-0 bg-red-600 text-white px-4 py-1 m-2 rounded-tr-xl font-semibold shadow-md text-sm">
-                                    {product.price} €
-                                </div>
-                            </div>
+                    {/* Nombre y precio */}
+                    <h2 className="text-4xl font-extrabold uppercase mb-2">
+                      {product.name}
+                    </h2>
+                    <p className="text-2xl font-semibold mb-4">
+                      ${product.price.toFixed(2)}
+                    </p>
 
-                            <div className="p-5 border-t-4 border-blue-400 flex flex-col flex-grow justify-between">
-                                <div>
-                                    <h5 className="text-xl font-bold text-blue-700 mb-2">{product.name}</h5>
-                                    <p className="text-gray-600 mb-3 text-sm">{product.description}</p>
+                    {/* Descripción */}
+                    <p className="mb-6 max-w-prose text-sm leading-relaxed">
+                      {product.description}
+                    </p>
 
-                                    <div className="flex flex-wrap gap-2 mb-4">
-
-
-                                        <div className="bg-purple-100 px-3 py-1 rounded text-sm max-w-full inline-block">
-                                            <span className="text-purple-800 font-medium">Categoría:</span>
-                                            <span className="text-gray-700 ml-1">{product.categoria}</span>
-                                        </div>
-
-                                        <div className={`px-3 py-1 rounded text-sm font-medium ${product.stock === 0
-                                                ? 'bg-gray-300 text-gray-700'
-                                                : (product.stock ?? 0) <= 20
-                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                    : 'bg-green-100 text-green-800'
-                                            }`}>
-                                            {product.stock === 0
-                                                ? 'No disponible'
-                                                : (product.stock ?? 0) <= 20
-                                                    ? '¡Quedan pocas unidades!'
-                                                    : 'Disponible'}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {(product.stock ?? 0) > 0 && (
-                                    <button
-                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full w-full font-bold tracking-wide shadow-md transition-colors flex items-center justify-center"
-                                        onClick={() => handleAddToCart(product.id)}
-                                    >
-                                        <span className="mr-2">🛒</span> Añadir al Carrito
-                                    </button>
-                                )}
-
-                            </div>
-                        </div>
-
-
-                    ))}
-                </div>
+                    {/* Botón “Add to Cart” */}
+                    {product.stock > 0 && (
+                      <button
+                        onClick={() => handleAddToCart(product.id)}
+                        className={`
+                          px-6 py-3 rounded-full font-semibold uppercase tracking-wide transition
+                          bg-amber-600 text-black hover:bg-amber-500
+                        `}
+                      >
+                        Add to Cart
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
+          </div>
 
-            <div className="flex justify-center mt-8 space-x-4">
-                <button
-                    className={`px-5 py-2 rounded-full font-bold shadow-md transition-colors ${currentPage === 1 ? 'bg-gray-300 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Anterior
-                </button>
+          {/* Paginación */}
+          <div className="max-w-7xl mx-auto mt-8">
+            <div className="flex justify-center space-x-4">
+              <button
+                className={`px-5 py-2 rounded-full font-semibold transition-colors ${
+                  currentPage === 1
+                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                    : 'bg-amber-600 text-black hover:bg-amber-500'
+                }`}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </button>
 
-                <span className="flex items-center justify-center bg-white px-4 py-2 rounded-full font-bold shadow-md text-blue-700 min-w-12">
-                    {currentPage} / {lastPage}
-                </span>
+              <span className="flex items-center justify-center bg-gray-100 dark:bg-white/10 px-4 py-2 rounded-full font-semibold text-gray-900 dark:text-white">
+                {currentPage} / {lastPage}
+              </span>
 
-                <button
-                    className={`px-5 py-2 rounded-full font-bold shadow-md transition-colors ${currentPage === lastPage ? 'bg-gray-300 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === lastPage}
-                >
-                    Siguiente
-                </button>
+              <button
+                className={`px-5 py-2 rounded-full font-semibold transition-colors ${
+                  currentPage === lastPage
+                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                    : 'bg-amber-600 text-black hover:bg-amber-500'
+                }`}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === lastPage}
+              >
+                Siguiente
+              </button>
             </div>
+          </div>
         </div>
-    );
-};
+      );
+
+
+    };
 
 export default ProductList;

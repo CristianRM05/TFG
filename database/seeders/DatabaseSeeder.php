@@ -43,6 +43,19 @@ class DatabaseSeeder extends Seeder
                 'avatar' => 'profile.jpg', // cambiado
                 'external_id' => null,
                 'external_auth' => null,
+            ],
+            [
+                'name' => 'cliente',
+                'last_name' => 'cliente',
+                'email' => 'cliente@cliente.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('cliente123'),
+                'phone' => '123456781',
+                'location' => 'Calle Falsa 123',
+                'role' => 'Cliente',
+                'avatar' => 'profile.jpg', // cambiado
+                'external_id' => null,
+                'external_auth' => null,
             ]
         ];
 

@@ -112,7 +112,7 @@ export default function PaginaBebidas() {
   <div
     className="absolute inset-0 bg-no-repeat bg-right bg-cover"
     style={{ backgroundImage: `url('fondoLandingPage.png')`,
-        backgroundSize: '95%',
+        backgroundSize: '70%',  // Ajusta el tamaño necesario según sea necesario
         backgroundPosition: 'center',
      }}
   />
