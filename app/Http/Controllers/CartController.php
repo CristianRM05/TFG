@@ -55,7 +55,7 @@ class CartController extends Controller
 
     public function add(Product $product, Request $request)
     {
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return response()->json(['error' => 'No autenticado'], 401);
         }
 

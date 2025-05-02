@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('num_reference')->unique();
             $table->integer('stock')->default(0);
             $table->float('price');
-            $table->float('discount_percent')->default(0);
+           // $table->float('discount_percent')->default(0);
             $table->string('image_url')->nullable();
             $table->string('categoria'); // Enum como string
             $table->unsignedBigInteger('shelf_id')->nullable(); // <- esta es la columna que falta

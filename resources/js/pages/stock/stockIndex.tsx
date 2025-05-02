@@ -81,7 +81,7 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                     <span className="font-semibold">Ubicación:</span> {stock.location}
                   </p>
                   <p className="text-sm">
-                    <span className="font-semibold">Capacidad:</span>{' '}
+                    <span className="font-semibold">Capacidad Estanteria:</span>{' '}
                     {stock.shelf?.max_capacity ?? '–'}
                   </p>
                 </div>
@@ -97,12 +97,7 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                   >
                     {stock.available_quantity} uds.
                   </span>
-                  <Link
-                    href={route('products.show', product.id)}
-                    className="text-amber-400 hover:underline text-sm"
-                  >
-                    Ver
-                  </Link>
+
                 </div>
               </div>
             ))

@@ -10,13 +10,13 @@ export default function Welcome() {
     const cards = [
         {
           title: '📦 Descuentos',
-          link: '/discounts',
+          link: '/manager/discounts',
           desc: 'Gestiona todos los descuentos.',
           img: '/images/descuento.jpg',
         },
         {
           title: '🏷️ Estanterías',
-          link: '/manager/locations',
+          link: '/manager/shelves',
           desc: 'Asignar estanterías a productos.',
           img: '/images/estanterias.jpg',
         },
