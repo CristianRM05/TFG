@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Enums\StatusTruck;
 use App\Enums\RolesEmployee;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Cart;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -18,13 +19,6 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $table = 'users';
     protected $primaryKey = 'id';
 
-    /**
-     * The attributes that are mass assignable.
-     * The attributes that are mass assignable.
-     *
-     * @throws \Illuminate\Database\QueryException
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'last_name',
@@ -41,21 +35,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+ 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -65,31 +50,38 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     protected static function boot()
-{
-    parent::boot();
-
-
-}
-public function cart(): HasOne
+    {
+        parent::boot();
+    }
+    public function cart(): HasOne
     {
         return $this->hasOne(Cart::class)->where('status', 'active');
     }
 
-public function ban()
-{
-    $this->update(['banned_at' => now()]);
-    return $this;
-}
+    public function ban()
+    {
+        $this->update(['banned_at' => now()]);
+        return $this;
+    }
 
-public function unban()
-{
-    $this->update(['banned_at' => null]);
-    return $this;
-}
+    public function unban()
+    {
+        $this->update(['banned_at' => null]);
+        return $this;
+    }
 
-public function isBanned(): bool
-{
-    return !is_null($this->banned_at);
-}
-
+    public function isBanned(): bool
+    {
+        return !is_null($this->banned_at);
+    }
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function coupons()
+    {
+        return $this->belongsToMany(Coupon::class)
+            ->withPivot('status', 'used_at')
+            ->withTimestamps();
+    }
 }

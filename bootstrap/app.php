@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Middleware\HandleAppearance;
-use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\CorsMiddleware; // <-- Agrega esta línea
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
+use App\Http\Middleware\HandleAppearance;
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -19,11 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance']);
 
         $middleware->web(append: [
-            \App\Http\Middleware\HandleAppearance::class,
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            \App\Http\Middleware\CorsMiddleware::class,
-            \App\Http\Middleware\HandleCors::class,
+           HandleAppearance::class,
+           HandleInertiaRequests::class,
+           AddLinkHeadersForPreloadedAssets::class,
+            CorsMiddleware::class,
+            HandleCors::class,
         ]);
 
         // Aquí registras correctamente tu middleware con alias

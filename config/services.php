@@ -35,11 +35,14 @@ return [
         ],
     ],
 
-'google' => [
-    'client_id' => env('GOOGLE_OAUTH_ID'), // cambiado
-    'client_secret' => env('GOOGLE_OAUTH_KEY'), // cambiado
-    'redirect' => env('GOOGLE_REDIRECT_URI'),
-],
+    'google' => [
+        'client_id' => env('GOOGLE_OAUTH_ID'), // cambiado
+        'client_secret' => env('GOOGLE_OAUTH_KEY'), // cambiado
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),    ],
 
 
 ];
