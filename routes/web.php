@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //API IMAGENES
 Route::post('/subir-imagen', [ImagenController::class, 'subirImagen']);
 //PRODUCTOS
-Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products', action: [ProductController::class, 'index']);
 
 //CARRITO Y COUPONS
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -34,9 +34,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/apply-coupon', [CouponController::class, 'apply']);
     Route::get('coupons/available ', [CouponController::class, 'getAvailableCoupons']);
 });
-
-
-
 
 //NEWSLETTER
 Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');

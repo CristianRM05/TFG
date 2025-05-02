@@ -13,8 +13,8 @@ interface DiscountsPageProps extends SharedData {
 }
 export default function DiscountsIndex() {
     const {
-        products = [], 
-        productsWithoutDiscount = [], 
+        products = [],
+        productsWithoutDiscount = [],
         flash,
         auth
     } = usePage<DiscountsPageProps>().props;
@@ -67,7 +67,7 @@ export default function DiscountsIndex() {
         if (!confirm('¿Estás seguro de eliminar este descuento?')) return;
 
         try {
-            await router.delete(`/discounts/${productId}`, {
+            await router.delete(`/manager/discounts/${productId}`, {
                 preserveScroll: true,
                 onSuccess: () => setShowSuccess(true)
             });
@@ -118,7 +118,7 @@ export default function DiscountsIndex() {
                                             <option value="">Seleccionar producto</option>
                                             {availableProducts?.map(product => ( // Usa optional chaining
                                                 <option key={product.id} value={product.id}>
-                                                    {product.name} (${product.price.toFixed(2)})
+                                                    {product.name} (${product.price?.toFixed(2)})
                                                 </option>
                                             ))}
                                         </select>
@@ -169,14 +169,14 @@ export default function DiscountsIndex() {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {discounts?.map((product) => ( 
+                                        {discounts?.map((product) => (
                                             <tr key={product.id}>
                                                 <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">{product.name}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-300">${product.price.toFixed(2)}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-300">${product.price?.toFixed(2)}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-300">{product.discount_percent}%</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className="font-bold text-green-600 dark:text-green-400">
-                                                        ${(product.price * (1 - (product.discount_percent || 0) / 100)).toFixed(2)}
+                                                        ${(product.price ?? 0 * (1 - (product.discount_percent || 0) / 100)).toFixed(2)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">

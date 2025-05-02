@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use App\Enums\StatusTruck;
 use App\Enums\RolesEmployee;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Cart;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
@@ -36,7 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'external_auth',
         'banned_at'
 
-        
+
     ];
 
     /**
