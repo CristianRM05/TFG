@@ -28,7 +28,7 @@ export default function Welcome() {
         },
         {
           title: '🧾 Pedidos',
-          link: '/orders',
+          link: '/manager/orders',
           desc: 'Pedidos pendientes y completados.',
           img: '/images/pedidos.png',
         },

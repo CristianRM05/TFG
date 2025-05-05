@@ -43,6 +43,8 @@ Route::post('/checkout', action: [OrderController::class, 'checkout'])->name('ch
 Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
 Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

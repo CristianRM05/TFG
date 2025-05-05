@@ -187,11 +187,7 @@ export default function PaginaBebidas() {
               key={i}
               className="bg-black/50 rounded-xl p-8 text-center backdrop-blur-md"
             >
-              <img
-                src={t.avatar}
-                alt={t.nombre}
-                className="mx-auto w-16 h-16 rounded-full mb-4"
-              />
+            
               <p className="italic mb-4">"{t.comentario}"</p>
               <strong>{t.nombre}</strong>
             </div>

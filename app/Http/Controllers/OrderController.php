@@ -81,5 +81,47 @@ class OrderController extends Controller
         ]);
     }
 
+    //mostrar todos los pedidos con sus items
+    public function managerOrders()
+    {
+        $orders = Order::with('items.product')->get();
+
+        return Inertia::render('ManagerPages/ManagerOrders', [
+            'orders' => $orders
+        ]);
+    }
+
+    public function createOrder($user, $session, $cart, $total)
+    {
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_amount' => $total,
+            'status' => 'paid',
+            'payment_method' => $session->payment_method_types[0] ?? 'card',
+            'shipping_address' => $user->location,
+            'stripe_session_id' => $session->id,
+            'ref' => $this->generateUniqueRef()
+        ]);
+
+        foreach ($cart->items as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'price' => $item->price
+            ]);
+        }
+
+        return $order;
+    }
+
+    private function generateUniqueRef()
+    {
+        do {
+            $ref = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+        } while (Order::where('ref', $ref)->exists());
+
+        return $ref;
+    }
 
 }
