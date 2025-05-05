@@ -176,7 +176,7 @@ export default function DiscountsIndex() {
                                                 <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-300">{product.discount_percent}%</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className="font-bold text-green-600 dark:text-green-400">
-                                                        ${(product.price ?? 0 * (1 - (product.discount_percent || 0) / 100)).toFixed(2)}
+                                                        ${((product.price ?? 0) * (1 - (product.discount_percent || 0) / 100)).toFixed(2)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">

@@ -35,7 +35,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'num_reference' => 'required|string|max:50|unique:products,num_reference',
+            'num_reference' => 'required|string|max:50|',
             'price' => 'required|numeric|min:0',
             'image_url' => 'nullable|string',
             'weight' => 'nullable|numeric|min:0',
@@ -64,7 +64,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'num_reference' => 'sometimes|string|max:50|unique:products,num_reference,' . $product->id,
+            'num_reference' => 'sometimes|string|max:50|' . $product->id,
             'stock' => 'sometimes|numeric|min:0',
             'price' => 'sometimes|numeric|min:0',
             'image_url' => 'nullable|image|max:2048',
