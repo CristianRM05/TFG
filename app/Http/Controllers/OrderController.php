@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
@@ -123,5 +124,23 @@ class OrderController extends Controller
 
         return $ref;
     }
+
+    public function assignOrder($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->status !== 'paid') {
+            return response()->json(['error' => 'Solo se pueden asignar pedidos pagados.'], 400);
+        }
+
+        $order->update([
+            'status' => 'In progress',
+            'assigned_at' => now()
+        ]);
+
+        return response()->json(['message' => 'Pedido asignado correctamente.']);
+    }
+
+
 
 }

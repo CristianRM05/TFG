@@ -35,5 +35,9 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     //pedidos
     Route::get('/orders', [OrderController::class, 'managerOrders'])
         ->name('orders.manager');
+        
+    Route::put('/orders/{id}/assign', [OrderController::class, 'assignOrder'])
+        ->name('orders.assign');
+
 
 });
