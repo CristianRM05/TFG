@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderAssignedMail;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -135,8 +136,11 @@ class OrderController extends Controller
 
         $order->update([
             'status' => 'In progress',
-            'assigned_at' => now()
+            'assigned_at' => now(),
         ]);
+
+        // Enviar el correo
+        Mail::to($order->user->email)->send(new OrderAssignedMail($order));
 
         return response()->json(['message' => 'Pedido asignado correctamente.']);
     }
