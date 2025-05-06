@@ -47,19 +47,28 @@ export default function CartShow({ cart: initialCart, success }: { cart: any, su
 
     const handleCheckout = async () => {
         try {
-            const discount = appliedCoupon?.discountPercentage ?? 0;
+          const discount = appliedCoupon?.discountPercentage ?? 0;
 
-            const response = await proceedToCheckout(discount);
-            window.location.href = response.data.url;
+          const response = await proceedToCheckout(discount);
+
+          window.location.href = response.data.url;
+
         } catch (error: any) {
-            const message = error.response?.data?.message || 'Error al procesar el pago.';
-            MySwal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: message,
-            });
+          const message =
+            error.response?.data?.error ||
+            error.response?.data?.message ||
+            error.message ||
+            'Error al procesar el pago.';
+
+          MySwal.fire({
+            icon: 'error',
+            title: 'Stock insuficiente',
+            text: message,
+          });
         }
-    };
+      };
+
+
 
     const removeItem = (id: number) => {
         MySwal.fire({
