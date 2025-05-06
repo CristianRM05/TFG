@@ -9,8 +9,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'user_id', 'total_amount', 'status', 'payment_method', 'shipping_address','stripe_session_id'
+        'user_id', 'total_amount', 'status', 'payment_method', 'shipping_address', 'stripe_session_id', 'ref', 'assigned_at'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            do {
+                $ref = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+            } while (self::where('ref', $ref)->exists());
+
+            $order->ref = $ref;
+        });
+    }
 
     public function user(): BelongsTo
     {

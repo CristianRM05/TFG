@@ -22,14 +22,7 @@ class DiscountController extends Controller
     }
 
 
-    public function apiProductsWithoutDiscount()
-    {
-        $products = Product::whereNull('discount_percent')
-            ->orWhere('discount_percent', 0)
-            ->get(['id', 'name', 'price']);
 
-        return response()->json($products);
-    }
 
     public function store(Request $request)
     {

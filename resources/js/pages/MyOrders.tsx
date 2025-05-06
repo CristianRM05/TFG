@@ -14,6 +14,7 @@ interface OrderItem {
 
 interface Order {
     id: number;
+    ref: string;
     created_at: string;
     items: OrderItem[];
 }
@@ -63,15 +64,15 @@ const MyOrders: React.FC<MyOrdersProps> = ({ orders }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {orders.data.map(order => (
                         <div className="bg-white rounded-lg shadow-sm overflow-hidden h-full flex flex-col" key={order.id}>
-                            <div className="bg-gradient-to-r from-amber-600 to-amber-800 px-4 py-3 flex justify-between items-center">
-                                <div>
-                                    <span className="text-amber-50 font-medium">Pedido #{order.id}</span>
-                                    <span className="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full ml-2">
-                                        {new Date(order.created_at).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div className="text-amber-50 text-xs">
-                                    {new Date(order.created_at).toLocaleTimeString()}
+                            <div className="p-4 border-b border-amber-100">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h3 className="text-gray-800 font-medium">Pedido #{order.ref}</h3>
+                                        <p className="text-gray-500 text-sm">{new Date(order.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                    <div className="text-amber-50 text-xs">
+                                        {new Date(order.created_at).toLocaleTimeString()}
+                                    </div>
                                 </div>
                             </div>
 

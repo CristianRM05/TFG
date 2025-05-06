@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
@@ -7,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderAssignedMail;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -80,6 +82,69 @@ class OrderController extends Controller
             'orders' => $orders
         ]);
     }
+
+    //mostrar todos los pedidos con sus items
+    public function managerOrders()
+    {
+        $orders = Order::with('items.product')->get();
+
+        return Inertia::render('ManagerPages/ManagerOrders', [
+            'orders' => $orders
+        ]);
+    }
+
+    public function createOrder($user, $session, $cart, $total)
+    {
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_amount' => $total,
+            'status' => 'paid',
+            'payment_method' => $session->payment_method_types[0] ?? 'card',
+            'shipping_address' => $user->location,
+            'stripe_session_id' => $session->id,
+            'ref' => $this->generateUniqueRef()
+        ]);
+
+        foreach ($cart->items as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'price' => $item->price
+            ]);
+        }
+
+        return $order;
+    }
+
+    private function generateUniqueRef()
+    {
+        do {
+            $ref = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+        } while (Order::where('ref', $ref)->exists());
+
+        return $ref;
+    }
+
+    public function assignOrder($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->status !== 'paid') {
+            return response()->json(['error' => 'Solo se pueden asignar pedidos pagados.'], 400);
+        }
+
+        $order->update([
+            'status' => 'In progress',
+            'assigned_at' => now(),
+        ]);
+
+        // Enviar el correo
+        Mail::to($order->user->email)->send(new OrderAssignedMail($order));
+
+        return response()->json(['message' => 'Pedido asignado correctamente.']);
+    }
+
 
 
 }

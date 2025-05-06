@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
-use Illuminate\Support\Facades\Http;
 
 class CheckoutSuccessController extends Controller
 {
@@ -27,6 +26,7 @@ class CheckoutSuccessController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('dashboard');
         }
+
         if (Order::where('stripe_session_id', $session->id)->exists()) {
             return redirect()->route('dashboard', ['success' => 'true']);
         }
@@ -39,23 +39,9 @@ class CheckoutSuccessController extends Controller
 
         $total = $cart->items->sum(fn($item) => $item->price * $item->quantity);
 
-        $order = Order::create([
-            'user_id' => $user->id,
-            'total_amount' => $total,
-            'status' => 'paid',
-            'payment_method' => $session->payment_method_types[0] ?? 'card',
-            'shipping_address' => $user->location,
-            'stripe_session_id' => $session->id
-        ]);
-
-        foreach ($cart->items as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->price
-            ]);
-        }
+        // Crear el pedido usando el OrderController
+        $orderController = new OrderController();
+        $orderController->createOrder($user, $session, $cart, $total);
 
         // Confirmar el uso del cupón
         $pendingCoupons = $user->coupons()->wherePivot('status', 'pending')->get();
@@ -69,7 +55,6 @@ class CheckoutSuccessController extends Controller
         // Limpiar carrito
         $cart->items()->delete();
         $cart->update(['status' => 'completed']);
-
 
         return redirect()->route('dashboard', ['success' => 'true']);
     }
