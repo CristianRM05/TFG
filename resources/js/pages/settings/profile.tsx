@@ -139,7 +139,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
   };
 
   return (
-    <AppLayout className="bg-white" breadcrumbs={breadcrumbs}>
+    <AppLayout className="bg-black" breadcrumbs={breadcrumbs}>
       <Head title="Profile settings" />
       <SettingsLayout>
         <div className="flex justify-center mb-4">

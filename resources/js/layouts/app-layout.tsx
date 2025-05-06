@@ -38,10 +38,10 @@ const AppLayout = ({
         <>
             {isLoading && <LoadingSpinner />}
             <AppLayoutTemplate
-                breadcrumbs={breadcrumbs}
+  breadcrumbs={breadcrumbs}
                 user={user}
                 header={header}
-                className={props.className}
+                className={`min-h-screen ${props.className || 'bg-red-100 dark:bg-gray-900'}`}
                 {...props}
             >
                 {children}

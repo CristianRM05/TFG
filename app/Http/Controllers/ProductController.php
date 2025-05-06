@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Shelf;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
-
+use App\Enums\categoryProducts;
 
 class ProductController extends Controller
 {
@@ -293,4 +293,16 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Producto eliminado correctamente');
     }
+
+    public function getCategorias()
+{
+    $categorias = collect(categoryProducts::cases())->map(function ($case) {
+        return [
+            'value' => $case->value,
+            'name' => ucfirst($case->name),
+        ];
+    });
+
+    return response()->json($categorias);
+}
 }
