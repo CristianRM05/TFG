@@ -22,7 +22,7 @@ export default function Welcome() {
         },
         {
           title: '📈 Movimientos',
-          link: '/warehouse-movements',
+          link: '/manager/movimientos',
           desc: 'Entradas y salidas.',
           img: '/images/balance.jpg',
         },

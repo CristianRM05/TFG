@@ -9,6 +9,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutSuccessController;
+use App\Http\Controllers\AnalyticsController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -25,14 +26,21 @@ Route::post('/subir-imagen', [ImagenController::class, 'subirImagen']);
 //PRODUCTOS
 Route::get('/products', action: [ProductController::class, 'index']);
 
-//CARRITO Y COUPONS
+//CARRITO, COUPONS Y PEDIDOS
 Route::middleware(['auth', 'verified'])->group(function () {
+    //carrito
     Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
     Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
     Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
     Route::put('updateQuantity/{id}', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
+    //cupones
     Route::post('/apply-coupon', [CouponController::class, 'apply']);
     Route::get('coupons/available ', [CouponController::class, 'getAvailableCoupons']);
+    //checkout stock
+    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
+    //mis pedidos
+    Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 });
 
 //NEWSLETTER
@@ -42,8 +50,6 @@ Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('new
 Route::post('/checkout', action: [OrderController::class, 'checkout'])->name('checkout');
 Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
 Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
-
-
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

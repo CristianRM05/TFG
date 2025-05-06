@@ -6,6 +6,9 @@ use App\Http\Controllers\ManagerDashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AnalyticsController;
+
+
 Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function () {
     Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
     //ruta a stock
@@ -35,9 +38,18 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     //pedidos
     Route::get('/orders', [OrderController::class, 'managerOrders'])
         ->name('orders.manager');
-        
+
     Route::put('/orders/{id}/assign', [OrderController::class, 'assignOrder'])
         ->name('orders.assign');
 
-
 });
+
+    // Movimientos
+    Route::prefix('manager')
+     ->name('manager.')
+     ->middleware(['auth','role:manager'])
+     ->group(function(){
+         // …
+         Route::get('/movimientos', [AnalyticsController::class,'index'])
+              ->name('movimientos.index');
+     });
