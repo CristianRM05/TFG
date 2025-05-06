@@ -336,7 +336,11 @@ export default function DiscountsIndex() {
                                                             ${product.price?.toFixed(2)}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.discount_percent >= 50 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' :
+                                                                product.discount_percent >= 30 ? 'bg-amber-100 text-amber-700 dark:bg-amber-600/40 dark:text-amber-50' :
+                                                                        product.discount_percent > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                                                                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                                                }`}>
                                                                 {product.discount_percent}%
                                                             </span>
                                                         </td>
