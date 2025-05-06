@@ -5,6 +5,8 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\NewsletterController;
 use App\Models\User;
+use App\Http\Controllers\ProductController;
+
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     // Ruta existente del dashboard
@@ -30,4 +32,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/send-newsletter', [NewsletterController::class, 'send']);
     Route::patch('/users/{user}/ban', [AdminDashboardController::class, 'banUser'])
         ->name('admin.users.ban');
+
+    //CATEGORIAS Y PRODUCTOS
+    Route::get('/products/categorias', [ProductController::class, 'getCategorias']);
+    Route::post('/products', [ProductController::class, 'store']);
+
 });

@@ -1,9 +1,14 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import type { SharedData } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { useInitials } from '@/hooks/use-initials';
+import AppLogo from '@/components/app-logo';
+import AppLayout from '@/layouts/app-layout';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
-
+    const getInitials = useInitials();
     const user = auth?.user;
 
     //defino el contenido de cada card
@@ -41,78 +46,72 @@ export default function Welcome() {
       ];
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col">
+        <AppLayout>
+        <div className="min-h-screen  dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 flex flex-col">
         <Head title="Inicio - Almacén" />
 
-        {/* Navbar/Header */}
-        <header className="flex items-center justify-between px-8 py-6 border-b border-gray-700">
-          <h1 className="text-3xl font-extrabold uppercase">
-            {user ? `Bienvenido, ${user.name}` : 'Almacén Pro'}
-          </h1>
-          <div>
-            {user ? (
-              <Link
-                href={route('logout')}
-                method="post"
-                as="button"
-                className="px-4 py-2 bg-amber-600 text-black font-semibold uppercase rounded-full hover:bg-amber-500 transition"
-              >
-                Cerrar Sesión
-              </Link>
-            ) : (
-              <Link
-                href={route('login')}
-                className="px-4 py-2 bg-amber-600 text-black font-semibold uppercase rounded-full hover:bg-amber-500 transition"
-              >
-                Iniciar Sesión
-              </Link>
-            )}
-          </div>
-        </header>
+
 
         {/* Content */}
-        <main className="flex-grow px-8 py-12">
+        <main className="flex-grow container mx-auto px-4 py-8 md:px-8 md:py-12">
           {user ? (
-            <section className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map(({ title, desc, link, img }) => (
-              <Link
-                key={link}
-                href={link}
-                className="group relative rounded-2xl overflow-hidden h-48 flex flex-col justify-between transition"
-                style={{
-                  backgroundImage: `url('${img}')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              >
-                {/* Overlay oscuro para legibilidad */}
-                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition" />
-
-                {/* Contenido encima del overlay */}
-                <div className="relative p-6">
-                  <h2 className="text-2xl font-bold uppercase group-hover:text-amber-400 transition">
-                    {title}
-                  </h2>
-                  <p className="text-sm text-gray-200 group-hover:text-white transition">
-                    {desc}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </section>
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Panel de Control</h2>
+              <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {cards.map(({ title, desc, link, img }) => (
+                  <Link
+                    key={link}
+                    href={link}
+                    className="group bg-white dark:bg-neutral-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition"
+                  >
+                    <div className="h-40 overflow-hidden relative">
+                      <img
+                        src={img}
+                        alt={title}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    </div>
+                    <div className="p-4">
+                      <h2 className="text-xl font-semibold mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                        {title}
+                      </h2>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">
+                        {desc}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </section>
+            </div>
           ) : (
-            <div className="text-center mt-24">
-              <p className="text-lg text-gray-400">
-                Accede con tus credenciales para comenzar a trabajar.
-              </p>
+            <div className="flex flex-col items-center justify-center mt-16 space-y-6">
+              <div className="bg-white dark:bg-neutral-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+                <h2 className="text-2xl font-bold mb-4">Bienvenido a Almacén Pro</h2>
+                <p className="text-neutral-600 dark:text-neutral-300 mb-6">
+                  Accede con tus credenciales para comenzar a trabajar con nuestro sistema de gestión.
+                </p>
+                <Link
+                  href={route('login')}
+                  className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
+                >
+                  Iniciar Sesión
+                </Link>
+              </div>
             </div>
           )}
         </main>
 
         {/* Footer */}
-        <footer className="px-8 py-6 border-t border-gray-700 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Almacén Pro. Todos los derechos reservados.
+        <footer className="bg-white dark:bg-neutral-800 py-6 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              © {new Date().getFullYear()} Almacén Pro. Todos los derechos reservados.
+            </p>
+          </div>
         </footer>
       </div>
+    </AppLayout>
     );
   }

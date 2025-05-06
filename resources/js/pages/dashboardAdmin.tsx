@@ -8,6 +8,8 @@ import type { BreadcrumbItem, User } from '@/types';
 import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import Swal from 'sweetalert2';
+import ProductModal from './product/create';
+import { Package, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,28 +18,42 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-
 export default function AdminDashboard() {
     const [users, setUsers] = useState<User[]>([]);
     const { auth, roles } = usePage<{
         auth: { user: User | null };
-        roles: RoleOption[];
     }>().props;
     const [categorias, setCategorias] = useState<Categoria[]>([]);
+    const [openProductModal, setOpenProductModal] = useState(false);
+
+    const {
+        data: productData,
+        setData: setProductData,
+        post,
+        processing: processingProduct,
+        errors: productErrors,
+        reset: resetProduct,
+    } = useForm({
+        name: '',
+        description: '',
+        num_reference: '',
+        stock: '',
+        categoria: '',
+        price: '',
+        image_url: '',
+    });
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalUsers, setTotalUsers] = useState(0);
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const response = await fetch(`/admin/users?page=${currentPage}`);
-
                 if (!response.ok) throw new Error('Error al cargar usuarios');
-
                 const data = await response.json();
-
                 if (data.success) {
                     setUsers(data.users);
                     setTotalPages(data.pagination.last_page);
@@ -48,549 +64,322 @@ export default function AdminDashboard() {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                // Datos de prueba como fallback
-                setUsers([
-                    {
-                        id: 1,
-                        name: "Admin",
-                        email: "admin@test.com",
-                        role: "Admin"
-                    }
-                ]);
                 setTotalPages(1);
             }
         };
-
         fetchUsers();
-    }, [currentPage]); // Se ejecuta cuando cambia currentPage
-
-
-    useEffect(() => {
-        fetch('/api/products/categorias')
-            .then(response => response.json())
-            .then(data => setCategorias(data))
-            .catch(error => console.error('Error al obtener categorías:', error));
-    }, []);
+    }, [currentPage]);
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>;
-    const uploadToImgBB = async (file: File): Promise<string | null> => {
-        const apiKey = import.meta.env.VITE_IMGBB_API_KEY || '6512c2d5a06b884ad74a74727c6e6332';
-
-        const formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            const result = await response.json();
-            return result.data?.url || null;
-        } catch (error) {
-            console.error('❌ Error al subir la imagen a ImgBB:', error);
-            return null;
-        }
-    };
-
     const user = auth.user;
-    const [openProductModal, setOpenProductModal] = useState(false);
-    const [openUserModal, setOpenUserModal] = useState(false);
-
-    const {
-        data: productData,
-        setData: setProductData,
-        post: postProduct,
-        processing: processingProduct,
-        errors: productErrors,
-        reset: resetProduct,
-    } = useForm<ProductForm>({
-        name: '',
-        description: '',
-        num_reference: '',
-        stock: '',
-        categoria: '',
-        price: '',
-        image_url: "",
-    });
 
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const price = parseFloat(productData.price);
-        const stock = parseInt(productData.stock);
-
-        if (price < 0 || stock < 0) {
-            Swal.fire({
-                title: 'Error',
-                text: 'El precio y el stock no pueden ser negativos.',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-            });            return;
-        }
-
-        let imageUrl = '';
-        if (productData.image_url instanceof File) {
-            const uploadedUrl = await uploadToImgBB(productData.image_url);
-            if (!uploadedUrl) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo subir la imagen a ImgBB.',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar'
-                });                return;
-            }
-            imageUrl = uploadedUrl;
-        } else if (typeof productData.image_url === 'string') {
-            imageUrl = productData.image_url;
-        }
-
-        const formData = {
-            ...productData,
-            image_url: imageUrl,
-            price: price,
-            stock: stock,
-            categoria: productData.categoria || null,
-        };
-
-        postProduct('/admin/products', {
-            data: formData,
+        post('/admin/products', {
+            preserveScroll: true,
             onSuccess: () => {
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'Producto e inventario creados con éxito',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    timer: 3000,  // Se cierra automáticamente después de 3 segundos 
-                });                resetProduct();
+                resetProduct();
                 setOpenProductModal(false);
             },
-            onError: (errors) => {
-                console.error('Error al crear producto:', errors);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Hubo un error al crear el producto',
-                    icon: 'error',
-                    confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#d33',  // Color rojo para el botón
-                });            },
-            forceFormData: false,
         });
     };
 
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors,
-        reset
-    } = useForm<RegisterForm>({
-        name: '',
-        last_name: '',
-        dni: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        phone: '',
-        address: '',
-        role: '',
-        photograph: null,
-        license: '',
-        driver_license: '',
-        license_expiration_date: '',
-    });
-
-    function validarDNI(dni: string): boolean {
-        const letras = 'TRWAGMYFPDXBNJZSQVHLCKE';
-        const dniRegex = /^\d{8}[A-Z]$/;
-        if (!dniRegex.test(dni)) return false;
-
-        const numero = parseInt(dni.substring(0, 8), 10);
-        const letra = dni.charAt(8);
-        return letras.charAt(numero % 23) === letra;
-    }
-
-    function validarTelefono(telefono: string): boolean {
-        return /^(6|7|9)\d{8}$/.test(telefono);
-    }
-
-    const submitUser = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!validarDNI(data.dni)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Formato incorrecto',
-                html: `
-            <div style="text-align:center; font-family:Arial, sans-serif">
-                <p style="color:#dc3545; font-weight:bold; margin-bottom:15px">
-                    ❌ Error en el DNI
-                </p>
-                <div style="display:flex; justify-content:center; gap:10px; margin:15px 0">
-                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
-                              background-color:#f8f9fa; font-family:monospace">
-                        12345678Z
-                    </div>
-                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
-                              background-color:#f8f9fa; font-family:monospace">
-                        87654321X
-                    </div>
-                </div>
-                <p style="color:#6c757d; font-size:0.9em; margin-top:10px">
-                    8 números + 1 letra (sin espacios ni guiones)
-                </p>
-            </div>
-        `,
-                confirmButtonText: 'Volver a intentar',
-                confirmButtonColor: '#dc3545',
-                backdrop: 'rgba(255,0,0,0.1)'
-            });
-            return;
-        }
-
-        if (!validarTelefono(data.phone)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Formato incorrecto',
-                html: `
-            <div style="text-align:center; font-family:Arial, sans-serif">
-                <p style="color:#dc3545; font-weight:bold; margin-bottom:15px">
-                    ❌ Error en el teléfono
-                </p>
-                <div style="display:flex; justify-content:center; gap:10px; margin:15px 0">
-                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
-                              background-color:#f8f9fa; font-family:monospace">
-                        6XX XXX XXX
-                    </div>
-                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
-                              background-color:#f8f9fa; font-family:monospace">
-                        7XX XXX XXX
-                    </div>
-                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
-                              background-color:#f8f9fa; font-family:monospace">
-                        9XX XXX XXX
-                    </div>
-                </div>
-                <p style="color:#6c757d; font-size:0.9em; margin-top:10px">
-                    9 dígitos, comenzando por 6, 7 o 9 (sin espacios ni guiones)
-                </p>
-            </div>
-        `,
-                confirmButtonText: 'Volver a intentar',
-                confirmButtonColor: '#dc3545',
-                backdrop: 'rgba(255,0,0,0.1)'
-            });
-            return;
-        }
-
-        post('/admin/users', {
-            onSuccess: () => {
-                reset();
-                setOpenUserModal(false);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Operación exitosa',
-                    text: 'Usuario creado correctamente.',
-                    showDenyButton: true,
-                    confirmButtonText: 'Ver usuario',
-                    denyButtonText: 'Crear otro',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/usuarios/' + nuevoUsuarioId;  // Ver detalle
-                    } else if (result.isDenied) {
-                        document.getElementById('form-usuario').reset();  // Reiniciar formulario
-                    }
-                });            },
-            forceFormData: true,
-        });
+    // Custom styles based on the provided color palette
+    const styles = {
+        primary: '#8F5C0C',    // warm brown
+        secondary: '#7C5F42',  // medium brown
+        dark: '#000000',       // black
+        light: '#F3F3F1',      // off-white
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs} className='bg-red-100'>
             <Head title="Dashboard Admin" />
-            <div className="p-4 space-y-10 max-w-5xl mx-auto">
-
-                <section className="bg-white dark:bg-gray-900 shadow rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-
-                    <h2 className="text-2xl font-bold mb-4">Bienvenido, {user.name} {user.last_name}</h2>
-
-                    <div className="grid md:grid-cols-2 gap-4 text-sm">
-                        <div className="space-y-1">
-                            <p><strong>Rol:</strong> {user.role}</p>
+            <div
+                className="min-h-screen py-8 px-4 sm:px-6 lg:px-8"
+                style={{ backgroundColor: styles.light }}
+            >
+                <div className="max-w-6xl mx-auto space-y-8">
+                    {/* Welcome section */}
+                    <section
+                        className="rounded-2xl p-6 shadow-lg"
+                        style={{
+                            background: `linear-gradient(135deg, ${styles.primary}, ${styles.secondary})`,
+                            color: styles.light,
+                        }}
+                    >
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div>
+                                <h1 className="text-3xl font-bold mb-2">Bienvenido, {user.name} {user.last_name}</h1>
+                                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
+                                    <span className="mr-2">•</span> {user.role}
+                                </div>
+                            </div>
+                            <Button
+                                onClick={() => setOpenProductModal(true)}
+                                className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all"
+                                style={{
+                                    backgroundColor: styles.light,
+                                    color: styles.primary,
+                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}
+                            >
+                                <Package size={20} />
+                                Crear producto
+                            </Button>
                         </div>
+                    </section>
+
+                    {/* Dashboard stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div
+                            className="rounded-2xl p-6 shadow-md border-l-4 transition-all hover:shadow-lg"
+                            style={{
+                                backgroundColor: 'white',
+                                borderLeftColor: styles.primary
+                            }}
+                        >
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-medium text-gray-700">Total Usuarios</h3>
+                                <div
+                                    className="p-3 rounded-full"
+                                    style={{ backgroundColor: `${styles.primary}20` }}
+                                >
+                                    <Users size={20} style={{ color: styles.primary }} />
+                                </div>
+                            </div>
+                            <p className="text-3xl font-bold mt-4" style={{ color: styles.primary }}>{totalUsers}</p>
+                            <p className="text-sm text-gray-500 mt-2">Usuarios activos en el sistema</p>
+                        </div>
+
+                        {/* You can add more stats cards here */}
                     </div>
 
-                    <div className="flex gap-4 mt-6">
-                        <Button onClick={() => setOpenUserModal(true)}>➕ Crear empleado</Button>
-                        <Button onClick={() => setOpenProductModal(true)}>📦 Crear producto</Button>
-                    </div>
-                </section>
-                <section className="bg-white dark:bg-gray-900 shadow rounded-xl p-6 border border-gray-200 dark:border-gray-700 mt-6">
-                    <h2 className="text-2xl font-bold mb-4">Gestión de Usuarios</h2>
+                    {/* User management section */}
+                    <section className="bg-white rounded-2xl shadow-md overflow-hidden">
+                        <div className="p-6 border-b"
+                            style={{ borderColor: `${styles.secondary}30` }}>
+                            <div className="flex items-center gap-3">
+                                <Users size={24} style={{ color: styles.primary }} />
+                                <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>
+                                    Gestión de Usuarios
+                                </h2>
+                            </div>
+                        </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead className="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">DNI</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                {users.length > 0 ? (
-                                    users.map(user => (
-                                        <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    {user.photograph && (
-                                                        <img
-                                                            src={user.photograph}
-                                                            alt={`${user.name} ${user.last_name}`}
-                                                            className="h-10 w-10 rounded-full object-cover"
-                                                        />
-                                                    )}
-                                                    <div className="ml-4">
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                            {user.name} {user.last_name}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                                <thead style={{ backgroundColor: `${styles.secondary}10` }}>
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                            style={{ color: styles.secondary }}>
+                                            Nombre
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                            style={{ color: styles.secondary }}>
+                                            Email
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                            style={{ color: styles.secondary }}>
+                                            Teléfono
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                            style={{ color: styles.secondary }}>
+                                            Rol
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                            style={{ color: styles.secondary }}>
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                                    {users.length > 0 ? (
+                                        users.map(user => (
+                                            <tr key={user.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        {user.avatar ? (
+                                                            <img
+                                                                src={user.avatar}
+                                                                alt={`${user.name} ${user.last_name}`}
+                                                                className="h-10 w-10 rounded-full object-cover ring-2"
+                                                                style={{ borderColor: styles.primary }}
+                                                            />
+                                                        ) : (
+                                                            <div
+                                                                className="h-10 w-10 rounded-full flex items-center justify-center text-lg font-medium"
+                                                                style={{
+                                                                    backgroundColor: `${styles.primary}20`,
+                                                                    color: styles.primary
+                                                                }}
+                                                            >
+                                                                {user.name.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                        <div className="ml-4">
+                                                            <div className="text-sm font-medium"
+                                                                style={{ color: styles.dark }}>
+                                                                {user.name} {user.last_name}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {user.email}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {user.dni}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {user.phone}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    ${user.role === 'Admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                                                        user.role === 'Manager' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>
-                                                    {user.role}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button
-                                                    onClick={() => {
-                                                        if (confirm(`¿Estás seguro de querer ${user.banned_at ? 'desbanear' : 'banear'} a ${user.name}?`)) {
-                                                            router.patch(`/admin/users/${user.id}/ban`, {
-                                                                banned: !user.banned_at,
-                                                            }, {
-                                                                preserveScroll: true,
-                                                                onSuccess: () => {
-                                                                    // Actualizar el estado local
-                                                                    setUsers(users.map(u =>
-                                                                        u.id === user.id
-                                                                            ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
-                                                                            : u
-                                                                    ));
-                                                                },
-                                                                onError: () => {
-                                                                    Swal.fire({
-                                                                        icon: 'error',
-                                                                        title: 'Error en el proceso',
-                                                                        html: `
-    <div style="text-align:left">
-      <p>❌ <strong>Fallo al actualizar el estado</strong></p>
-      <p><small>${error.message || 'Error desconocido'}</small></p>
-    </div>
-  `,
-                                                                        confirmButtonText: 'Entendido',
-                                                                        footer: '<a href="#" onclick="mostrarDetallesTecnicos()">Ver detalles técnicos</a>'
-                                                                    });                                                                }
-                                                            });
-                                                        }
-                                                    }}
-                                                    className={`px-3 py-1 rounded-md text-sm font-medium ${user.banned_at
-                                                            ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800'
-                                                            : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800'
-                                                        }`}
-                                                >
-                                                    {user.banned_at ? 'Desbanear' : 'Banear'}
-                                                </button>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                    {user.email}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                    {user.phone}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                        style={{
+                                                            backgroundColor:
+                                                                user.role === 'Admin' ? `${styles.primary}20` :
+                                                                user.role === 'Manager' ? `${styles.secondary}20` :
+                                                                'rgba(0, 128, 0, 0.2)',
+                                                            color:
+                                                                user.role === 'Admin' ? styles.primary :
+                                                                user.role === 'Manager' ? styles.secondary :
+                                                                'green'
+                                                        }}>
+                                                        {user.role}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm(`¿Estás seguro de querer ${user.banned_at ? 'desbanear' : 'banear'} a ${user.name}?`)) {
+                                                                router.patch(`/admin/users/${user.id}/ban`, {
+                                                                    banned: !user.banned_at,
+                                                                }, {
+                                                                    preserveScroll: true,
+                                                                    onSuccess: () => {
+                                                                        setUsers(users.map(u =>
+                                                                            u.id === user.id
+                                                                                ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
+                                                                                : u
+                                                                        ));
+                                                                    },
+                                                                    onError: () => {
+                                                                        Swal.fire({
+                                                                            icon: 'error',
+                                                                            title: 'Error en el proceso',
+                                                                            html: `
+                                                                            <div style="text-align:left">
+                                                                                <p>❌ <strong>Fallo al actualizar el estado</strong></p>
+                                                                                <p><small>Error al procesar la solicitud</small></p>
+                                                                            </div>
+                                                                            `,
+                                                                            confirmButtonText: 'Entendido',
+                                                                            footer: '<a href="#" onclick="mostrarDetallesTecnicos()">Ver detalles técnicos</a>'
+                                                                        });
+                                                                    }
+                                                                });
+                                                            }
+                                                        }}
+                                                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
+                                                        style={{
+                                                            backgroundColor: user.banned_at
+                                                                ? 'rgba(0, 128, 0, 0.15)'
+                                                                : 'rgba(220, 38, 38, 0.15)',
+                                                            color: user.banned_at
+                                                                ? 'green'
+                                                                : '#dc2626'
+                                                        }}
+                                                    >
+                                                        {user.banned_at ? 'Desbanear' : 'Banear'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                                                No hay usuarios registrados
                                             </td>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                            No hay usuarios registrados
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                        {/* Componente de Paginación */}
-                        <div className="flex items-center justify-between mt-6">
-                            <div className="text-sm text-gray-600">
-                                Mostrando {(currentPage - 1) * perPage + 1}-
-                                {Math.min(currentPage * perPage, totalUsers)} de {totalUsers} usuarios
-                            </div>
+                                    )}
+                                </tbody>
+                            </table>
 
-                            <div className="flex gap-1">
-                                {/* Botón Anterior */}
-                                <button
-                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                    disabled={currentPage === 1}
-                                    className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                >
-                                    &larr; Anterior
-                                </button>
+                            {/* Pagination control */}
+                            <div className="flex items-center justify-between p-6">
+                                <div className="text-sm text-gray-600">
+                                    Mostrando {(currentPage - 1) * perPage + 1}-
+                                    {Math.min(currentPage * perPage, totalUsers)} de {totalUsers} usuarios
+                                </div>
 
-                                {/* Números de página */}
-                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                    const page = currentPage <= 3
-                                        ? i + 1
-                                        : currentPage >= totalPages - 2
-                                            ? totalPages - 4 + i
-                                            : currentPage - 2 + i;
+                                <div className="flex gap-2 items-center">
+                                    {/* Previous button */}
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                        className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                        style={{ color: styles.secondary }}
+                                    >
+                                        <ChevronLeft size={18} />
+                                    </button>
 
-                                    return (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`w-10 h-10 rounded-md ${currentPage === page
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'border hover:bg-gray-100'
-                                                } transition-colors`}
-                                        >
-                                            {page}
-                                        </button>
-                                    );
-                                })}
+                                    {/* Page numbers */}
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const page = currentPage <= 3
+                                            ? i + 1
+                                            : currentPage >= totalPages - 2
+                                                ? totalPages - 4 + i
+                                                : currentPage - 2 + i;
 
-                                {/* Botón Siguiente */}
-                                <button
-                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                >
-                                    Siguiente &rarr;
-                                </button>
+                                        return (
+                                            <button
+                                                key={page}
+                                                onClick={() => setCurrentPage(page)}
+                                                className={`w-10 h-10 rounded-lg transition-all font-medium ${
+                                                    currentPage === page ? 'shadow-md' : ''
+                                                }`}
+                                                style={{
+                                                    backgroundColor: currentPage === page
+                                                        ? styles.primary
+                                                        : 'transparent',
+                                                    color: currentPage === page
+                                                        ? 'white'
+                                                        : styles.secondary,
+                                                    border: currentPage === page
+                                                        ? 'none'
+                                                        : `1px solid ${styles.secondary}30`
+                                                }}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    })}
+
+                                    {/* Next button */}
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                        style={{ color: styles.secondary }}
+                                    >
+                                        <ChevronRight size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </div>
             </div>
 
-            {/* Modal Crear Empleado */}
-            <Dialog open={openUserModal} onClose={() => setOpenUserModal(false)} className="fixed inset-0 z-50 flex items-center justify-center">
-                <Dialog.Panel className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-2xl overflow-y-auto max-h-screen">
-                    <Dialog.Title className="text-xl font-bold mb-4">Registrar nuevo empleado</Dialog.Title>
-                    <form onSubmit={submitUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-2 text-lg font-medium text-gray-600">Datos personales</div>
-                        <div><Label htmlFor="name">Nombre</Label><Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} /><InputError message={errors.name} /></div>
-                        <div><Label htmlFor="last_name">Apellido</Label><Input id="last_name" value={data.last_name} onChange={e => setData('last_name', e.target.value)} /><InputError message={errors.last_name} /></div>
-                        <div><Label htmlFor="dni">DNI</Label><Input id="dni" value={data.dni} onChange={e => setData('dni', e.target.value)} /><InputError message={errors.dni} /></div>
-                        <div><Label htmlFor="email">Email</Label><Input id="email" type="email" value={data.email} onChange={e => setData('email', e.target.value)} /><InputError message={errors.email} /></div>
-                        <div><Label htmlFor="phone">Teléfono</Label><Input id="phone" value={data.phone} onChange={e => setData('phone', e.target.value)} /><InputError message={errors.phone} /></div>
-                        <div><Label htmlFor="address">Dirección</Label><Input id="address" value={data.address} onChange={e => setData('address', e.target.value)} /><InputError message={errors.address} /></div>
-                        <div className="col-span-2">
-                            <Label htmlFor="role">Rol</Label>
-                            <select id="role" value={data.role} onChange={e => setData('role', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-sm">
-                                <option value="">Seleccionar rol</option>
-                                {roles.map(role => <option key={role.value} value={role.value}>{role.label}</option>)}
-                            </select>
-                            <InputError message={errors.role} />
-                        </div>
-                        <div className="col-span-2"><Label htmlFor="photograph">Fotografía</Label><Input type="file" id="photograph" accept="image/*" onChange={e => setData('photograph', e.target.files?.[0] ?? null)} /><InputError message={errors.photograph} /></div>
-                        {data.role === 'Repartidor' && (
-                            <>
-                                <div className="col-span-2 text-lg font-medium text-gray-600 pt-4">Datos de conducción</div>
-                                <div><Label htmlFor="license">Licencia</Label><Input id="license" value={data.license} onChange={e => setData('license', e.target.value)} /><InputError message={errors.license} /></div>
-                                <div><Label htmlFor="driver_license">Carnet de conducir</Label><Input id="driver_license" value={data.driver_license} onChange={e => setData('driver_license', e.target.value)} /><InputError message={errors.driver_license} /></div>
-                                <div><Label htmlFor="license_expiration_date">Vencimiento de licencia</Label><Input id="license_expiration_date" type="date" value={data.license_expiration_date} onChange={e => setData('license_expiration_date', e.target.value)} /><InputError message={errors.license_expiration_date} /></div>
-                            </>
-                        )}
-                        <div className="col-span-2 flex justify-end mt-6">
-                            <Button type="button" variant="ghost" onClick={() => setOpenUserModal(false)}>Cancelar</Button>
-                            <Button type="submit" disabled={processing}>Crear empleado</Button>
-                        </div>
-                    </form>
-                </Dialog.Panel>
-            </Dialog>
-
-            {/* Modal Crear Producto */}
-            <Dialog open={openProductModal} onClose={() => setOpenProductModal(false)} className="fixed inset-0 z-50 flex items-center justify-center">
-
-                <Dialog.Panel className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-lg">
-
-                    <Dialog.Title className="text-xl font-bold mb-4">Registrar nuevo producto</Dialog.Title>
-
-                    <form onSubmit={submitProduct} className="space-y-4">
-
-                        <div><Label htmlFor="name">Nombre</Label><Input id="name" value={productData.name} onChange={e => setProductData('name', e.target.value)} /><InputError message={productErrors.name} /></div>
-
-                        <div><Label htmlFor="description">Descripción</Label><Input id="description" value={productData.description} onChange={e => setProductData('description', e.target.value)} /><InputError message={productErrors.description} /></div>
-
-                        <div><Label htmlFor="num_reference">Referencia</Label><Input id="num_reference" value={productData.num_reference} onChange={e => setProductData('num_reference', e.target.value)} /><InputError message={productErrors.num_reference} /></div>
-
-                        <div><Label htmlFor="stock">Stock</Label><Input id="stock" type="number" step="1" min="0" value={productData.stock} onChange={e => setProductData('stock', e.target.value)} /><InputError message={productErrors.stock} /></div>
-
-                        <div>
-                            <Label htmlFor="categoria">Categoría</Label>
-                            <select
-                                id="categoria"
-                                value={productData.categoria || ''}
-                                onChange={e => setProductData('categoria', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                            >
-                                <option value="">Seleccione una categoría</option>
-                                {categorias.map(c => (
-                                    <option key={c.value} value={c.value}>
-                                        {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
-                                    </option>
-                                ))}
-
-                            </select>
-                            <InputError message={productErrors.categoria} />
-                        </div>
-
-                        <div><Label htmlFor="price">Precio (€)</Label><Input id="price" type="number" step="0.01" min="0" value={productData.price} onChange={e => setProductData('price', e.target.value)} /><InputError message={productErrors.price} /></div>
-
-                        <div>
-                            <Label htmlFor="image_url">Fotografía</Label>
-                            <Input
-                                id="image_url"
-                                type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        const uploadedUrl = await uploadToImgBB(file);
-                                        if (!uploadedUrl) {
-                                            Swal.fire({
-                                                icon: 'error',
-                                                title: 'Error al subir imagen',
-                                                text: 'No se pudo subir la imagen a ImgBB.',
-                                                confirmButtonColor: '#dc3545'
-                                            });                                            return;
-                                        }
-                                        setProductData('image_url', uploadedUrl);
-                                    }
-                                }}
-                            />
-                            <InputError message={productErrors.image_url} />
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-4">
-                            <Button type="button" variant="ghost" onClick={() => setOpenProductModal(false)}>Cancelar</Button>
-                            <Button type="submit" disabled={processingProduct}>Crear producto</Button>
-
-                        </div>
-
-                    </form>
-                </Dialog.Panel>
-            </Dialog>
+            <ProductModal
+                open={openProductModal}
+                onClose={() => setOpenProductModal(false)}
+                categorias={categorias}
+                productData={productData}
+                setProductData={setProductData}
+                submitProduct={submitProduct}
+                productErrors={productErrors}
+                processingProduct={processingProduct}
+            />
         </AppLayout>
     );
 }

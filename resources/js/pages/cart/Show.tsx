@@ -169,7 +169,7 @@ export default function CartShow({ cart: initialCart, success }: { cart: any, su
         <AppLayout>
         <Head title="Mi Carrito" />
 
-        <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white py-12 px-6">
+        <div className="min-h-screen  dark:bg-black text-gray-900 dark:text-white py-12 px-6">
           <div className="max-w-6xl mx-auto space-y-8">
             {/* Éxito */}
             {success && (

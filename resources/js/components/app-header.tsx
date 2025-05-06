@@ -6,35 +6,18 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Importación del Tooltip
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Ticket, Home, LayoutGrid, Menu, Search, ShoppingCart } from 'lucide-react';
+import { Ticket, Home, LayoutGrid, Menu, Search, ShoppingCart, User, FileText } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 import AvailableCouponsModal from './AvailableCouponsModal';
 import NewsletterModal from './NewsletterModal';
 import CreateCouponModal from './CreateCoupon';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Home',
-        href: '/',
-        icon: Home,
-    },
-    {
-        title: 'Productos',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-];
-
-const rightNavItems: NavItem[] = [];
-
-const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
@@ -47,10 +30,64 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     //MODALES
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showNewsletterModal, setShowNewsletterModal] = useState(false);
-
     const [showCouponsModal, setShowCouponsModal] = useState(false);
 
+    // Configuración de items de navegación según el rol del usuario
+    const getNavItems = (): NavItem[] => {
+        const userRole = auth.user.role;
 
+        if (userRole === "Admin") {
+            return [
+                {
+                    title: 'Home',
+                    href: '/',
+                    icon: Home,
+                }
+            ];
+        } else if (userRole === "Manager") {
+            return [
+                {
+                    title: 'Movimientos',
+                    href: '/manager/movimientos',
+                    icon: LayoutGrid,
+                },
+
+                {
+                    title: 'Movimientos',
+                    href: '/manager/movimientos',
+                    icon: FileText,
+                },
+                {
+                    title: 'Pedidos',
+                    href: '/manager/orders',
+                    icon: ShoppingCart,
+                }
+            ];
+        } else {
+            // Cliente por defecto
+            return [
+                {
+                    title: 'Home',
+                    href: '/',
+                    icon: Home,
+                },
+                {
+                    title: 'Productos',
+                    href: '/dashboard',
+                    icon: LayoutGrid,
+                },
+                {
+                    title: 'Perfil',
+                    href: '/settings/profile',
+                    icon: User,
+                }
+            ];
+        }
+    };
+
+    const mainNavItems = getNavItems();
+    const rightNavItems: NavItem[] = [];
+    const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
     return (
         <div className="space-y-4 p-4">
@@ -135,26 +172,27 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                         {/* Botones adicionales (Carrito, Crear Cupón, Avatar) */}
                         <div className="ml-auto flex items-center space-x-2">
-                            {/* Carrito de compras con tooltip */}
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Link href="/cart">
-                                            <Button variant="ghost" size="icon" className="h-10 w-10">
-                                                <ShoppingCart className="h-5 w-5" />
-                                            </Button>
-                                        </Link>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Carrito</TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                            {/* Carrito de compras solo para clientes */}
+                            {auth.user.role !== "Admin" && auth.user.role !== "Manager" && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Link href="/cart">
+                                                <Button variant="ghost" size="icon" className="h-10 w-10">
+                                                    <ShoppingCart className="h-5 w-5" />
+                                                </Button>
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Carrito</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
 
-
-                            {auth.user.role==="Admin" && (
+                            {/* Opciones de administrador */}
+                            {auth.user.role === "Admin" && (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="icon" className="h-10 w-10">
-                                            {/* Icono de admin */}
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
@@ -178,8 +216,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 </DropdownMenu>
                             )}
 
-
-
                             {/* Menú de usuario */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -195,23 +231,23 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                                 <DropdownMenuContent className="w-56" align="end">
                                     <UserMenuContent user={auth.user} />
-                                    <div className="px-2 py-1">
-                                        <button
-                                            onClick={() => setShowCouponsModal(true)}
-                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md transition text-gray-800"
-                                        >
-                                        🎟️ Ver mis cupones
-                                        </button>
-                                    </div>
-
+                                    {/* Mostrar cupones solo para clientes */}
+                                    {auth.user.role !== "Admin" && auth.user.role !== "Manager" && (
+                                        <div className="px-2 py-1">
+                                            <button
+                                                onClick={() => setShowCouponsModal(true)}
+                                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md transition text-gray-800"
+                                            >
+                                                🎟️ Ver mis cupones
+                                            </button>
+                                        </div>
+                                    )}
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
                     </div>
                 </div>
             </div>
-
-
 
             {/* Modal para crear cupón */}
             <CreateCouponModal
@@ -227,8 +263,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                 isOpen={showNewsletterModal}
                 onClose={() => setShowNewsletterModal(false)}
             />
-
         </div>
     );
-
 }
