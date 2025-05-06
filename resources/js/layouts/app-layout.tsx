@@ -46,6 +46,7 @@ const AppLayout = ({
             >
                 {children}
             </AppLayoutTemplate>
+            <footer className="nav-footer"></footer>
         </>
     );
 };

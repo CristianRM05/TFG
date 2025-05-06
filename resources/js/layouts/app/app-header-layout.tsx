@@ -30,6 +30,7 @@ export default function AppHeaderLayout({
                 header={header}
             />
             <AppContent>{children}</AppContent>
+          
         </AppShell>
     );
 }
