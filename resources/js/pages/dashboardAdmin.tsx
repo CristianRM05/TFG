@@ -7,6 +7,7 @@ import InputError from '@/components/input-error';
 import type { BreadcrumbItem, User } from '@/types';
 import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
+import Swal from 'sweetalert2';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -120,16 +121,24 @@ export default function AdminDashboard() {
         const stock = parseInt(productData.stock);
 
         if (price < 0 || stock < 0) {
-            alert('El precio y el stock no pueden ser negativos.');
-            return;
+            Swal.fire({
+                title: 'Error',
+                text: 'El precio y el stock no pueden ser negativos.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });            return;
         }
 
         let imageUrl = '';
         if (productData.image_url instanceof File) {
             const uploadedUrl = await uploadToImgBB(productData.image_url);
             if (!uploadedUrl) {
-                alert('No se pudo subir la imagen a ImgBB.');
-                return;
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo subir la imagen a ImgBB.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });                return;
             }
             imageUrl = uploadedUrl;
         } else if (typeof productData.image_url === 'string') {
@@ -147,14 +156,24 @@ export default function AdminDashboard() {
         postProduct('/admin/products', {
             data: formData,
             onSuccess: () => {
-                alert('Producto e inventario creados con éxito');
-                resetProduct();
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'Producto e inventario creados con éxito',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    timer: 3000,  // Se cierra automáticamente después de 3 segundos 
+                });                resetProduct();
                 setOpenProductModal(false);
             },
             onError: (errors) => {
                 console.error('Error al crear producto:', errors);
-                alert('Hubo un error al crear el producto');
-            },
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un error al crear el producto',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#d33',  // Color rojo para el botón
+                });            },
             forceFormData: false,
         });
     };
@@ -200,12 +219,68 @@ export default function AdminDashboard() {
         e.preventDefault();
 
         if (!validarDNI(data.dni)) {
-            alert('❌ DNI no válido. Debe tener 8 cifras seguidas de una letra correcta.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Formato incorrecto',
+                html: `
+            <div style="text-align:center; font-family:Arial, sans-serif">
+                <p style="color:#dc3545; font-weight:bold; margin-bottom:15px">
+                    ❌ Error en el DNI
+                </p>
+                <div style="display:flex; justify-content:center; gap:10px; margin:15px 0">
+                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
+                              background-color:#f8f9fa; font-family:monospace">
+                        12345678Z
+                    </div>
+                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
+                              background-color:#f8f9fa; font-family:monospace">
+                        87654321X
+                    </div>
+                </div>
+                <p style="color:#6c757d; font-size:0.9em; margin-top:10px">
+                    8 números + 1 letra (sin espacios ni guiones)
+                </p>
+            </div>
+        `,
+                confirmButtonText: 'Volver a intentar',
+                confirmButtonColor: '#dc3545',
+                backdrop: 'rgba(255,0,0,0.1)'
+            });
             return;
         }
 
         if (!validarTelefono(data.phone)) {
-            alert('❌ Teléfono no válido. Debe tener 9 cifras y comenzar por 6, 7 o 9.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Formato incorrecto',
+                html: `
+            <div style="text-align:center; font-family:Arial, sans-serif">
+                <p style="color:#dc3545; font-weight:bold; margin-bottom:15px">
+                    ❌ Error en el teléfono
+                </p>
+                <div style="display:flex; justify-content:center; gap:10px; margin:15px 0">
+                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
+                              background-color:#f8f9fa; font-family:monospace">
+                        6XX XXX XXX
+                    </div>
+                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
+                              background-color:#f8f9fa; font-family:monospace">
+                        7XX XXX XXX
+                    </div>
+                    <div style="border:2px solid #28a745; border-radius:5px; padding:8px 12px; 
+                              background-color:#f8f9fa; font-family:monospace">
+                        9XX XXX XXX
+                    </div>
+                </div>
+                <p style="color:#6c757d; font-size:0.9em; margin-top:10px">
+                    9 dígitos, comenzando por 6, 7 o 9 (sin espacios ni guiones)
+                </p>
+            </div>
+        `,
+                confirmButtonText: 'Volver a intentar',
+                confirmButtonColor: '#dc3545',
+                backdrop: 'rgba(255,0,0,0.1)'
+            });
             return;
         }
 
@@ -213,8 +288,20 @@ export default function AdminDashboard() {
             onSuccess: () => {
                 reset();
                 setOpenUserModal(false);
-                alert('Usuario creado con éxito');
-            },
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Operación exitosa',
+                    text: 'Usuario creado correctamente.',
+                    showDenyButton: true,
+                    confirmButtonText: 'Ver usuario',
+                    denyButtonText: 'Crear otro',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/usuarios/' + nuevoUsuarioId;  // Ver detalle
+                    } else if (result.isDenied) {
+                        document.getElementById('form-usuario').reset();  // Reiniciar formulario
+                    }
+                });            },
             forceFormData: true,
         });
     };
@@ -308,8 +395,18 @@ export default function AdminDashboard() {
                                                                     ));
                                                                 },
                                                                 onError: () => {
-                                                                    alert('Ocurrió un error al intentar cambiar el estado');
-                                                                }
+                                                                    Swal.fire({
+                                                                        icon: 'error',
+                                                                        title: 'Error en el proceso',
+                                                                        html: `
+    <div style="text-align:left">
+      <p>❌ <strong>Fallo al actualizar el estado</strong></p>
+      <p><small>${error.message || 'Error desconocido'}</small></p>
+    </div>
+  `,
+                                                                        confirmButtonText: 'Entendido',
+                                                                        footer: '<a href="#" onclick="mostrarDetallesTecnicos()">Ver detalles técnicos</a>'
+                                                                    });                                                                }
                                                             });
                                                         }
                                                     }}
@@ -471,8 +568,12 @@ export default function AdminDashboard() {
                                     if (file) {
                                         const uploadedUrl = await uploadToImgBB(file);
                                         if (!uploadedUrl) {
-                                            alert('No se pudo subir la imagen a ImgBB.');
-                                            return;
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Error al subir imagen',
+                                                text: 'No se pudo subir la imagen a ImgBB.',
+                                                confirmButtonColor: '#dc3545'
+                                            });                                            return;
                                         }
                                         setProductData('image_url', uploadedUrl);
                                     }
