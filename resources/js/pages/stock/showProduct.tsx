@@ -14,7 +14,7 @@ interface Product {
     discount_percent: number | null
     final_price: number | null
     image_url: string | null
-    calegonia: string
+    categoria: string
     shelf_id: number | null
     created_at: string | null
     updated_at: string | null
@@ -81,7 +81,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                 <h2 className="text-lg font-semibold mb-3">Información General</h2>
                                 <div className="space-y-2">
                                     <p><span className="font-medium">Referencia:</span> {product.num_reference}</p>
-                                    <p><span className="font-medium">Categoría:</span> {product.calegonia}</p>
+                                    <p><span className="font-medium">Categoría:</span> {product.categoria}</p>
                                     <p><span className="font-medium">Stock disponible:</span> {product.stock} unidades</p>
                                 </div>
                             </div>
