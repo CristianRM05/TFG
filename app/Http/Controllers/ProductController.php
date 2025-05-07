@@ -18,16 +18,14 @@ class ProductController extends Controller
         return response()->json($products, 200);
     }
 
-    public function show($id)
-    {
-        $product = Product::find($id);
-
-        if (!$product) {
-            abort(404, 'Producto no encontrado');
-        }
-
-        return inertia('Products/Show', ['product' => $product]);
-    }
+    public function show(Product $product)
+{
+    $product->load('shelf');
+    
+    return Inertia::render('stock/showProduct', [
+        'product' => $product
+    ]);
+}
 
     public function store(Request $request)
     {
