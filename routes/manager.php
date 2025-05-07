@@ -11,8 +11,9 @@ use App\Http\Controllers\AnalyticsController;
 
 Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function () {
     Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
-    //ruta a stock
+    //ruta a stock y productos
     Route::get('/stock', [ProductController::class, 'stockIndex'])->name('stock.index');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
     //descuentos
     Route::prefix('discounts')->group(function () {

@@ -18,16 +18,14 @@ class ProductController extends Controller
         return response()->json($products, 200);
     }
 
-    public function show($id)
-    {
-        $product = Product::find($id);
-
-        if (!$product) {
-            abort(404, 'Producto no encontrado');
-        }
-
-        return inertia('Products/Show', ['product' => $product]);
-    }
+    public function show(Product $product)
+{
+    $product->load('shelf');
+    
+    return Inertia::render('stock/showProduct', [
+        'product' => $product
+    ]);
+}
 
     public function store(Request $request)
     {
@@ -246,41 +244,48 @@ class ProductController extends Controller
         return back()->with('success', 'Producto asignado correctamente');
     }
 
-    public function removeAndMergeFromShelf(Product $product)
-    {
-        DB::transaction(function () use ($product) {
-            $currentShelfId = $product->shelf_id;
+public function removeAndMergeFromShelf(Product $product)
+{
+    DB::transaction(function () use ($product) {
+        $currentShelfId = $product->shelf_id;
+        $numReference = $product->num_reference;
 
-            $siblingProducts = Product::where('num_reference', $product->num_reference)
+        // 1. Buscar el producto con ID menor en la MISMA estantería (si existe)
+        if ($currentShelfId !== null) {
+            $siblingInShelf = Product::where('num_reference', $numReference)
                 ->where('shelf_id', $currentShelfId)
-                ->where('id', '!=', $product->id)
-                ->get();
+                ->where('id', '<', $product->id)
+                ->orderBy('id', 'asc')
+                ->first();
 
-            if ($siblingProducts->isNotEmpty()) {
-                $originalProduct = $siblingProducts->first();
-                $originalProduct->stock += $product->stock;
-                $originalProduct->save();
+            if ($siblingInShelf) {
+                $siblingInShelf->stock += $product->stock;
+                $siblingInShelf->save();
                 $product->delete();
-            } else {
-                $unassignedSibling = Product::where('num_reference', $product->num_reference)
-                    ->whereNull('shelf_id')
-                    ->where('id', '!=', $product->id)
-                    ->first();
-
-                if ($unassignedSibling) {
-                    $unassignedSibling->stock += $product->stock;
-                    $unassignedSibling->save();
-                    $product->delete();
-                } else {
-                    $product->shelf_id = null;
-                    $product->save();
-                }
+                return;
             }
-        });
+        }
 
-        return back()->with('success', 'Operación completada');
-    }
+        // 2. Buscar el producto con ID menor SIN estantería (shelf_id = null)
+        $siblingUnassigned = Product::where('num_reference', $numReference)
+            ->whereNull('shelf_id')
+            ->where('id', '<', $product->id)
+            ->orderBy('id', 'asc')
+            ->first();
 
+        if ($siblingUnassigned) {
+            $siblingUnassigned->stock += $product->stock;
+            $siblingUnassigned->save();
+            $product->delete();
+        } else {
+            // 3. Si no hay ID menor, desasignar el producto actual
+            $product->shelf_id = null;
+            $product->save();
+        }
+    });
+
+    return back()->with('success', 'Operación completada');
+}
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
