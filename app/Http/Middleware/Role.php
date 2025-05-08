@@ -10,15 +10,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Role
 {
-    public function handle(Request $request, Closure $next, string $roles): Response
+    public function handle(Request $request, Closure $next, string ...$roles)
+: Response
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
         $user = Auth::user();
-        $userRole = strtolower($user->role->value ?? ''); // 🔥 Pasamos a minúsculas
-        $allowedRoles = array_map('strtolower', explode(',', $roles)); // 🔥 También los permitidos en minúsculas
+        $userRole = strtolower($user->role->value ?? ''); //  Pasamos a minúsculas
+$allowedRoles = array_map('strtolower', $roles);
+    \Log::info("User Role: {$userRole}, Allowed Roles: " . json_encode($allowedRoles));
 
         if (!in_array($userRole, $allowedRoles)) {
             if ($request->header('X-Inertia')) {

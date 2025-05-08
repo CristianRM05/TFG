@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import Swal from 'sweetalert2';
 import ProductModal from './product/create';
+import ShelfModal from './shelves/create';
 import { Package, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -25,7 +26,7 @@ export default function AdminDashboard() {
     }>().props;
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [openProductModal, setOpenProductModal] = useState(false);
-
+    const [openShelfModal, setOpenShelfModal] = useState(false);
     const {
         data: productData,
         setData: setProductData,
@@ -33,6 +34,7 @@ export default function AdminDashboard() {
         processing: processingProduct,
         errors: productErrors,
         reset: resetProduct,
+        
     } = useForm({
         name: '',
         description: '',
@@ -41,6 +43,19 @@ export default function AdminDashboard() {
         categoria: '',
         price: '',
         image_url: '',
+    });
+    const {
+        data: shelfData,
+        setData: setShelfData,
+        post: postShelf,
+        processing: processingShelf,
+        errors: shelfErrors,
+        reset: resetShelf,
+        clearErrors,
+    } = useForm({
+        code: '',
+        location: '',
+        max_capacity: '',
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -83,6 +98,39 @@ export default function AdminDashboard() {
             },
         });
     };
+    const submitShelf = (e: React.FormEvent) => {
+        e.preventDefault();
+        postShelf('/admin/shelves', {
+            preserveScroll: true,
+            onSuccess: () => {
+                resetShelf();
+                setOpenShelfModal(false);
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'Estantería creada con éxito',
+                    icon: 'success',
+                    confirmButtonColor: styles.primary,
+                    timer: 3000
+
+                });
+                // Resetear el formulario
+                resetShelf();
+
+                // Cerrar el modal
+                setOpenShelfModal(false);
+
+            },
+            onError: () => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al crear la estantería',
+                    icon: 'error',
+                    confirmButtonColor: styles.secondary,
+                    timer: 3000
+                });
+            }
+        });
+    };
 
     // Custom styles based on the provided color palette
     const styles = {
@@ -116,18 +164,34 @@ export default function AdminDashboard() {
                                     <span className="mr-2">•</span> {user.role}
                                 </div>
                             </div>
-                            <Button
-                                onClick={() => setOpenProductModal(true)}
-                                className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all"
-                                style={{
-                                    backgroundColor: styles.light,
-                                    color: styles.primary,
-                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                                }}
-                            >
-                                <Package size={20} />
-                                Crear producto
-                            </Button>
+
+                            {/* Contenedor para los botones */}
+                            <div className="flex flex-col gap-3 w-full md:w-auto">
+                                <Button
+                                    onClick={() => setOpenProductModal(true)}
+                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
+                                    style={{
+                                        backgroundColor: styles.light,
+                                        color: styles.primary,
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                >
+                                    <Package size={20} />
+                                    Crear producto
+                                </Button>
+                                <Button
+                                    onClick={() => setOpenShelfModal(true)}
+                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
+                                    style={{
+                                        backgroundColor: styles.light,
+                                        color: styles.primary,
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                >
+                                    <Package size={20} />
+                                    Crear estantería
+                                </Button>
+                            </div>
                         </div>
                     </section>
 
@@ -380,6 +444,24 @@ export default function AdminDashboard() {
                 productErrors={productErrors}
                 processingProduct={processingProduct}
             />
+            
+            <ShelfModal
+                open={openShelfModal}
+                onClose={() => {
+                    setOpenShelfModal(false);
+                    resetShelf(); 
+                    clearErrors();
+
+                }}
+                shelfData={shelfData}
+                setShelfData={setShelfData}
+                submitShelf={submitShelf}
+                shelfErrors={shelfErrors}
+                processingShelf={processingShelf}
+                clearErrors={clearErrors} 
+
+            />
+
         </AppLayout>
     );
 }

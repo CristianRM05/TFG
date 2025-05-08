@@ -6,6 +6,7 @@ use App\Enums\RolesEmployee;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
+use App\Models\Shelf; 
 
 class AdminDashboardController extends Controller
 {
@@ -32,4 +33,24 @@ public function banUser(User $user, Request $request)
             : 'Usuario desbaneado correctamente',
         'user' => $user->fresh()
     ]);
-}}
+
+    
+}    public function storeShelf(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|max:255|unique:shelves',
+            'location' => 'required|string|max:255',
+            'max_capacity' => 'required|numeric|min:1',
+        ]);
+
+        $shelf = Shelf::create($validated);
+
+        return back()->with([
+            'success' => true,
+            'message' => 'Estantería creada con éxito',
+            'shelf' => $shelf
+        ]);
+
+}
+
+}

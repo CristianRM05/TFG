@@ -33,8 +33,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/ban', [AdminDashboardController::class, 'banUser'])
         ->name('admin.users.ban');
 
-    //CATEGORIAS Y PRODUCTOS
+    //CATEGORIAS, PRODUCTOS Y ESTANTERIAS
     Route::get('/products/categorias', [ProductController::class, 'getCategorias']);
     Route::post('/products', [ProductController::class, 'store']);
+    Route::post('/shelves', [AdminDashboardController::class, 'storeShelf'])
+        ->name('admin.shelves.store');
 
 });
