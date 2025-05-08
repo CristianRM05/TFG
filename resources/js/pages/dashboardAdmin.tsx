@@ -164,32 +164,34 @@ export default function AdminDashboard() {
                                     <span className="mr-2">•</span> {user.role}
                                 </div>
                             </div>
-                            <Button
-                                onClick={() => setOpenProductModal(true)}
-                                className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all"
-                                style={{
-                                    backgroundColor: styles.light,
-                                    color: styles.primary,
-                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                                }}
-                            >
-                                <Package size={20} />
-                                Crear producto
-                            </Button>
-                            <Button
-                                onClick={() => setOpenShelfModal(true)}
-                                className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all"
-                                style={{
-                                    backgroundColor: styles.light,
-                                    color: styles.primary,
-                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                                }}
-                            >
-                                {/* Puedes usar un icono diferente para estanterías */}
-                                <Package size={20} />
-                                Crear estantería
-                            </Button>
 
+                            {/* Contenedor para los botones */}
+                            <div className="flex flex-col gap-3 w-full md:w-auto">
+                                <Button
+                                    onClick={() => setOpenProductModal(true)}
+                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
+                                    style={{
+                                        backgroundColor: styles.light,
+                                        color: styles.primary,
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                >
+                                    <Package size={20} />
+                                    Crear producto
+                                </Button>
+                                <Button
+                                    onClick={() => setOpenShelfModal(true)}
+                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
+                                    style={{
+                                        backgroundColor: styles.light,
+                                        color: styles.primary,
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                >
+                                    <Package size={20} />
+                                    Crear estantería
+                                </Button>
+                            </div>
                         </div>
                     </section>
 

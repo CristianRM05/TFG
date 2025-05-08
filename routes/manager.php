@@ -9,7 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AnalyticsController;
 
 
-Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function () {
+Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
     Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
     //ruta a stock y productos
     Route::get('/stock', [ProductController::class, 'stockIndex'])->name('stock.index');
@@ -48,7 +48,7 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function (
     // Movimientos
     Route::prefix('manager')
      ->name('manager.')
-     ->middleware(['auth','role:manager'])
+     ->middleware(['auth','role:manager,admin'])
      ->group(function(){
          // …
          Route::get('/movimientos', [AnalyticsController::class,'index'])
