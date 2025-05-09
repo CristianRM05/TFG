@@ -289,6 +289,7 @@ export default function AdminDashboard() {
                     text: "Hubo un problema al crear la estantería",
                     icon: "error",
                     confirmButtonColor: styles.secondary,
+                    showConfirmButton: false,
                     timer: 3000,
                 })
             },
@@ -1156,6 +1157,9 @@ export default function AdminDashboard() {
                 submitProduct={submitProduct}
                 productErrors={productErrors}
                 processingProduct={processingProduct}
+                resetProduct={resetProduct}     
+                clearErrors={clearErrors}       
+
             />
 
             <ShelfModal

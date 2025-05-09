@@ -24,6 +24,9 @@ interface Props {
     submitProduct: (e: React.FormEvent) => void;
     productErrors: any;
     processingProduct: boolean;
+    resetProduct: () => void;      
+    clearErrors: () => void;       
+
 }
 
 
@@ -37,9 +40,17 @@ export default function ProductModal({
     submitProduct,
     productErrors,
     processingProduct,
+    resetProduct,     
+    clearErrors,
+    
+
 }: Props) {
     const [categorias, setCategorias] = useState<Categoria[]>(initialCategorias);
-
+    const handleClose = () => {
+        resetProduct();
+        clearErrors();
+        onClose();
+    };
     const { data, setData, post, processing, errors, reset } = useForm({
         name: productData.name || '',
         description: productData.description || '',
@@ -135,6 +146,8 @@ export default function ProductModal({
                     text: 'Hubo un error al crear el producto',
                     icon: 'error',
                     confirmButtonText: 'Entendido',
+                    showConfirmButton: false,
+                    timer: 3000,
                     confirmButtonColor: COLORS.secondary,
                 });
             },
@@ -310,8 +323,12 @@ export default function ProductModal({
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={onClose}
-                            className="px-4 py-2"
+                            onClick={() => {
+                                resetProduct();    // Limpia los datos del formulario
+                                clearErrors();     // Limpia los errores
+                                handleClose();// Cierra el modal
+                                                    }}
+                                                    className="px-4 py-2"
                             style={{
                                 borderColor: COLORS.secondary,
                                 color: COLORS.secondary

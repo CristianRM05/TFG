@@ -33,12 +33,12 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'num_reference' => 'required|string|max:50|',
+            'num_reference' => 'required|string|max:50|unique:products,num_reference',
             'price' => 'required|numeric|min:0',
             'image_url' => 'nullable|string',
             'weight' => 'nullable|numeric|min:0',
             'volume' => 'nullable|numeric|min:0',
-            'categoria' => 'nullable|string',
+            'categoria' => 'required|nullable|string',
             'stock' => 'nullable|numeric|min:0',
         ]);
 
