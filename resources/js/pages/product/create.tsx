@@ -26,6 +26,8 @@ interface Props {
     processingProduct: boolean;
 }
 
+
+
 export default function ProductModal({
     open,
     onClose,
@@ -119,6 +121,7 @@ export default function ProductModal({
                     text: 'Producto e inventario creados con éxito',
                     icon: 'success',
                     confirmButtonText: 'Aceptar',
+                    showConfirmButton: false,
                     confirmButtonColor: COLORS.primary,
                     timer: 3000,
                 });

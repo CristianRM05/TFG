@@ -266,6 +266,7 @@ export default function AdminDashboard() {
                 Swal.fire({
                     title: "¡Éxito!",
                     text: "Estantería creada con éxito",
+                    showConfirmButton: false,
                     icon: "success",
                     confirmButtonColor: styles.primary,
                     timer: 3000,
@@ -318,6 +319,7 @@ export default function AdminDashboard() {
                             title: '¡Borrado!',
                             text: 'La estantería ha sido eliminada.',
                             icon: 'success',
+                            showConfirmButton: false,
                             confirmButtonColor: styles.primary, // Marrón principal
                             background: styles.light,
                             timer: 3000
@@ -356,6 +358,7 @@ export default function AdminDashboard() {
                         Swal.fire({
                             title: '¡Borrado!',
                             text: 'El producto ha sido eliminado.',
+                            showConfirmButton: false,
                             icon: 'success',
                             confirmButtonColor: styles.primary,
                             background: styles.light,
@@ -624,45 +627,66 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <button
                                                                 onClick={() => {
-                                                                    if (
-                                                                        confirm(
-                                                                            `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
-                                                                        )
-                                                                    ) {
-                                                                        router.patch(
-                                                                            `/admin/users/${user.id}/ban`,
-                                                                            {
-                                                                                banned: !user.banned_at,
-                                                                            },
-                                                                            {
-                                                                                preserveScroll: true,
-                                                                                onSuccess: () => {
-                                                                                    setUsers(
-                                                                                        users.map((u) =>
-                                                                                            u.id === user.id
-                                                                                                ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
-                                                                                                : u,
-                                                                                        ),
-                                                                                    )
+                                                                        Swal.fire({
+                                                                            title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
+                                                                            icon: user.banned_at ? "question" : "warning",
+                                                                            showCancelButton: true,
+                                                                            confirmButtonColor: styles.primary,
+                                                                            cancelButtonColor: styles.secondary,
+                                                                            confirmButtonText: user.banned_at ? "Sí, desbanear" : "Sí, banear",
+                                                                            cancelButtonText: "Cancelar",
+                                                                            background: styles.light,
+                                                                            customClass: {
+                                                                                popup: 'shadow-lg',
+                                                                                confirmButton: 'hover:opacity-90 transition-opacity'
+                                                                            }
+                                                                        }).then((result) => {
+                                                                            if (result.isConfirmed) {
+                                                                                router.patch(
+                                                                                    `/admin/users/${user.id}/ban`,
+                                                                                    {
+                                                                                        banned: !user.banned_at,
+                                                                                    },
+                                                                                    {
+                                                                                        preserveScroll: true,
+                                                                                        onSuccess: () => {
+                                                                                            setUsers(
+                                                                                                users.map((u) =>
+                                                                                                    u.id === user.id
+                                                                                                        ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
+                                                                                                        : u,
+                                                                                                ),
+                                                                                            )
+                                                                                        Swal.fire({
+                                                                                            icon: "success",
+                                                                                            title: user.banned_at ? "Usuario desbaneado" : "Usuario baneado",
+                                                                                            showConfirmButton: false,
+                                                                                            timer: 1800,
+                                                                                            background: styles.light,
+                                                                                            customClass: { popup: 'shadow-lg' }
+                                                                                        });
+                                                                                    },
+                                                                                    onError: () => {
+                                                                                        Swal.fire({
+                                                                                            icon: "error",
+                                                                                            title: "Error en el proceso",
+                                                                                            html: `
+                                                                                          <div style="text-align:left">
+                                                                                            <p>❌ <strong>Fallo al actualizar el estado</strong></p>
+                                                                                            <p><small>Error al procesar la solicitud</small></p>
+                                                                                          </div>
+                                                                                        `,
+                                                                                            confirmButtonText: "Entendido",
+                                                                                            footer:
+                                                                                                '<a href="#" onclick="mostrarDetallesTecnicos()">Ver detalles técnicos</a>',
+                                                                                            background: styles.light,
+                                                                                            customClass: { popup: 'shadow-lg' }
+                                                                                        })
+                                                                                    },
                                                                                 },
-                                                                                onError: () => {
-                                                                                    Swal.fire({
-                                                                                        icon: "error",
-                                                                                        title: "Error en el proceso",
-                                                                                        html: `
-                                              <div style="text-align:left">
-                                                <p>❌ <strong>Fallo al actualizar el estado</strong></p>
-                                                <p><small>Error al procesar la solicitud</small></p>
-                                              </div>
-                                            `,
-                                                                                        confirmButtonText: "Entendido",
-                                                                                        footer:
-                                                                                            '<a href="#" onclick="mostrarDetallesTecnicos()">Ver detalles técnicos</a>',
-                                                                                    })
-                                                                                },
-                                                                            },
-                                                                        )
-                                                                    }
+                                                                            )
+                                                                        }
+                                                                    });
                                                                 }}
                                                                 className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
                                                                 style={{
@@ -1122,8 +1146,11 @@ export default function AdminDashboard() {
 
             <ProductModal
                 open={openProductModal}
-                onClose={() => setOpenProductModal(false)}
-                categorias={categorias}
+                onClose={() => {
+                    setOpenProductModal(false)
+                    resetProduct()
+                    clearErrors()
+                }}                            categorias={categorias}
                 productData={productData}
                 setProductData={setProductData}
                 submitProduct={submitProduct}
