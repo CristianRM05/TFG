@@ -26,6 +26,7 @@ class AdminDashboardController extends Controller
                         'capacity_percentage' => $shelf->max_capacity > 0 
                             ? min(100, ($shelf->products->sum('stock') / $shelf->max_capacity) * 100)
                             : 0,
+                            'created_at' => $shelf->created_at,
                     ];
                 });
 

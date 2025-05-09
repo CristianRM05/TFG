@@ -32,8 +32,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     
     // Ruta para estanterías - EXACTAMENTE IGUAL QUE USUARIOS
     Route::get('/shelves', function () {
-        $shelves = Shelf::all(); // Puedes usar paginate(10) si quieres paginación
-    
+        $shelves = \App\Models\Shelf::all()->map(function ($shelf) {
+            return [
+                'id' => $shelf->id,
+                'code' => $shelf->code,
+                'location' => $shelf->location,
+                'max_capacity' => $shelf->max_capacity,
+                'created_at' => $shelf->created_at, // <-- Añade esto
+                'updated_at' => $shelf->updated_at, // (opcional)
+                'products' => $shelf->products,     // si lo necesitas
+            ];
+        });    
         return response()->json([
             'success' => true,
             'shelves' => $shelves,
