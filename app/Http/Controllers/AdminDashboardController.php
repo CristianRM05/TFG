@@ -7,16 +7,36 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use App\Models\Shelf; 
+use App\Models\Product;
 
 class AdminDashboardController extends Controller
 {
-    public function create()
-    {
-        return Inertia::render('dashboardAdmin', [
-            'roles' => RolesEmployee::casesArray(),
-        ]);
-    }
+    public function create()  
+{
+    $shelves = Shelf::with(['products'])
+                ->get()
+                ->map(function ($shelf) {
+                    return [
+                        'id' => $shelf->id,
+                        'code' => $shelf->code,
+                        'location' => $shelf->location,
+                        'max_capacity' => $shelf->max_capacity,
+                        'total_stock' => $shelf->products->sum('stock'),
+                        'products_count' => $shelf->products->count(),
+                        'capacity_percentage' => $shelf->max_capacity > 0 
+                            ? min(100, ($shelf->products->sum('stock') / $shelf->max_capacity) * 100)
+                            : 0,
+                    ];
+                });
 
+    return Inertia::render('dashboardAdmin', [  // Asegúrate que coincida con tu vista
+        'shelves' => $shelves,
+        'roles' => RolesEmployee::casesArray(),
+        'products' => Product::with('shelf')->get(), 
+        'auth' => ['user' => auth()->user()]  
+    ]);
+}
+    
 public function banUser(User $user, Request $request)
 {
     $request->validate([
@@ -35,7 +55,48 @@ public function banUser(User $user, Request $request)
     ]);
 
     
-}    public function storeShelf(Request $request)
+}  
+
+ /**
+     * Elimina una estantería (shelf) 
+     */
+    public function deleteShelf(Shelf $shelf, Request $request)
+    {
+        try {
+            $shelf->delete();
+            
+            return back()->with([
+                'success' => true,
+                'message' => 'Estantería eliminada correctamente',
+                // Incluye los datos actualizados si es necesario
+                'shelves' => Shelf::all()
+            ]);
+        } catch (\Exception $e) {
+            return back()->with([
+                'success' => false,
+                'message' => 'Error al eliminar la estantería: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Elimina un producto 
+     */
+    public function deleteProduct(Product $product, Request $request) {
+        try {
+            $product->delete();
+            return back()->with([
+                'success' => true,
+                'message' => 'Producto eliminado correctamente',
+                'products' => Product::with(['categoria', 'shelf'])->get() // ¡Clave 'products'!
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+
+public function storeShelf(Request $request)
     {
         $validated = $request->validate([
             'code' => 'required|string|max:255|unique:shelves',

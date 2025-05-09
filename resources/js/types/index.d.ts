@@ -89,12 +89,14 @@ export interface Shelf {
     code: string;
     location: string;
     max_capacity: number;
-    created_at?: string;
-    updated_at?: string;
-    total_stock?: number;
-    products_count?: number;
+    total_stock: number;
+    products_count: number;
+    capacity_percentage: number;
+    created_at?: string;  // Añade esta línea
+    updated_at?: string;  // Opcional si también la necesitas
     products?: Product[];
 }
+
 
 interface Props {
     products: StockProduct[];
