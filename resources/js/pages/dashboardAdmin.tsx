@@ -418,8 +418,19 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
 
-                            {/* Contenedor para los botones */}
                             <div className="flex flex-col gap-3 w-full md:w-auto">
+                                <Button
+                                    onClick={() => setOpenShelfModal(true)}
+                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
+                                    style={{
+                                        backgroundColor: styles.light,
+                                        color: styles.primary,
+                                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                    }}
+                                >
+                                    <Package2 size={20} />
+                                    Crear estantería
+                                </Button>
                                 <Button
                                     onClick={() => setOpenProductModal(true)}
                                     className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
@@ -432,18 +443,7 @@ export default function AdminDashboard() {
                                     <Package size={20} />
                                     Crear producto
                                 </Button>
-                                <Button
-                                    onClick={() => setOpenShelfModal(true)}
-                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
-                                    style={{
-                                        backgroundColor: styles.light,
-                                        color: styles.primary,
-                                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                                    }}
-                                >
-                                    <Package size={20} />
-                                    Crear estantería
-                                </Button>
+                                
                             </div>
                         </div>
                     </section>

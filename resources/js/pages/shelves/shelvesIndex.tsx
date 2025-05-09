@@ -315,11 +315,15 @@ export default function ShelvesIndex() {
                                                     </div>
                                                     <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                                                         <div
-                                                            className={`h-2.5 rounded-full ${getShelfCapacityPercentage(shelf) > 90
-                                                                    ? "bg-red-600"
-                                                                    : getShelfCapacityPercentage(shelf) > 70
-                                                                        ? "bg-yellow-400"
-                                                                        : "bg-green-600"
+                                                            className={`h-2.5 rounded-full ${getShelfCapacityPercentage(shelf) >= 100
+                                                                    ? 'bg-black'
+                                                                    : getShelfCapacityPercentage(shelf) >= 99
+                                                                        ? 'bg-red-500'
+                                                                        : getShelfCapacityPercentage(shelf) > 85
+                                                                            ? 'bg-red-500'
+                                                                            : getShelfCapacityPercentage(shelf) > 50
+                                                                                ? 'bg-yellow-500'
+                                                                                : 'bg-green-500'
                                                                 }`}
                                                             style={{ width: `${getShelfCapacityPercentage(shelf)}%` }}
                                                         ></div>
