@@ -514,8 +514,7 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                             <p className="text-3xl font-bold mt-4" style={{ color: styles.primary }}>
-                                {loading.shelves ? "..." : totalShelves}
-                            </p>
+                                {loading.shelves ? "..." : shelves.length}                            </p>
                             <p className="text-sm text-gray-500 mt-2">Estanterías disponibles</p>
                         </div>
 
@@ -874,12 +873,18 @@ export default function AdminDashboard() {
                                                                                 style={{
                                                                                     width: `${shelf.capacity_percentage}%`
                                                                                 }}
-                                                                                className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${shelf.capacity_percentage > 100
-                                                                                    ? 'bg-red-500'
-                                                                                    : shelf.capacity_percentage > 70
-                                                                                        ? 'bg-yellow-500'
-                                                                                        : 'bg-green-500'
-                                                                                    }`}
+                                                                                className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center
+                                                                                    ${shelf.capacity_percentage >= 100
+                                                                                        ? 'bg-black'
+                                                                                        : shelf.capacity_percentage >= 99
+                                                                                            ? 'bg-red-500'
+                                                                                            : shelf.capacity_percentage > 85
+                                                                                                ? 'bg-red-500'
+                                                                                                : shelf.capacity_percentage > 50
+                                                                                                    ? 'bg-yellow-500'
+                                                                                                    : 'bg-green-500'
+                                                                                    }`
+                                                                                }
                                                                             ></div>
                                                                         </div>
                                                                     </div>
