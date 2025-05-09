@@ -483,7 +483,7 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                             <p className="text-3xl font-bold mt-4" style={{ color: styles.primary }}>
-                                {loading.shelves ? "..." : shelves.length}                            </p>
+                                {loading.shelves ? "..." : totalShelves}                           </p>
                             <p className="text-sm text-gray-500 mt-2">Estanterías disponibles</p>
                         </div>
 
