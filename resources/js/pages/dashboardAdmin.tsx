@@ -112,7 +112,7 @@ export default function AdminDashboard() {
     const [perPage, setPerPage] = useState(10)
     const [totalUsers, setTotalUsers] = useState(0)
     const [products, setProducts] = useState<ExtendedProduct[]>([])
-    const [openSection, setOpenSection] = useState<string | null>("users") // 'users', 'shelves', 'products' o null
+    const [openSection, setOpenSection] = useState<string | null>("null") // 'users', 'shelves', 'products' o null
     const [loading, setLoading] = useState({
         users: false,
         shelves: false,
@@ -605,25 +605,25 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phone}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span
-                                                                className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                                style={{
-                                                                    backgroundColor:
-                                                                        user.role === "Admin"
-                                                                            ? `${styles.primary}20`
-                                                                            : user.role === "Manager"
-                                                                                ? `${styles.secondary}20`
-                                                                                : "rgba(0, 128, 0, 0.2)",
-                                                                    color:
-                                                                        user.role === "Admin"
-                                                                            ? styles.primary
-                                                                            : user.role === "Manager"
-                                                                                ? styles.secondary
-                                                                                : "green",
-                                                                }}
-                                                            >
-                                                                {user.role}
-                                                            </span>
+                                                                <span
+                                                                    className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            user.role === "Admin"
+                                                                                ? "#fef9c3" // amarillo claro (bg-yellow-100)
+                                                                                : user.role === "Manager"
+                                                                                    ? "#dbeafe" // azul claro (bg-blue-100)
+                                                                                    : "rgba(0, 128, 0, 0.2)", // verde claro
+                                                                        color:
+                                                                            user.role === "Admin"
+                                                                                ? "#b45309" // amarillo oscuro (text-yellow-700)
+                                                                                : user.role === "Manager"
+                                                                                    ? "#1d4ed8" // azul fuerte (text-blue-700)
+                                                                                    : "green",
+                                                                    }}
+                                                                >
+                                                                    {user.role}
+                                                                </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <button
