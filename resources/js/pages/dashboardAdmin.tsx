@@ -370,11 +370,11 @@ export default function AdminDashboard() {
             text: "¡Esta acción no se puede deshacer!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: styles.primary, // #8F5C0C
-            cancelButtonColor: styles.secondary, // #7C5F42
+            confirmButtonColor: styles.primary,
+            cancelButtonColor: styles.secondary,
             confirmButtonText: 'Sí, borrar',
             cancelButtonText: 'Cancelar',
-            background: styles.light, // #F3F3F1
+            background: styles.light,
             customClass: {
                 popup: 'shadow-lg',
                 confirmButton: 'hover:opacity-90 transition-opacity'
@@ -384,24 +384,26 @@ export default function AdminDashboard() {
                 router.delete(`/admin/products/${productId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
+                        // Elimina el producto localmente
+                        setProducts((prev) => prev.filter(p => p.id !== productId));
+                        setTotalProducts((prev) => prev - 1);
+
                         Swal.fire({
                             title: '¡Borrado!',
                             text: 'El producto ha sido eliminado.',
                             icon: 'success',
                             confirmButtonColor: styles.primary,
                             background: styles.light,
-                            timer: 3000,
+                            timer: 2000,
                             customClass: {
                                 popup: 'shadow-lg'
                             }
                         });
-                        router.reload({ only: ['products'] });
                     }
                 });
             }
         });
     };
-
     // Custom styles based on the provided color palette
     const styles = {
         primary: "#8F5C0C", // warm brown

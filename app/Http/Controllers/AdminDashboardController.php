@@ -82,19 +82,12 @@ public function banUser(User $user, Request $request)
     /**
      * Elimina un producto 
      */
-    public function deleteProduct(Product $product, Request $request) {
-        try {
-            $product->delete();
-            return back()->with([
-                'success' => true,
-                'message' => 'Producto eliminado correctamente',
-                'products' => Product::with(['categoria', 'shelf'])->get() // ¡Clave 'products'!
-            ]);
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()]);
-        }
-    }
-
+    
+     public function deleteProduct(Product $product, Request $request)
+     {
+         $product->delete();
+         return redirect()->back()->with('success', true);
+     }
 
 public function storeShelf(Request $request)
     {
