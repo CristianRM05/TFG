@@ -30,34 +30,65 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         ]);
     })->name('admin.users.index');
     
-    // Ruta para estanterías - EXACTAMENTE IGUAL QUE USUARIOS
-    Route::get('/shelves', function () {
-        $shelves = \App\Models\Shelf::all()->map(function ($shelf) {
+    Route::get('/shelves', function (\Illuminate\Http\Request $request) {
+        $perPage = $request->input('per_page', 10);
+        $shelves = \App\Models\Shelf::with('products')->paginate($perPage);
+    
+        $shelvesData = $shelves->getCollection()->map(function ($shelf) {
             return [
                 'id' => $shelf->id,
                 'code' => $shelf->code,
                 'location' => $shelf->location,
                 'max_capacity' => $shelf->max_capacity,
-                'created_at' => $shelf->created_at, // <-- Añade esto
-                'updated_at' => $shelf->updated_at, // (opcional)
-                'products' => $shelf->products,     // si lo necesitas
+                'created_at' => $shelf->created_at,
+                'updated_at' => $shelf->updated_at,
+                'products' => $shelf->products,
             ];
-        });    
+        });
+    
         return response()->json([
             'success' => true,
-            'shelves' => $shelves,
-            'total' => $shelves->count()
+            'shelves' => $shelvesData,
+            'pagination' => [
+                'current_page' => $shelves->currentPage(),
+                'last_page' => $shelves->lastPage(),
+                'per_page' => $shelves->perPage(),
+                'total' => $shelves->total(),
+            ]
         ]);
     })->name('admin.shelves.index');
     
     // Ruta para productos - EXACTAMENTE IGUAL QUE USUARIOS
-    Route::get('/products', function () {
-        $products = Product::all(); // Puedes usar paginate(10) si quieres paginación
+    Route::get('/products', function (\Illuminate\Http\Request $request) {
+        $perPage = $request->input('per_page', 10);
+        $products = \App\Models\Product::with('shelf')->paginate($perPage);
+    
+        $productsData = $products->getCollection()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'num_reference' => $product->num_reference,
+                'stock' => $product->stock,
+                'price' => $product->price,
+                'categoria' => $product->categoria,
+                'shelf_id' => $product->shelf_id,
+                'created_at' => $product->created_at,
+                'updated_at' => $product->updated_at,
+                'image_url' => $product->image_url,
+                'shelf' => $product->shelf,
+            ];
+        });
     
         return response()->json([
             'success' => true,
-            'products' => $products,
-            'total' => $products->count()
+            'products' => $productsData,
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+            ]
         ]);
     })->name('admin.products.index');
     

@@ -41,9 +41,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState<User[]>([])
+    // Para estanterías
+    const [shelves, setShelves] = useState<any[]>([]);
+    const [shelvesPage, setShelvesPage] = useState(1)
+    const [shelvesTotalPages, setShelvesTotalPages] = useState(1)
+    const [shelvesPerPage, setShelvesPerPage] = useState(10)
+    const [totalShelves, setTotalShelves] = useState(0)
 
+    // Para productos
+    const [productsPage, setProductsPage] = useState(1)
+    const [productsTotalPages, setProductsTotalPages] = useState(1)
+    const [productsPerPage, setProductsPerPage] = useState(10)
+    const [totalProducts, setTotalProducts] = useState(0)
     // Obtén TODAS las props necesarias en un solo hook
-    const { auth, shelves, roles, products: productsFromProps } = usePage<{
+    const { auth, shelves: shelvesFromProps, roles, products: productsFromProps } = usePage<{
         auth: { user: User | null };
     shelves: Array<{
         id: number;
@@ -101,8 +112,6 @@ export default function AdminDashboard() {
     const [perPage, setPerPage] = useState(10)
     const [totalUsers, setTotalUsers] = useState(0)
     const [products, setProducts] = useState<ExtendedProduct[]>([])
-    const [totalShelves, setTotalShelves] = useState(0)
-    const [totalProducts, setTotalProducts] = useState(0)
     const [openSection, setOpenSection] = useState<string | null>("users") // 'users', 'shelves', 'products' o null
     const [loading, setLoading] = useState({
         users: false,
@@ -150,16 +159,13 @@ export default function AdminDashboard() {
 
     // Cargar , estanterías y productos
     useEffect(() => {
-
-
+        // Estanterías paginadas
         const fetchShelves = async () => {
             setLoading((prev) => ({ ...prev, shelves: true }));
             try {
-                const response = await fetch("/admin/shelves");
+                const response = await fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`);
                 if (!response.ok) throw new Error("Error al cargar estanterías");
                 const data = await response.json();
-
-                console.log("Respuesta de estanterías:", data);
 
                 if (data.success) {
                     const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
@@ -172,84 +178,43 @@ export default function AdminDashboard() {
                     }));
 
                     setShelves(shelvesWithCalculations);
-                    setTotalShelves(data.total || data.shelves.length);
+                    setTotalShelves(data.pagination.total);
+                    setShelvesTotalPages(data.pagination.last_page);
+                    setShelvesPerPage(data.pagination.per_page);
                 }
             } catch (error) {
                 console.error("Error al cargar estanterías:", error);
-                // Datos de ejemplo para desarrollo
-                setShelves([
-                    {
-                        id: 1,
-                        code: "SH-001",
-                        location: "Pasillo A",
-                        max_capacity: 100,
-                        total_stock: 25,
-                        products_count: 3,
-                        capacity_percentage: 25,
-                        products: []
-                    },
-                    // ... más estanterías de ejemplo
-                ]);
+                // ...datos de ejemplo 
             } finally {
                 setLoading((prev) => ({ ...prev, shelves: false }));
             }
         };
 
-
-        // Cargar productos - USANDO FETCH IGUAL QUE USUARIOS
+        // Productos paginados
         const fetchProducts = async () => {
-            setLoading((prev) => ({ ...prev, products: true }))
+            setLoading((prev) => ({ ...prev, products: true }));
             try {
-                const response = await fetch("/admin/products")
-                if (!response.ok) throw new Error("Error al cargar productos")
-                const data = await response.json()
-
-                console.log("Respuesta de productos:", data) // Para depuración
+                const response = await fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`);
+                if (!response.ok) throw new Error("Error al cargar productos");
+                const data = await response.json();
 
                 if (data.success) {
-                    setProducts(data.products)
-                    setTotalProducts(data.total || data.products.length)
-                } else {
-                    throw new Error("Error en la respuesta del servidor")
+                    setProducts(data.products);
+                    setTotalProducts(data.pagination.total);
+                    setProductsTotalPages(data.pagination.last_page);
+                    setProductsPerPage(data.pagination.per_page);
                 }
             } catch (error) {
-                console.error("Error al cargar productos:", error)
-                showError("No se pudieron cargar los productos. Por favor, intenta de nuevo más tarde.")
-
-                // Datos de ejemplo para desarrollo
-                setProducts([
-                    {
-                        id: 1,
-                        name: "Producto 1",
-                        num_reference: "REF001",
-                        stock: 10,
-                        price: 19.99,
-                        categoria: "Electrónica",
-                        shelf_id: 1,
-                        created_at: "2023-03-10",
-                        updated_at: "2023-03-10",
-                    },
-                    {
-                        id: 2,
-                        name: "Producto 2",
-                        num_reference: "REF002",
-                        stock: 5,
-                        price: 29.99,
-                        categoria: "Hogar",
-                        shelf_id: 2,
-                        created_at: "2023-03-15",
-                        updated_at: "2023-03-15",
-                    },
-                ])
-                setTotalProducts(2)
+                console.error("Error al cargar productos:", error);
+                // ...datos de ejemplo 
             } finally {
-                setLoading((prev) => ({ ...prev, products: false }))
+                setLoading((prev) => ({ ...prev, products: false }));
             }
-        }
+        };
 
-        fetchShelves()
-        fetchProducts()
-    }, [])
+        fetchShelves();
+        fetchProducts();
+    }, [shelvesPage, shelvesPerPage, productsPage, productsPerPage]);
 
     useEffect(() => {
         if (productsFromProps) {
@@ -916,9 +881,57 @@ export default function AdminDashboard() {
                                                 </tr>
                                             )}
                                         </tbody>
-                                    </table>
+                                        </table>
+                                        
                                 )}
+                                <div className="flex items-center justify-between p-6">
+                                    <div className="text-sm text-gray-600">
+                                        Mostrando {(shelvesPage - 1) * shelvesPerPage + 1}-{Math.min(shelvesPage * shelvesPerPage, totalShelves)} de {totalShelves} estanterías
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <button
+                                            onClick={() => setShelvesPage((p) => Math.max(1, p - 1))}
+                                            disabled={shelvesPage === 1}
+                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                            style={{ color: styles.secondary }}
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+                                        {Array.from({ length: Math.min(5, shelvesTotalPages) }, (_, i) => {
+                                            const page =
+                                                shelvesPage <= 3
+                                                    ? i + 1
+                                                    : shelvesPage >= shelvesTotalPages - 2
+                                                        ? shelvesTotalPages - 4 + i
+                                                        : shelvesPage - 2 + i
+
+                                            return (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setShelvesPage(page)}
+                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${shelvesPage === page ? "shadow-md" : ""}`}
+                                                    style={{
+                                                        backgroundColor: shelvesPage === page ? styles.primary : "transparent",
+                                                        color: shelvesPage === page ? "white" : styles.secondary,
+                                                        border: shelvesPage === page ? "none" : `1px solid ${styles.secondary}30`,
+                                                    }}
+                                                >
+                                                    {page}
+                                                </button>
+                                            )
+                                        })}
+                                        <button
+                                            onClick={() => setShelvesPage((p) => Math.min(shelvesTotalPages, p + 1))}
+                                            disabled={shelvesPage === shelvesTotalPages}
+                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                            style={{ color: styles.secondary }}
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                            
                         )}
 
                         {/* Products Section Header */}
@@ -1049,11 +1062,58 @@ export default function AdminDashboard() {
                                                     <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
                                                         No hay productos registrados
                                                     </td>
-                                                </tr>
+                                                        </tr>
+                                                        
                                             )}
                                         </tbody>
                                     </table>
                                 )}
+                                <div className="flex items-center justify-between p-6">
+                                    <div className="text-sm text-gray-600">
+                                        Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <button
+                                            onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
+                                            disabled={productsPage === 1}
+                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                            style={{ color: styles.secondary }}
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+                                        {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
+                                            const page =
+                                                productsPage <= 3
+                                                    ? i + 1
+                                                    : productsPage >= productsTotalPages - 2
+                                                        ? productsTotalPages - 4 + i
+                                                        : productsPage - 2 + i
+
+                                            return (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setProductsPage(page)}
+                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${productsPage === page ? "shadow-md" : ""}`}
+                                                    style={{
+                                                        backgroundColor: productsPage === page ? styles.primary : "transparent",
+                                                        color: productsPage === page ? "white" : styles.secondary,
+                                                        border: productsPage === page ? "none" : `1px solid ${styles.secondary}30`,
+                                                    }}
+                                                >
+                                                    {page}
+                                                </button>
+                                            )
+                                        })}
+                                        <button
+                                            onClick={() => setProductsPage((p) => Math.min(productsTotalPages, p + 1))}
+                                            disabled={productsPage === productsTotalPages}
+                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                            style={{ color: styles.secondary }}
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </section>
