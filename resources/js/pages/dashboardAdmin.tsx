@@ -1147,18 +1147,14 @@ export default function AdminDashboard() {
 
             <ProductModal
                 open={openProductModal}
-                onClose={() => {
-                    setOpenProductModal(false)
-                    resetProduct()
-                    clearErrors()
-                }}                            categorias={categorias}
+                onClose={() => setOpenProductModal(false)}
+                categorias={categorias}
                 productData={productData}
                 setProductData={setProductData}
                 submitProduct={submitProduct}
                 productErrors={productErrors}
                 processingProduct={processingProduct}
-                resetProduct={resetProduct}     
-                clearErrors={clearErrors}       
+    
 
             />
 

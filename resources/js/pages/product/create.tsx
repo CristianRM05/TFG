@@ -25,13 +25,12 @@ interface Props {
     productErrors: any;
     processingProduct: boolean;
     resetProduct: () => void;      
-    clearErrors: () => void;       
-
 }
 
 
 
 export default function ProductModal({
+    
     open,
     onClose,
     categorias: initialCategorias,
@@ -41,26 +40,40 @@ export default function ProductModal({
     productErrors,
     processingProduct,
     resetProduct,     
-    clearErrors,
     
 
 }: Props) {
     const [categorias, setCategorias] = useState<Categoria[]>(initialCategorias);
     const handleClose = () => {
-        resetProduct();
-        clearErrors();
+        reset();        // <-- useForm del modal
+        clearErrors();  // <-- useForm del modal
         onClose();
     };
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: productData.name || '',
-        description: productData.description || '',
-        num_reference: productData.num_reference || '',
-        stock: productData.stock || '',
-        categoria: productData.categoria || '',
-        price: productData.price || '',
-        image_url: productData.image_url || '',
+    
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
+        name: "",
+        description: "",
+        num_reference: "",
+        stock: "",
+        categoria: "",
+        price: "",
+        image_url: "",
     });
-
+    useEffect(() => {
+        if (open) {
+            setData({
+                name: productData.name || '',
+                description: productData.description || '',
+                num_reference: productData.num_reference || '',
+                stock: productData.stock || '',
+                categoria: productData.categoria || '',
+                price: productData.price || '',
+                image_url: productData.image_url || '',
+            });
+            clearErrors();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
     const uploadToImgBB = async (file: File): Promise<string | null> => {
         const apiKey = import.meta.env.VITE_IMGBB_API_KEY || '6512c2d5a06b884ad74a74727c6e6332';
 
@@ -162,20 +175,23 @@ export default function ProductModal({
     }, []);
 
     return (
-        <Dialog open={open} onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center">
+        <Dialog open={open} onClose={handleClose} className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Overlay */}
             <div
-                className="fixed inset-0 z-40 backdrop-blur-sm bg-black/30"
-                onClick={onClose}
-            />
-
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+                aria-hidden="true"
+                style={{ zIndex: 40 }}
+                onClick={handleClose}
+            ></div>
+            {/* Modal Panel */}
             <Dialog.Panel className="relative z-50 bg-white rounded-xl shadow-xl p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]" style={{ backgroundColor: COLORS.white }}>
                 <div className="flex justify-between items-center mb-6 pb-3 border-b" style={{ borderColor: COLORS.secondary }}>
                     <Dialog.Title className="text-2xl font-bold" style={{ color: COLORS.primary }}>
                         Registrar nuevo producto
                     </Dialog.Title>
                     <button
-                        onClick={onClose}
-                        className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+                        onClick={handleClose}
+    className="p-1 rounded-full hover:bg-gray-200 transition-colors"
                         aria-label="Cerrar"
                     >
                         <X size={24} style={{ color: COLORS.primary }} />
@@ -323,12 +339,8 @@ export default function ProductModal({
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => {
-                                resetProduct();    // Limpia los datos del formulario
-                                clearErrors();     // Limpia los errores
-                                handleClose();// Cierra el modal
-                                                    }}
-                                                    className="px-4 py-2"
+                            onClick={handleClose}
+                            className="px-4 py-2"
                             style={{
                                 borderColor: COLORS.secondary,
                                 color: COLORS.secondary
