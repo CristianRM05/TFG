@@ -133,6 +133,32 @@ export default function PaginaBebidas() {
             </div>
           </section>
 
+             {/* Sección Swapify con parallax */}
+             <section className="relative flex items-center justify-start h-screen overflow-hidden">
+            <div
+              className="absolute inset-0 bg-no-repeat bg-fixed bg-center bg-cover"
+              style={{
+                backgroundImage: `url('/images/cocteles.png')`,
+                backgroundSize: '100%',
+                backgroundPosition: 'center',
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black to-black/0" />
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 px-8 md:px-16 text-left max-w-xl">
+              <h1 className="text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-4">
+                Swapify<br/>
+                Cocteles<br/>
+                <span className="text-amber-400"></span>
+              </h1>
+              <Link
+                href={route('dashboard')}
+                className="inline-block px-8 py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors"
+              >
+                Recetario
+              </Link>
+            </div>
+          </section>
+
           {/* Beneficios, Categorías, Testimonios y modal Newsletter */}
         </div>
       );
