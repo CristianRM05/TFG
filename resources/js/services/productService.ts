@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const getProducts = async (page = 1) => {
-  const response = await axios.get(`/products?page=${page}`);
+  const response = await axios.get(`/products?page=${page}&limit=6`); //defino la paginacion con el &limit=6 para que sean 6 por pagina
   return response.data;
 };
 export const addToCart = async (productId: number) => {

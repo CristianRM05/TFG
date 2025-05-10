@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::paginate(5);
+        $products = Product::paginate(6); //se pagina a 6 productos por página
         return response()->json($products, 200);
     }
 
