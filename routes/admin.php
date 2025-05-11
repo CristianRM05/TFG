@@ -71,6 +71,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
                 'num_reference' => $product->num_reference,
                 'stock' => $product->stock,
                 'price' => $product->price,
+                'discount_percent' => $product->discount_percent,
+                'final_price' => $product->final_price,
                 'categoria' => $product->categoria,
                 'shelf_id' => $product->shelf_id,
                 'created_at' => $product->created_at,
