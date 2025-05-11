@@ -71,6 +71,7 @@ export default function AdminDashboard() {
     }>;
     products: ExtendedProduct[];
 }>().props;
+    const allShelvesForProducts = shelvesFromProps || [];
 
     // Verificación
     console.log('Datos completos:', { auth, shelves, roles });
@@ -1063,7 +1064,9 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.price}€</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                                             {product.shelf_id ? (
-                                                                shelves.find((shelf) => shelf.id === product.shelf_id)?.code || "N/A"
+                                                                allShelvesForProducts.find((shelf) => shelf.id === product.shelf_id)
+                                                                    ? allShelvesForProducts.find((shelf) => shelf.id === product.shelf_id)!.code
+                                                                    : <span className="text-gray-400">ID: {product.shelf_id}</span>
                                                             ) : (
                                                                 <span className="text-gray-400">Sin asignar</span>
                                                             )}
