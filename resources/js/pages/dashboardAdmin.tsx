@@ -30,6 +30,8 @@ interface ExtendedProduct {
     shelf_id: number | null
     created_at: string
     updated_at: string
+    discount_percent?: number
+    final_price?: number
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -71,6 +73,7 @@ export default function AdminDashboard() {
     }>;
     products: ExtendedProduct[];
 }>().props;
+    const allShelvesForProducts = shelvesFromProps || [];
 
     // Verificación
     console.log('Datos completos:', { auth, shelves, roles });
@@ -1018,7 +1021,10 @@ export default function AdminDashboard() {
                                                     style={{ color: styles.secondary }}
                                                 >
                                                     Precio
-                                                </th>
+                                                    </th>
+                                                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Descuento (%)</th>
+                                                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Precio Final</th>
+
                                                 <th
                                                     className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
                                                     style={{ color: styles.secondary }}
@@ -1062,8 +1068,20 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.stock}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.price}€</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                            {typeof product.discount_percent === "number" ? product.discount_percent + "%" : "0%"}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                            {typeof product.discount_percent === "number"
+                                                                ? ((product.price || 0) * (1 - (product.discount_percent || 0) / 100)).toFixed(2) + "€"
+                                                                : (product.price || 0).toFixed(2) + "€"}
+                                                        </td>
+
+
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                                             {product.shelf_id ? (
-                                                                shelves.find((shelf) => shelf.id === product.shelf_id)?.code || "N/A"
+                                                                allShelvesForProducts.find((shelf) => shelf.id === product.shelf_id)
+                                                                    ? allShelvesForProducts.find((shelf) => shelf.id === product.shelf_id)!.code
+                                                                    : <span className="text-gray-400">ID: {product.shelf_id}</span>
                                                             ) : (
                                                                 <span className="text-gray-400">Sin asignar</span>
                                                             )}
