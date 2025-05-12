@@ -55,7 +55,7 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
   const navigateToProduct = (productId: number) => {
     setShowResults(false)
     setSearchTerm("")
-    router.visit(`/products/${productId}`)
+    router.visit(`/manager/products/${productId}`)
   }
 
   return (
@@ -107,12 +107,18 @@ const StockIndex: React.FC<Props> = ({ products, auth }) => {
                   {/* Stock y acciones */}
                   <div className="mt-4 flex items-center justify-between">
                     <span
-                      className={`px-3 py-1 text-sm font-semibold rounded-full ${item.stock.available_quantity <= 10 ? "bg-red-700 text-white" : "bg-green-700 text-white"
-                        }`}
+                      className={`px-3 py-1 text-sm font-semibold rounded-full ${item.stock.available_quantity <= 10 ? "bg-red-700 text-white" : "bg-green-700 text-white"}`}
                     >
                       {item.stock.available_quantity} uds.
                     </span>
+                    <button
+                      onClick={() => navigateToProduct(item.id)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Ver Producto
+                    </button>
                   </div>
+
                 </div>
               ))
             ) : (

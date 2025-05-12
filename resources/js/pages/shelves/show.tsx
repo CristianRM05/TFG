@@ -137,11 +137,15 @@ export default function ShelfShow({ shelf }: Props) {
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-600 mt-2">
                                                 <div
-                                                    className={`h-2.5 rounded-full ${getCapacityPercentage() > 90
-                                                            ? 'bg-red-600'
-                                                            : getCapacityPercentage() > 70
-                                                                ? 'bg-yellow-400'
-                                                                : 'bg-green-600'
+                                                    className={`h-2.5 rounded-full ${getCapacityPercentage() >= 100
+                                                            ? 'bg-black'
+                                                            : getCapacityPercentage() >= 99
+                                                                ? 'bg-red-500'
+                                                                : getCapacityPercentage() > 85
+                                                                    ? 'bg-red-500'
+                                                                    : getCapacityPercentage() > 50
+                                                                        ? 'bg-yellow-500'
+                                                                        : 'bg-green-500'
                                                         }`}
                                                     style={{ width: `${getCapacityPercentage()}%` }}
                                                 ></div>
