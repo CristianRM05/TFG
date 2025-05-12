@@ -14,6 +14,7 @@ interface Order {
   id: number;
   ref: string;
   created_at: string;
+  status: 'Paid' | 'In progress' | 'Completed';
   items: OrderItem[];
 }
 
@@ -31,11 +32,46 @@ interface MyOrdersProps {
 export default function MyOrders() {
   const { auth, orders } = usePage<MyOrdersProps>().props;
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  const [selectedStatuses, setSelectedStatuses] = useState<Order['status'][]>(['Paid', 'In progress', 'Completed']);
+
   const toggle = (id: number) => setExpandedOrderId(prev => (prev === id ? null : id));
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Mis pedidos', href: route('orders.manager') },
   ];
+
+  // Status configuration
+  const statusConfig = {
+    'Paid': {
+      label: 'Pagado',
+      color: 'bg-blue-100 text-blue-800 border-blue-200',
+      darkColor: 'bg-blue-900 text-blue-300 border-blue-800'
+    },
+    'In progress': {
+      label: 'En Progreso',
+      color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      darkColor: 'bg-yellow-900 text-yellow-300 border-yellow-800'
+    },
+    'Completed': {
+      label: 'Completado',
+      color: 'bg-green-100 text-green-800 border-green-200',
+      darkColor: 'bg-green-900 text-green-300 border-green-800'
+    }
+  };
+
+  // Toggle status selection
+  const toggleStatusFilter = (status: Order['status']) => {
+    setSelectedStatuses(prev =>
+      prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  // Filter orders based on selected statuses
+  const filteredOrders = orders.data.filter(order =>
+    selectedStatuses.includes(order.status)
+  );
 
   return (
     <AppLayout
@@ -46,13 +82,38 @@ export default function MyOrders() {
     >
       <Head title="Mis Pedidos" />
       <div className="min-h-screen py-12 px-6">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">Mis Pedidos</h1>
-        {orders.data.length === 0 ? (
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Mis Pedidos</h1>
+          </div>
+
+          {/* Status Filter Badges */}
+          <div className="flex space-x-2 mb-4">
+            {Object.entries(statusConfig).map(([status, config]) => (
+              <button
+                key={status}
+                onClick={() => toggleStatusFilter(status as Order['status'])}
+                className={`
+                  px-3 py-1 rounded-full border-2 text-sm font-medium transition-all
+                  ${selectedStatuses.includes(status as Order['status'])
+                    ? `${config.color} dark:${config.darkColor} border-opacity-100`
+                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-transparent opacity-50'}
+                `}
+              >
+                {config.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredOrders.length === 0 ? (
           <div className="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-amber-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7l9-4 9 4-9 4-9-4z M3 17l9 4 9-4-9-4-9 4z" />
             </svg>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">Aún no tienes pedidos.</p>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+              No hay pedidos en los estados seleccionados.
+            </p>
             <Link
               href={route('manager.dashboard')}
               className="inline-block bg-amber-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-amber-500 transition"
@@ -60,8 +121,11 @@ export default function MyOrders() {
           </div>
         ) : (
           <ul className="space-y-4">
-            {orders.data.map(order => {
+            {filteredOrders.map(order => {
               const total = order.items.reduce((sum, i) => sum + i.product.price * i.quantity, 0).toFixed(2);
+              const status = order.status;
+              const statusInfo = statusConfig[status];
+
               return (
                 <li key={order.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
                   <button
@@ -69,7 +133,18 @@ export default function MyOrders() {
                     className="w-full flex justify-between items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none"
                   >
                     <div>
-                      <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">Pedido #{order.ref}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">Pedido #{order.ref}</p>
+                        <span
+                          className={`
+                            px-2 py-0.5 rounded-full text-xs font-medium
+                            ${statusInfo.color}
+                            dark:${statusInfo.darkColor}
+                          `}
+                        >
+                          {statusInfo.label}
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(order.created_at).toLocaleDateString()}</p>
                     </div>
                     <p className="text-lg font-bold text-amber-500">€{total}</p>
@@ -92,15 +167,30 @@ export default function MyOrders() {
             })}
           </ul>
         )}
-        <div className="mt-8 flex justify-center space-x-4">
-          {orders.prev_page_url && (
-            <Link href={orders.prev_page_url} className="px-4 py-2 bg-amber-600 text-white rounded-full hover:bg-amber-500 transition">Anterior</Link>
-          )}
-          <span className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full text-gray-800 dark:text-gray-200">Página {orders.current_page} de {orders.last_page}</span>
-          {orders.next_page_url && (
-            <Link href={orders.next_page_url} className="px-4 py-2 bg-amber-600 text-white rounded-full hover:bg-amber-500 transition">Siguiente</Link>
-          )}
-        </div>
+    {orders.last_page > 1 && (
+  <div className="mt-8 flex justify-center space-x-4">
+    {orders.prev_page_url && (
+      <Link
+        href={orders.prev_page_url}
+        className="px-4 py-2 bg-amber-600 text-white rounded-full hover:bg-amber-500 transition"
+      >
+        Anterior
+      </Link>
+    )}
+    <span className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full text-gray-800 dark:text-gray-200">
+      Página {orders.current_page} de {orders.last_page}
+    </span>
+    {orders.next_page_url && (
+      <Link
+        href={orders.next_page_url}
+        className="px-4 py-2 bg-amber-600 text-white rounded-full hover:bg-amber-500 transition"
+      >
+        Siguiente
+      </Link>
+    )}
+  </div>
+)}
+
       </div>
     </AppLayout>
   );
