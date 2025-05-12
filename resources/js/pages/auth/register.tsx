@@ -1,177 +1,166 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
-
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-import { __, setLanguage } from '../../translate';
-
-type RegisterForm = {
-    name: string;
-    last_name: string;
-    number_employ: string;
-    dni: string;
-    email: string;
-    phone: string;
-    address: string;
-    role: string;
-    departamento_id: string;
-    photograph: File | null;
-    license: string;
-    driver_license: string;
-    license_expiration_date: string;
-    password: string;
-    password_confirmation: string;
-};
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
-        name: '',
-        last_name: '',
-        number_employ: '',
-        dni: '',
-        email: '',
-        phone: '',
-        address: '',
-        role: '',
-        departamento_id: '',
-        photograph: null,
-        license: '',
-        driver_license: '',
-        license_expiration_date: '',
-        password: '',
-        password_confirmation: '',
-    });
+  const { data, setData, post, processing, errors, reset } = useForm({
+    name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+    photograph: null,
+  });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
+  const submit: FormEventHandler = (e) => {
+    e.preventDefault();
+    post(route('register'), { onFinish: () => reset('password', 'password_confirmation') });
+  };
 
-    return (
-        <AuthLayout title={__('Create an account')} description={__('Enter your details below to create your account')}>
-            <Head title={__('Create an account')} />
+  return (
+    <section className="min-h-screen bg-black flex items-center justify-center py-12 px-4">
+      <Head title="CREATE AN ACCOUNT" />
+      <div className="max-w-md w-full space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-5xl font-extrabold uppercase text-white">Create Account</h2>
+          <p className="mt-2 text-sm text-gray-400">
+            Enter your details to get started
+          </p>
+        </div>
 
-            {/* Selector de idioma */}
-            <div className="flex justify-end mb-4">
-                <select
-                    onChange={(e) => setLanguage(e.target.value)}
-                    defaultValue={localStorage.getItem('lang') || 'en'}
-                    className="p-2 border border-gray-300 rounded-md"
-                >
-                    <option className="text-black" value="en">🇬🇧 English</option>
-                    <option className="text-black" value="es">🇪🇸 Español</option>
-                </select>
+        {/* Form */}
+        <form className="space-y-6" onSubmit={submit}>
+          {/* Name */}
+          <div>
+            <label htmlFor="name" className="block text-xs font-bold uppercase text-white">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              autoComplete="name"
+              value={data.name}
+              onChange={(e) => setData('name', e.target.value)}
+              disabled={processing}
+              className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+              placeholder="Full Name"
+            />
+            <InputError message={errors.name} className="mt-1 text-xs text-red-500" />
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label htmlFor="last_name" className="block text-xs font-bold uppercase text-white">
+              Last Name
+            </label>
+            <input
+              id="last_name"
+              type="text"
+              value={data.last_name}
+              onChange={(e) => setData('last_name', e.target.value)}
+              disabled={processing}
+              className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+              placeholder="Last Name"
+            />
+            <InputError message={errors.last_name} className="mt-1 text-xs text-red-500" />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-xs font-bold uppercase text-white">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={data.email}
+              onChange={(e) => setData('email', e.target.value)}
+              disabled={processing}
+              className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+              placeholder="you@example.com"
+            />
+            <InputError message={errors.email} className="mt-1 text-xs text-red-500" />
+          </div>
+
+          {/* Passwords */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="password" className="block text-xs font-bold uppercase text-white">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                autoComplete="new-password"
+                value={data.password}
+                onChange={(e) => setData('password', e.target.value)}
+                disabled={processing}
+                className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+                placeholder="Password"
+              />
+              <InputError message={errors.password} className="mt-1 text-xs text-red-500" />
             </div>
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">{__('Name')}</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            disabled={processing}
-                            placeholder={__('Full name')}
-                        />
-                        <InputError message={errors.name} className="mt-2" />
-                    </div>
+            <div>
+              <label htmlFor="password_confirmation" className="block text-xs font-bold uppercase text-white">
+                Confirm Password
+              </label>
+              <input
+                id="password_confirmation"
+                type="password"
+                required
+                autoComplete="new-password"
+                value={data.password_confirmation}
+                onChange={(e) => setData('password_confirmation', e.target.value)}
+                disabled={processing}
+                className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+                placeholder="Confirm Password"
+              />
+              <InputError message={errors.password_confirmation} className="mt-1 text-xs text-red-500" />
+            </div>
+          </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="last_name">{__('Last Name')}</Label>
-                        <Input
-                            id="last_name"
-                            type="text"
-                            value={data.last_name}
-                            onChange={(e) => setData('last_name', e.target.value)}
-                            disabled={processing}
-                            placeholder={__('Last name')}
-                        />
-                        <InputError message={errors.last_name} />
-                    </div>
+          {/* Photo Upload */}
+          <div>
+            <label htmlFor="photograph" className="block text-xs font-bold uppercase text-white">
+              Profile Photo
+            </label>
+            <input
+              id="photograph"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setData('photograph', e.target.files?.[0] || null)}
+              className="mt-2 text-sm text-gray-300"
+            />
+            <InputError message={errors.photograph} className="mt-1 text-xs text-red-500" />
+          </div>
 
+          {/* Submit */}
+          <div>
+            <button
+              type="submit"
+              disabled={processing}
+              className="w-full py-4 uppercase font-bold tracking-wider bg-white text-black hover:bg-gray-200 transition"
+            >
+              {processing ? 'Processing...' : 'Create Account'}
+            </button>
+          </div>
+        </form>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">{__('Email address')}</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            tabIndex={2}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            disabled={processing}
-                            placeholder="correo@ejemplo.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">{__('Password')}</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
-                            placeholder={__('Password')}
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">{__('Confirm password')}</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
-                            placeholder={__('Confirm password')}
-                        />
-                        <InputError message={errors.password_confirmation} />
-                    </div>
-
-
-                    <input
-                        type="file"
-                        onChange={(e) => setData('photograph', e.target.files?.[0] || null)}
-                        accept="image/*"
-                    />
-
-
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        {__('Create account')}
-                    </Button>
-                </div>
-
-                <div className="text-muted-foreground text-center text-sm">
-                    {__('Already have an account? Log in')}{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
-                        {__('Log in')}
-                    </TextLink>
-                </div>
-            </form>
-        </AuthLayout>
-    );
+        {/* Footer */}
+        <p className="mt-6 text-center text-sm text-gray-400">
+          Already have an account?{' '}
+          <TextLink href={route('login')} className="font-bold hover:underline text-white">
+            Log in
+          </TextLink>
+        </p>
+      </div>
+    </section>
+  );
 }

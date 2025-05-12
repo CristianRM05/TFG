@@ -1,109 +1,141 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
-
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-import { __ } from '../../translate';
-type LoginForm = {
-    email: string;
-    password: string;
-    remember: boolean;
-};
+import { GoogleIcon } from '@/components/icons/google';
 
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-}
+export default function Login({ status, canResetPassword }) {
+  const { data, setData, post, processing, errors, reset } = useForm({
+    email: '',
+    password: '',
+    remember: false,
+  });
 
-export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
-        email: '',
-        password: '',
-        remember: false,
-    });
+  const submit: FormEventHandler = (e) => {
+    e.preventDefault();
+    post(route('login'), { onFinish: () => reset('password') });
+  };
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
-    };
-    return (
-        <AuthLayout title={__('Log in to your account')} description={__('Enter your email and password below to log in')}>
-            <Head title={__('Log in')} />
+  return (
+    <section className="min-h-screen bg-black flex items-center justify-center py-12 px-4">
+      <Head title="LOG IN" />
+      <div className="max-w-md w-full space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-5xl font-extrabold uppercase text-white">Welcome Back</h2>
+          <p className="mt-2 text-sm text-gray-400">
+            Log in to manage your account
+          </p>
+          {status && (
+            <p className="mt-4 text-sm text-green-500">{status}</p>
+          )}
+        </div>
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">{__('Email address')}</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder={__('email@example.com')}
-                        />
-                        <InputError message={errors.email} />
-                    </div>
+        {/* Form */}
+        <form className="space-y-6" onSubmit={submit}>
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-xs font-bold uppercase text-white">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoFocus
+              required
+              autoComplete="email"
+              value={data.email}
+              onChange={(e) => setData('email', e.target.value)}
+              disabled={processing}
+              className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+              placeholder="you@example.com"
+            />
+            <InputError message={errors.email} className="mt-1 text-xs text-red-500" />
+          </div>
 
-                    <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">{__('Password')}</Label>
-                            {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    {__('Forgot password?')}
-                                </TextLink>
-                            )}
-                        </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder={__('Password')}
-                        />
-                        <InputError message={errors.password} />
-                    </div>
+          {/* Password */}
+          <div>
+            <label htmlFor="password" className="block text-xs font-bold uppercase text-white">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={data.password}
+              onChange={(e) => setData('password', e.target.value)}
+              disabled={processing}
+              className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
+              placeholder="••••••••"
+            />
+            <InputError message={errors.password} className="mt-1 text-xs text-red-500" />
+            {canResetPassword && (
+              <div className="text-right mt-1">
+                <TextLink href={route('password.request')} className="text-xs text-gray-400 hover:text-white">
+                  Forgot password?
+                </TextLink>
+              </div>
+            )}
+          </div>
 
-                    <div className="flex items-center space-x-3">
-                        <Checkbox
-                            id="remember"
-                            name="remember"
-                            checked={data.remember}
-                            onClick={() => setData('remember', !data.remember)}
-                            tabIndex={3}
-                        />
-                        <Label htmlFor="remember">{__('Remember me')}</Label>
-                    </div>
+          {/* Remember */}
+          <div className="flex items-center">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={data.remember}
+              onChange={() => setData('remember', !data.remember)}
+              disabled={processing}
+              className="h-4 w-4 text-white bg-transparent border-gray-600 focus:ring-white rounded"
+            />
+            <label htmlFor="remember" className="ml-2 text-sm text-gray-400">
+              Remember me
+            </label>
+          </div>
 
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        {__('Log in')}
-                    </Button>
-                </div>
+          {/* Submit */}
+          <div>
+            <button
+              type="submit"
+              disabled={processing}
+              className="w-full py-4 uppercase font-bold tracking-wider bg-white text-black hover:bg-gray-200 transition"
+            >
+              {processing ? 'Processing...' : 'Log In'}
+            </button>
+          </div>
 
-                <div className="text-muted-foreground text-center text-sm">
-                    {__("Don't have an account?")}{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        {__('Sign up')}
-                    </TextLink>
-                </div>
-            </form>
+          {/* Divider */}
+          <div className="relative my-6">
+            <span className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-600" />
+            </span>
+            <span className="relative px-4 bg-black text-gray-400 text-sm uppercase">
+              Or continue with
+            </span>
+          </div>
 
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
-    );
+          {/* Google Login */}
+          <div>
+            <button
+              type="button"
+              onClick={() => (window.location.href = route('login-google'))}
+              className="w-full flex items-center justify-center gap-2 py-3 border-2 border-gray-600 rounded uppercase font-semibold text-gray-200 hover:text-white hover:border-white transition"
+            >
+              <GoogleIcon className="h-5 w-5" />
+              Continue with Google
+            </button>
+          </div>
+        </form>
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-sm text-gray-400">
+          Don't have an account?{' '}
+          <TextLink href={route('register')} className="font-bold hover:underline text-white">
+            Sign up
+          </TextLink>
+        </p>
+      </div>
+    </section>
+  );
 }

@@ -13,6 +13,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Validation\Rule;
+use App\Enums\RolesEmployee;
 
 
 class RegisteredUserController extends Controller
@@ -35,27 +36,19 @@ class RegisteredUserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'dni' => 'required|string|max:20|unique:users,dni',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
-            'role' => [Rule::in(array_column(RolesEmployee::cases(), 'Operario'))],
-            'departamento_id' => 'nullable|exists:departamentos,id',
-            'license' => 'nullable|string|max:50',
-            'driver_license' => 'nullable|string|max:50',
-            'license_expiration_date' => 'nullable|date',
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'photograph' => 'nullable|image|max:2048',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'avatar' => 'nullable|image|max:2048',
         ]);
 
 
         // Subir foto si existe
-        if ($request->hasFile('photograph')) {
-            $validated['photograph'] = $request->file('photograph')->store('photos', 'public');
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('photos', 'public');
         }
 
         // Generar número de empleado
-        $validated['number_employ'] = User::generateEmployeeNumber();
 
         // Hashear la contraseña
         $validated['password'] = Hash::make($validated['password']);

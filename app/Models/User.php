@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\StatusTruck;
 use App\Enums\RolesEmployee;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Cart;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -16,68 +19,69 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $table = 'users';
     protected $primaryKey = 'id';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'number_employ',
         'name',
         'last_name',
-        'dni',
         'email',
         'password',
         'phone',
-        'address',
+        'location',
         'role',
-        'photograph',
-        'license',
-        'driver_license',
-        'license_expiration_date',
+        'avatar',
+        'external_id',
+        'external_auth',
+        'banned_at'
+
+
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+ 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'role' => RolesEmployee::class,
-        'license_expiration_date' => 'date',
+        'banned_at' => 'datetime'
+
     ];
 
     protected static function boot()
-{
-    parent::boot();
+    {
+        parent::boot();
+    }
+    public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class)->where('status', 'active');
+    }
 
-    static::creating(function ($user) {
-        // Solo si no viene seteado manualmente
-        if (empty($user->number_employ)) {
-            $user->number_employ = self::generateEmployeeNumber();
-        }
-    });
-}
+    public function ban()
+    {
+        $this->update(['banned_at' => now()]);
+        return $this;
+    }
 
-public static function generateEmployeeNumber()
-{
-    do {
-        $random = strtoupper(chr(rand(65, 90))) . str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
-    } while (self::where('number_employ', $random)->exists());
+    public function unban()
+    {
+        $this->update(['banned_at' => null]);
+        return $this;
+    }
 
-    return $random;
-}
-
+    public function isBanned(): bool
+    {
+        return !is_null($this->banned_at);
+    }
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function coupons()
+    {
+        return $this->belongsToMany(Coupon::class)
+            ->withPivot('status', 'used_at')
+            ->withTimestamps();
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class StockController extends Controller
 {
@@ -24,9 +25,9 @@ class StockController extends Controller
         return Inertia::render('stock/stockIndex', [
             'products' => $products,
             'auth' => [
-                'user' => auth()->user() ? [
-                    'name' => auth()->user()->name,
-                    'email' => auth()->user()->email
+                'user' => Auth::user() ? [
+                    'name' => Auth::user()->name,
+                    'email' => Auth::user()->email
                 ] : null
             ]
         ]);

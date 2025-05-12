@@ -14,7 +14,9 @@ interface AppLayoutProps {
     breadcrumbs?: BreadcrumbItem[];
     user?: User;
     header?: ReactNode;
-    initialLoading?: boolean;  
+    initialLoading?: boolean;
+    className?: string;
+
 }
 
 const AppLayout = ({
@@ -36,15 +38,17 @@ const AppLayout = ({
         <>
             {isLoading && <LoadingSpinner />}
             <AppLayoutTemplate
-                breadcrumbs={breadcrumbs}
+  breadcrumbs={breadcrumbs}
                 user={user}
                 header={header}
+                className={`min-h-screen ${props.className || 'bg-red-100 dark:bg-gray-900'}`}
                 {...props}
             >
                 {children}
             </AppLayoutTemplate>
+            <footer className="nav-footer"></footer>
         </>
     );
 };
 
-export default AppLayout;  
+export default AppLayout;

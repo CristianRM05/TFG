@@ -2,20 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use App\Models\User;
-use App\Http\Middleware\RoleMiddleware;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\StockController;
+use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\ProductController;
-use App\Http\Middleware\VerifyCsrfToken;
-use App\Http\Middleware\CorsMiddleware;
-use App\Http\Controllers\BackOffice\OrderController;
-use App\Http\Controllers\BackOffice\RouteController;
-use App\Http\Controllers\TruckController;
-
-
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CouponController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutSuccessController;
+use App\Http\Controllers\AnalyticsController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -25,123 +19,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-
-Route::get('/stock', [ProductController::class, 'stockIndex'])->name('stock.index');
-Route::get('/shelves', [ProductController::class, 'unassignedProducts'])->name('shelves.index');
-
 });
 
-/**
- * Ruta protegida solo para administradores
- */
-Route::middleware(['auth'])->get('/admin/dashboard', function () {
-    return Inertia::render('dashboardAdmin');
-})->name('admin.dashboard');
+//API IMAGENES
+Route::post('/subir-imagen', [ImagenController::class, 'subirImagen']);
+//PRODUCTOS
+Route::get('/products', action: [ProductController::class, 'index']);
 
-Route::get('/middleware-test', function () {
-    return 'Middleware ejecutado correctamente';
-})->middleware('role:Admin,Manager');
-
-
-Route::middleware(['auth'])->get('/admin/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
-
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
+//CARRITO, COUPONS Y PEDIDOS
+Route::middleware(['auth', 'verified'])->group(function () {
+    //carrito
+    Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::put('updateQuantity/{id}', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
+    //cupones
+    Route::post('/apply-coupon', [CouponController::class, 'apply']);
+    Route::get('coupons/available ', [CouponController::class, 'getAvailableCoupons']);
+    //checkout stock
+    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
+    //mis pedidos
+    Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 });
 
-// Rutas de manager
-Route::middleware(['auth'])->prefix('manager')->group(function () {
-    Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
-    Route::post('/users', [UserController::class, 'store'])->name('manager.users.store');
-});
+//NEWSLETTER
+Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
-// Gestión de estanterías
-Route::middleware(['auth'])->group(function () {
-    Route::put('/products/{product}/assign-shelf', [ProductController::class, 'assignShelf'])
-    ->name('products.assign-shelf');
+//PEDIDOS
+Route::post('/checkout', action: [OrderController::class, 'checkout'])->name('checkout');
+Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
+Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 
-    Route::put('/products/{product}/assign-split', [ProductController::class, 'assignSplitToShelf'])
-        ->name('products.assign-split');
-
-    Route::delete('/products/{product}/remove-merge', [ProductController::class, 'removeAndMergeFromShelf'])
-        ->name('products.remove-merge');
-
-    Route::put('/products/{product}/update-shelf', [ProductController::class, 'updateShelf'])
-        ->name('products.update-shelf');
-
-
-    Route::get('/shelves/{shelf}', [ProductController::class, 'showShelf'])
-        ->name('shelves.show');
-});
-
-Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
-
-//para consumir los datos de la base de datos
-Route::middleware(['auth'])->group(function () {
-    Route::get('/api/productos', [ProductController::class, 'index']);
-});
-
-//devuelve a una vista
-Route::middleware(['auth', 'verified'])->get('/almacen/productos', function () {
-    return Inertia::render('ManagerPages/listProducts');
-})->name('almacen.productos');
-
-
-
-//BackOfice
-// Ruta para renderizar la vista de pedidos pendientes (BackOffice)
-Route::middleware(['auth'])->get('/orders', function () {
-    return Inertia::render('ManagerPages/backOffice');
-});
-
-// API de pedidos para React
-Route::prefix('backoffice')->middleware(['auth', 'role:Manager'])->group(function () {
-    Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders/{order}', [OrderController::class, 'show']);
-    Route::post('/orders/{order}/assign', [OrderController::class, 'assign']);
-});
-
-//descuentos
-Route::prefix('discounts')->group(function () {
-    // Ruta GET para mostrar la vista (Inertia)
-    Route::get('/', [DiscountController::class, 'index'])->name('discounts.index');
-
-    // Ruta POST para aplicar descuentos (API)
-    Route::post('/', [DiscountController::class, 'store'])->name('discounts.store');
-
-    // Ruta DELETE para eliminar descuentos
-    Route::delete('/{product}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
-});
-
-//rutas para la gestion de vehículos
-Route::middleware(['auth'])->group(function () {
-    Route::get('/trucks', [TruckController::class, 'index'])->name('trucks.index');
-    Route::post('/trucks', [TruckController::class, 'store'])->name('trucks.store');
-    Route::put('/trucks/{truck}', [TruckController::class, 'update'])->name('trucks.update');
-    Route::delete('/trucks/{truck}', [TruckController::class, 'destroy'])->name('trucks.destroy');
-    Route::put('/trucks/{truck}/status', [TruckController::class, 'updateStatus'])->name('trucks.updateStatus');
-});
-
-//ruta para listar empleados siendo manager
-Route::middleware(['auth'])->get('/employees', function () {
-    return Inertia::render('ManagerPages/ListEmployee');
-})->name('employees.index');
-Route::middleware(['auth'])->get('/employees-data', function () {
-    return response()->json(
-        User::whereIn('role', ['Operario', 'Repartidor'])->get()
-    );
-});
-
-//ruta para listar las rutas del repartidor
-Route::middleware(['auth'])->get('/routes', function () {
-    return Inertia::render('DealerPages/DriverRoutes');
-})->name('routes.index');
-
-Route::middleware(['auth', 'verified', 'role:Repartidor'])->group(function () {
-    Route::get('repartidor/rutas', function () {
-        return Inertia::render('DealerPages/DriverRoutes');
-    })->name('dealer.routes');
-});
-
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';
+require __DIR__ . '/manager.php';

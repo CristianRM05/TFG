@@ -9,6 +9,9 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -32,6 +35,40 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+        Route::get('/login-google', function () {
+            return Socialite::driver('google')->redirect();
+        })->name('login-google');
+        Route::get('/google-callback', function () {
+            $socialiteUser = Socialite::driver('google')->user();
+
+
+            $user = User::where('external_id', $socialiteUser->id)
+                      ->where('external_auth', 'google')
+                      ->first();
+
+            if ($user) {
+                \Illuminate\Support\Facades\Auth::login($user);
+            } else {
+                $newUser = \App\Models\User::create([
+                    'name' => $socialiteUser->name,
+                    'email' => $socialiteUser->email,
+                    'external_id' => $socialiteUser->id,
+                    'last_name' => $socialiteUser->user['family_name'] ?? '',
+                    'dni' => $socialiteUser->user['family_name'] ?? '',
+                    'external_auth' => 'google',
+                    'role_id' => 2,
+                    'avatar' => $socialiteUser->avatar,
+                    'password'=>null,
+                    'phone'=>null,
+                    'location'=>null,
+
+                ]);
+
+                \Illuminate\Support\Facades\Auth::login($newUser);
+            }
+
+            return redirect('/');
+        });
 });
 
 Route::middleware('auth')->group(function () {

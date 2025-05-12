@@ -5,17 +5,15 @@ namespace App\Enums;
 enum RolesEmployee: string
 {
     case Manager = 'Manager';
-    case Operator = 'Operario';
-    case Dealer = 'Repartidor';
+    case Client = 'Cliente';
     case Admin = 'Admin';
 
     public function label(): string
     {
         return match ($this) {
             self::Manager => 'Manager',
-            self::Operator => 'Operario',
-            self::Dealer => 'Repartidor',
-            self::Admin => 'Administrador',
+            self::Admin => 'Admin',
+            self::Client => 'Cliente',
         };
     }
 

@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Enums\categoryProducts;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Stock;
 
 class Product extends Model
 {
@@ -27,7 +30,7 @@ class Product extends Model
         'discount_percent',
         'image_url',
         'categoria',
-            'shelf_id',
+        'shelf_id',
 
     ];
 
@@ -38,7 +41,8 @@ class Product extends Model
      */
     protected $casts = [
         'price' => 'float',
-        'discount_percent' => 'float'
+        'discount_percent' => 'float',
+        'categoria' => categoryProducts::class,
     ];
 
 
@@ -46,6 +50,14 @@ class Product extends Model
 {
     return $this->hasOne(Stock::class, 'product_id');
 }
+
+    /**
+     * Stock en múltiples ubicaciones (hasMany).
+     */
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(Stock::class, 'product_id');
+    }
 
     public function shelf()
 {
@@ -58,9 +70,11 @@ public function siblingProducts()
                ->where('id', '!=', $this->id);
 }
 
+
+
 public function getFinalPriceAttribute()
 {
-    return $this->discount_percent 
+    return $this->discount_percent
         ? $this->price - ($this->price * $this->discount_percent / 100)
         : $this->price;
 }

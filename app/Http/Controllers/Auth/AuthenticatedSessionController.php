@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Enums\RolesEmployee;
+use App\Models\User; 
 
 class AuthenticatedSessionController extends Controller
 {
@@ -29,30 +30,34 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+    public function store(LoginRequest $request): RedirectResponse
+{
+    // Primero verifica si el usuario está baneado
+    $user = User::where('email', $request->email)->first();
+
+    if ($user && $user->banned_at) {
+        throw ValidationException::withMessages([
+            'email' => __('auth.banned'),
         ]);
-
-        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
-
-        $request->session()->regenerate();
-
-        $user = Auth::user();
-
-        if ($user->role === \App\Enums\RolesEmployee::Admin) {
-            // 👇 esta redirección debe coincidir con tu ruta real
-            return redirect()->intended('/admin/dashboard');
-        }
-
-        return redirect()->intended('/dashboard');
     }
+
+    // Luego intenta la autenticación normal
+    if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        throw ValidationException::withMessages([
+            'email' => __('auth.failed'),
+        ]);
+    }
+
+    $request->session()->regenerate();
+
+    $user = Auth::user();
+
+    if ($user->role === \App\Enums\RolesEmployee::Admin) {
+        return redirect()->intended('/admin/dashboard');
+    }
+
+    return redirect()->intended('/dashboard');
+}
 
 
     /**

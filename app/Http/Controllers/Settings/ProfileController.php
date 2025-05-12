@@ -29,16 +29,31 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user(); 
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->location = $request->input('location');
+
+        if ($request->has('avatar')) {
+            $user->avatar = $request->input('avatar');
         }
 
-        $request->user()->save();
+        $user->save();
+        logger('✅ Avatar recibido:', ['avatar' => $request->input('avatar')]);
+
+
+        logger('📦 Todos los datos crudos del request:', $request->all());
 
         return to_route('profile.edit');
     }
+
+
 
     /**
      * Delete the user's account.

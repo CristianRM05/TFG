@@ -14,4 +14,5 @@ class ManagerDashboardController extends Controller
             'roles' => RolesEmployee::casesArray(),
         ]);
     }
+    
 }

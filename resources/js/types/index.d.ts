@@ -24,21 +24,24 @@ export interface NavItem {
 
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
     auth: Auth;
     ziggy: Config & { location: string };
     [key: string]: unknown;
 }
 
-export interface User {
+interface User {
     id: number;
     name: string;
+    last_name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
+    phone: string;
+    location: string;
+    role: string;
+    avatar: string | null;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    banned_at: string | null;
+
 }
 
 interface Product {
@@ -49,7 +52,7 @@ interface Product {
     discount_percent?: number | null;
     final_price?: number;
     image_url?: string;
-    stock: number; 
+    stock: number;
     location: string;
     max_capacity?: number;
 }
@@ -86,12 +89,14 @@ export interface Shelf {
     code: string;
     location: string;
     max_capacity: number;
-    created_at?: string;
-    updated_at?: string;
-    total_stock?: number;
-    products_count?: number;
+    total_stock: number;
+    products_count: number;
+    capacity_percentage: number;
+    created_at?: string;  // Añade esta línea
+    updated_at?: string;  // Opcional si también la necesitas
     products?: Product[];
 }
+
 
 interface Props {
     products: StockProduct[];

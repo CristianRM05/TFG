@@ -13,36 +13,19 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('number_employ')->unique();
             $table->string('name');
             $table->string('last_name');
-            $table->string('dni')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('location')->nullable();
+            $table->enum('role', ['Admin', 'Manager', 'Cliente'])->default('Cliente');
+            $table->text('avatar')->nullable(); // Actualizado: tu modelo usa 'avatar', no 'photograph'
+            $table->string('external_id')->nullable();
+            $table->string('external_auth')->nullable();
             $table->rememberToken();
-            $table->string('phone');
-            $table->string('address');
-            $table->enum ('role', ['Admin','Manager', 'Operario', 'Repartidor'])->default('Operario');
-            $table->string('photograph')->nullable();
-            $table->string('license')->nullable();
-            $table->string('driver_license')->nullable();
-            $table->date('license_expiration_date')->nullable();
-
             $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-
-            $table->string('license')->nullable(false);
-            $table->string('driver_license')->nullable(false);
-            $table->date('license_expiration_date')->nullable(false);
         });
     }
 };
