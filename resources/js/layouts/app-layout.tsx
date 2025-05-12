@@ -41,7 +41,7 @@ const AppLayout = ({
   breadcrumbs={breadcrumbs}
                 user={user}
                 header={header}
-                className={`min-h-screen ${props.className || 'bg-red-100 dark:bg-gray-900'}`}
+                className={`min-h-screen ${props.className }`}
                 {...props}
             >
                 {children}
