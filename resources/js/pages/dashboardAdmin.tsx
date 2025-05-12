@@ -700,7 +700,11 @@ export default function AdminDashboard() {
                                                                 style={{
                                                                     backgroundColor: user.banned_at ? "rgba(0, 128, 0, 0.15)" : "rgba(220, 38, 38, 0.15)",
                                                                     color: user.banned_at ? "green" : "#dc2626",
+                                                                    opacity: auth.user.id === user.id ? 0.5 : 1,
+                                                                    cursor: auth.user.id === user.id ? "not-allowed" : "pointer",
                                                                 }}
+                                                                    disabled={auth.user.id === user.id} // <-- deshabilita si es el mismo usuario
+
                                                             >
                                                                 {user.banned_at ? "Desbanear" : "Banear"}
                                                             </button>
