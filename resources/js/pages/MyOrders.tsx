@@ -167,7 +167,8 @@ export default function MyOrders() {
             })}
           </ul>
         )}
-    {orders.last_page > 1 && (
+    {
+    orders.last_page > 1 && (
   <div className="mt-8 flex justify-center space-x-4">
     {orders.prev_page_url && (
       <Link

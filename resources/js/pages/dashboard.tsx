@@ -51,7 +51,7 @@ export default function Dashboard() {
       </section>
 
       {/* Contenedor con fondo claro para el listado */}
-      <div className="w-full px-4 md:px-8 py-12 bg-gray-100 dark:bg-gray-900">
+      <div className="w-full px-4 md:px-8 py-12  ">
         <ProductList />
       </div>
     </AppLayout>
