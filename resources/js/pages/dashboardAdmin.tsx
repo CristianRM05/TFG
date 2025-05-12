@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     const [shelves, setShelves] = useState<any[]>([]);
     const [shelvesPage, setShelvesPage] = useState(1)
     const [shelvesTotalPages, setShelvesTotalPages] = useState(1)
-    const [shelvesPerPage, setShelvesPerPage] = useState(10)
+    const [shelvesPerPage, setShelvesPerPage] = useState(5)
     const [totalShelves, setTotalShelves] = useState(0)
 
     // Para productos
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
                 }
             } catch (error) {
                 console.error("Error al cargar estanterías:", error);
-                // ...datos de ejemplo 
+                // ...datos de ejemplo
             } finally {
                 setLoading((prev) => ({ ...prev, shelves: false }));
             }
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
                 }
             } catch (error) {
                 console.error("Error al cargar productos:", error);
-                // ...datos de ejemplo 
+                // ...datos de ejemplo
             } finally {
                 setLoading((prev) => ({ ...prev, products: false }));
             }
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                                     <Package size={20} />
                                     Crear producto
                                 </Button>
-                                
+
                             </div>
                         </div>
                     </section>
@@ -910,7 +910,7 @@ export default function AdminDashboard() {
                                             )}
                                         </tbody>
                                         </table>
-                                        
+
                                 )}
                                 <div className="flex items-center justify-between p-6">
                                     <div className="text-sm text-gray-600">
@@ -959,7 +959,7 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                         )}
 
                         {/* Products Section Header */}
@@ -1106,7 +1106,7 @@ export default function AdminDashboard() {
                                                         No hay productos registrados
                                                     </td>
                                                         </tr>
-                                                        
+
                                             )}
                                         </tbody>
                                     </table>
@@ -1172,7 +1172,7 @@ export default function AdminDashboard() {
                 submitProduct={submitProduct}
                 productErrors={productErrors}
                 processingProduct={processingProduct}
-    
+
 
             />
 

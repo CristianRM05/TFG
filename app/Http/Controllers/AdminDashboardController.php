@@ -6,12 +6,12 @@ use App\Enums\RolesEmployee;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
-use App\Models\Shelf; 
+use App\Models\Shelf;
 use App\Models\Product;
 
 class AdminDashboardController extends Controller
 {
-    public function create()  
+    public function create()
 {
     $shelves = Shelf::with(['products'])
                 ->get()
@@ -23,21 +23,21 @@ class AdminDashboardController extends Controller
                         'max_capacity' => $shelf->max_capacity,
                         'total_stock' => $shelf->products->sum('stock'),
                         'products_count' => $shelf->products->count(),
-                        'capacity_percentage' => $shelf->max_capacity > 0 
+                        'capacity_percentage' => $shelf->max_capacity > 0
                             ? min(100, ($shelf->products->sum('stock') / $shelf->max_capacity) * 100)
                             : 0,
                             'created_at' => $shelf->created_at,
                     ];
                 });
 
-    return Inertia::render('dashboardAdmin', [  // Asegúrate que coincida con tu vista
+    return Inertia::render('dashboardAdmin', [  
         'shelves' => $shelves,
         'roles' => RolesEmployee::casesArray(),
-        'products' => Product::with('shelf')->get(), 
-        'auth' => ['user' => auth()->user()]  
+        'products' => Product::with('shelf')->get(),
+        'auth' => ['user' => auth()->user()]
     ]);
 }
-    
+
 public function banUser(User $user, Request $request)
 {
     $request->validate([
@@ -49,23 +49,23 @@ public function banUser(User $user, Request $request)
     // Devuelve una respuesta Inertia en lugar de JSON puro
     return back()->with([
         'success' => true,
-        'message' => $request->banned 
-            ? 'Usuario baneado correctamente' 
+        'message' => $request->banned
+            ? 'Usuario baneado correctamente'
             : 'Usuario desbaneado correctamente',
         'user' => $user->fresh()
     ]);
 
-    
-}  
+
+}
 
  /**
-     * Elimina una estantería (shelf) 
+     * Elimina una estantería (shelf)
      */
     public function deleteShelf(Shelf $shelf, Request $request)
     {
         try {
             $shelf->delete();
-            
+
             return back()->with([
                 'success' => true,
                 'message' => 'Estantería eliminada correctamente',
@@ -81,9 +81,9 @@ public function banUser(User $user, Request $request)
     }
 
     /**
-     * Elimina un producto 
+     * Elimina un producto
      */
-    
+
      public function deleteProduct(Product $product, Request $request)
      {
          $product->delete();
