@@ -133,40 +133,42 @@ const ProductList: React.FC = () => {
             )}
           </div>
 
-          {/* Paginación */}
-          <div className="max-w-7xl mx-auto mt-8">
-            <div className="flex justify-center space-x-4">
-              <button
-                className={`px-5 py-2 rounded-full font-semibold transition-colors ${
-                  currentPage === 1
-                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                    : 'bg-amber-600 text-black hover:bg-amber-500'
-                }`}
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Anterior
-              </button>
+   {/* Paginación: sólo si hay más de una página */}
+      {lastPage > 1 && (
+        <div className="max-w-7xl mx-auto mt-8">
+          <div className="flex justify-center space-x-4">
+            <button
+              className={`px-5 py-2 rounded-full font-semibold transition-colors ${
+                currentPage === 1
+                  ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                  : 'bg-amber-600 text-black hover:bg-amber-500'
+              }`}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Anterior
+            </button>
 
-              <span className="flex items-center justify-center bg-gray-100 dark:bg-white/10 px-4 py-2 rounded-full font-semibold text-gray-900 dark:text-white">
-                {currentPage} / {lastPage}
-              </span>
+            <span className="flex items-center justify-center bg-gray-100 dark:bg-white/10 px-4 py-2 rounded-full font-semibold text-gray-900 dark:text-white">
+              {currentPage} / {lastPage}
+            </span>
 
-              <button
-                className={`px-5 py-2 rounded-full font-semibold transition-colors ${
-                  currentPage === lastPage
-                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                    : 'bg-amber-600 text-black hover:bg-amber-500'
-                }`}
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === lastPage}
-              >
-                Siguiente
-              </button>
-            </div>
+            <button
+              className={`px-5 py-2 rounded-full font-semibold transition-colors ${
+                currentPage === lastPage
+                  ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                  : 'bg-amber-600 text-black hover:bg-amber-500'
+              }`}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === lastPage}
+            >
+              Siguiente
+            </button>
           </div>
         </div>
-      );
+      )}
+    </div>
+  );
 
 
     };

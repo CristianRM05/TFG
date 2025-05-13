@@ -58,21 +58,21 @@ export default function AdminDashboard() {
     // Obtén TODAS las props necesarias en un solo hook
     const { auth, shelves: shelvesFromProps, roles, products: productsFromProps } = usePage<{
         auth: { user: User | null };
-    shelves: Array<{
-        id: number;
-        code: string;
-        location: string;
-        max_capacity: number;
-        total_stock: number;
-        products_count: number;
-        capacity_percentage: number;
-    }>;
-    roles: Array<{
-        value: string;
-        label: string;
-    }>;
-    products: ExtendedProduct[];
-}>().props;
+        shelves: Array<{
+            id: number;
+            code: string;
+            location: string;
+            max_capacity: number;
+            total_stock: number;
+            products_count: number;
+            capacity_percentage: number;
+        }>;
+        roles: Array<{
+            value: string;
+            label: string;
+        }>;
+        products: ExtendedProduct[];
+    }>().props;
     const allShelvesForProducts = shelvesFromProps || [];
 
     // Verificación
@@ -539,49 +539,49 @@ export default function AdminDashboard() {
                                 {loading.users ? (
                                     <LoadingSpinner />
                                 ) : (
-                                        <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                            <thead style={{ backgroundColor: `${styles.secondary}10` }}>
-                                                <tr>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Nombre
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Email
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Teléfono
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Rol
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Acciones
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                                {users.length > 0 ? (
-                                                    users.map((user) => (
-                                                        <tr key={user.id} className="hover:bg-gray-50">
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="flex items-center">
-                                                                    {user.avatar ? (
-                                                                        <img
+                                    <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                                        <thead style={{ backgroundColor: `${styles.secondary}10` }}>
+                                            <tr>
+                                                <th
+                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                    style={{ color: styles.secondary }}
+                                                >
+                                                    Nombre
+                                                </th>
+                                                <th
+                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                    style={{ color: styles.secondary }}
+                                                >
+                                                    Email
+                                                </th>
+                                                <th
+                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                    style={{ color: styles.secondary }}
+                                                >
+                                                    Teléfono
+                                                </th>
+                                                <th
+                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                    style={{ color: styles.secondary }}
+                                                >
+                                                    Rol
+                                                </th>
+                                                <th
+                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                    style={{ color: styles.secondary }}
+                                                >
+                                                    Acciones
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                                            {users.length > 0 ? (
+                                                users.map((user) => (
+                                                    <tr key={user.id} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="flex items-center">
+                                                                {user.avatar ? (
+                                                                    <img
                                                                         src={user.avatar || "/placeholder.svg"}
                                                                         alt={`${user.name} ${user.last_name}`}
                                                                         className="h-10 w-10 rounded-full object-cover ring-2"
@@ -608,59 +608,59 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phone}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                                <span
-                                                                    className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                                    style={{
-                                                                        backgroundColor:
-                                                                            user.role === "Admin"
-                                                                                ? "#fef9c3" // amarillo claro (bg-yellow-100)
-                                                                                : user.role === "Manager"
-                                                                                    ? "#dbeafe" // azul claro (bg-blue-100)
-                                                                                    : "rgba(0, 128, 0, 0.2)", // verde claro
-                                                                        color:
-                                                                            user.role === "Admin"
-                                                                                ? "#b45309" // amarillo oscuro (text-yellow-700)
-                                                                                : user.role === "Manager"
-                                                                                    ? "#1d4ed8" // azul fuerte (text-blue-700)
-                                                                                    : "green",
-                                                                    }}
-                                                                >
-                                                                    {user.role}
-                                                                </span>
+                                                            <span
+                                                                className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                                style={{
+                                                                    backgroundColor:
+                                                                        user.role === "Admin"
+                                                                            ? "#fef9c3" // amarillo claro (bg-yellow-100)
+                                                                            : user.role === "Manager"
+                                                                                ? "#dbeafe" // azul claro (bg-blue-100)
+                                                                                : "rgba(0, 128, 0, 0.2)", // verde claro
+                                                                    color:
+                                                                        user.role === "Admin"
+                                                                            ? "#b45309" // amarillo oscuro (text-yellow-700)
+                                                                            : user.role === "Manager"
+                                                                                ? "#1d4ed8" // azul fuerte (text-blue-700)
+                                                                                : "green",
+                                                                }}
+                                                            >
+                                                                {user.role}
+                                                            </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <button
                                                                 onClick={() => {
-                                                                        Swal.fire({
-                                                                            title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
-                                                                            icon: user.banned_at ? "question" : "warning",
-                                                                            showCancelButton: true,
-                                                                            confirmButtonColor: styles.primary,
-                                                                            cancelButtonColor: styles.secondary,
-                                                                            confirmButtonText: user.banned_at ? "Sí, desbanear" : "Sí, banear",
-                                                                            cancelButtonText: "Cancelar",
-                                                                            background: styles.light,
-                                                                            customClass: {
-                                                                                popup: 'shadow-lg',
-                                                                                confirmButton: 'hover:opacity-90 transition-opacity'
-                                                                            }
-                                                                        }).then((result) => {
-                                                                            if (result.isConfirmed) {
-                                                                                router.patch(
-                                                                                    `/admin/users/${user.id}/ban`,
-                                                                                    {
-                                                                                        banned: !user.banned_at,
-                                                                                    },
-                                                                                    {
-                                                                                        preserveScroll: true,
-                                                                                        onSuccess: () => {
-                                                                                            setUsers(
-                                                                                                users.map((u) =>
-                                                                                                    u.id === user.id
-                                                                                                        ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
-                                                                                                        : u,
-                                                                                                ),
-                                                                                            )
+                                                                    Swal.fire({
+                                                                        title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
+                                                                        icon: user.banned_at ? "question" : "warning",
+                                                                        showCancelButton: true,
+                                                                        confirmButtonColor: styles.primary,
+                                                                        cancelButtonColor: styles.secondary,
+                                                                        confirmButtonText: user.banned_at ? "Sí, desbanear" : "Sí, banear",
+                                                                        cancelButtonText: "Cancelar",
+                                                                        background: styles.light,
+                                                                        customClass: {
+                                                                            popup: 'shadow-lg',
+                                                                            confirmButton: 'hover:opacity-90 transition-opacity'
+                                                                        }
+                                                                    }).then((result) => {
+                                                                        if (result.isConfirmed) {
+                                                                            router.patch(
+                                                                                `/admin/users/${user.id}/ban`,
+                                                                                {
+                                                                                    banned: !user.banned_at,
+                                                                                },
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                    onSuccess: () => {
+                                                                                        setUsers(
+                                                                                            users.map((u) =>
+                                                                                                u.id === user.id
+                                                                                                    ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
+                                                                                                    : u,
+                                                                                            ),
+                                                                                        )
                                                                                         Swal.fire({
                                                                                             icon: "success",
                                                                                             title: user.banned_at ? "Usuario desbaneado" : "Usuario baneado",
@@ -703,72 +703,74 @@ export default function AdminDashboard() {
                                                         </td>
                                                     </tr>
                                                 ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
-                                                            No hay usuarios registrados
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                                                        No hay usuarios registrados
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 )}
 
                                 {/* Pagination control */}
-                                <div className="flex items-center justify-between p-6">
-                                    <div className="text-sm text-gray-600">
-                                        Mostrando {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalUsers)} de{" "}
-                                        {totalUsers} usuarios
+                                {productsTotalPages > 1 && (
+                                    <div className="flex items-center justify-between p-6">
+                                        <div className="text-sm text-gray-600">
+                                            Mostrando {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalUsers)} de{" "}
+                                            {totalUsers} usuarios
+                                        </div>
+
+                                        <div className="flex gap-2 items-center">
+                                            {/* Previous button */}
+                                            <button
+                                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                                disabled={currentPage === 1}
+                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                                style={{ color: styles.secondary }}
+                                            >
+                                                <ChevronLeft size={18} />
+                                            </button>
+
+                                            {/* Page numbers */}
+                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                                const page =
+                                                    currentPage <= 3
+                                                        ? i + 1
+                                                        : currentPage >= totalPages - 2
+                                                            ? totalPages - 4 + i
+                                                            : currentPage - 2 + i
+
+                                                return (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setCurrentPage(page)}
+                                                        className={`w-10 h-10 rounded-lg transition-all font-medium ${currentPage === page ? "shadow-md" : ""
+                                                            }`}
+                                                        style={{
+                                                            backgroundColor: currentPage === page ? styles.primary : "transparent",
+                                                            color: currentPage === page ? "white" : styles.secondary,
+                                                            border: currentPage === page ? "none" : `1px solid ${styles.secondary}30`,
+                                                        }}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                )
+                                            })}
+
+                                            {/* Next button */}
+                                            <button
+                                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                                disabled={currentPage === totalPages}
+                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                                style={{ color: styles.secondary }}
+                                            >
+                                                <ChevronRight size={18} />
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    <div className="flex gap-2 items-center">
-                                        {/* Previous button */}
-                                        <button
-                                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                            disabled={currentPage === 1}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-
-                                        {/* Page numbers */}
-                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                            const page =
-                                                currentPage <= 3
-                                                    ? i + 1
-                                                    : currentPage >= totalPages - 2
-                                                        ? totalPages - 4 + i
-                                                        : currentPage - 2 + i
-
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setCurrentPage(page)}
-                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${currentPage === page ? "shadow-md" : ""
-                                                        }`}
-                                                    style={{
-                                                        backgroundColor: currentPage === page ? styles.primary : "transparent",
-                                                        color: currentPage === page ? "white" : styles.secondary,
-                                                        border: currentPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                    }}
-                                                >
-                                                    {page}
-                                                </button>
-                                            )
-                                        })}
-
-                                        {/* Next button */}
-                                        <button
-                                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                            disabled={currentPage === totalPages}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         )}
 
@@ -909,55 +911,57 @@ export default function AdminDashboard() {
                                                 </tr>
                                             )}
                                         </tbody>
-                                        </table>
+                                    </table>
 
                                 )}
-                                <div className="flex items-center justify-between p-6">
-                                    <div className="text-sm text-gray-600">
-                                        Mostrando {(shelvesPage - 1) * shelvesPerPage + 1}-{Math.min(shelvesPage * shelvesPerPage, totalShelves)} de {totalShelves} estanterías
-                                    </div>
-                                    <div className="flex gap-2 items-center">
-                                        <button
-                                            onClick={() => setShelvesPage((p) => Math.max(1, p - 1))}
-                                            disabled={shelvesPage === 1}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-                                        {Array.from({ length: Math.min(5, shelvesTotalPages) }, (_, i) => {
-                                            const page =
-                                                shelvesPage <= 3
-                                                    ? i + 1
-                                                    : shelvesPage >= shelvesTotalPages - 2
-                                                        ? shelvesTotalPages - 4 + i
-                                                        : shelvesPage - 2 + i
+                                {productsTotalPages > 1 && (
+                                    <div className="flex items-center justify-between p-6">
+                                        <div className="text-sm text-gray-600">
+                                            Mostrando {(shelvesPage - 1) * shelvesPerPage + 1}-{Math.min(shelvesPage * shelvesPerPage, totalShelves)} de {totalShelves} estanterías
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                            <button
+                                                onClick={() => setShelvesPage((p) => Math.max(1, p - 1))}
+                                                disabled={shelvesPage === 1}
+                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                                style={{ color: styles.secondary }}
+                                            >
+                                                <ChevronLeft size={18} />
+                                            </button>
+                                            {Array.from({ length: Math.min(5, shelvesTotalPages) }, (_, i) => {
+                                                const page =
+                                                    shelvesPage <= 3
+                                                        ? i + 1
+                                                        : shelvesPage >= shelvesTotalPages - 2
+                                                            ? shelvesTotalPages - 4 + i
+                                                            : shelvesPage - 2 + i
 
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setShelvesPage(page)}
-                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${shelvesPage === page ? "shadow-md" : ""}`}
-                                                    style={{
-                                                        backgroundColor: shelvesPage === page ? styles.primary : "transparent",
-                                                        color: shelvesPage === page ? "white" : styles.secondary,
-                                                        border: shelvesPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                    }}
-                                                >
-                                                    {page}
-                                                </button>
-                                            )
-                                        })}
-                                        <button
-                                            onClick={() => setShelvesPage((p) => Math.min(shelvesTotalPages, p + 1))}
-                                            disabled={shelvesPage === shelvesTotalPages}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
+                                                return (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setShelvesPage(page)}
+                                                        className={`w-10 h-10 rounded-lg transition-all font-medium ${shelvesPage === page ? "shadow-md" : ""}`}
+                                                        style={{
+                                                            backgroundColor: shelvesPage === page ? styles.primary : "transparent",
+                                                            color: shelvesPage === page ? "white" : styles.secondary,
+                                                            border: shelvesPage === page ? "none" : `1px solid ${styles.secondary}30`,
+                                                        }}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                )
+                                            })}
+                                            <button
+                                                onClick={() => setShelvesPage((p) => Math.min(shelvesTotalPages, p + 1))}
+                                                disabled={shelvesPage === shelvesTotalPages}
+                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                                style={{ color: styles.secondary }}
+                                            >
+                                                <ChevronRight size={18} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
 
                         )}
@@ -1021,7 +1025,7 @@ export default function AdminDashboard() {
                                                     style={{ color: styles.secondary }}
                                                 >
                                                     Precio
-                                                    </th>
+                                                </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Descuento (%)</th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Precio Final</th>
 
@@ -1105,58 +1109,60 @@ export default function AdminDashboard() {
                                                     <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
                                                         No hay productos registrados
                                                     </td>
-                                                        </tr>
+                                                </tr>
 
                                             )}
                                         </tbody>
                                     </table>
                                 )}
-                                <div className="flex items-center justify-between p-6">
-                                    <div className="text-sm text-gray-600">
-                                        Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
-                                    </div>
-                                    <div className="flex gap-2 items-center">
-                                        <button
-                                            onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
-                                            disabled={productsPage === 1}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-                                        {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
-                                            const page =
-                                                productsPage <= 3
-                                                    ? i + 1
-                                                    : productsPage >= productsTotalPages - 2
-                                                        ? productsTotalPages - 4 + i
-                                                        : productsPage - 2 + i
+                                {productsTotalPages > 1 && (
+                                    <div className="flex items-center justify-between p-6">
+                                        <div className="text-sm text-gray-600">
+                                            Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                            <button
+                                                onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
+                                                disabled={productsPage === 1}
+                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                                style={{ color: styles.secondary }}
+                                            >
+                                                <ChevronLeft size={18} />
+                                            </button>
+                                            {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
+                                                const page =
+                                                    productsPage <= 3
+                                                        ? i + 1
+                                                        : productsPage >= productsTotalPages - 2
+                                                            ? productsTotalPages - 4 + i
+                                                            : productsPage - 2 + i
 
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setProductsPage(page)}
-                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${productsPage === page ? "shadow-md" : ""}`}
-                                                    style={{
-                                                        backgroundColor: productsPage === page ? styles.primary : "transparent",
-                                                        color: productsPage === page ? "white" : styles.secondary,
-                                                        border: productsPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                    }}
-                                                >
-                                                    {page}
-                                                </button>
-                                            )
-                                        })}
-                                        <button
-                                            onClick={() => setProductsPage((p) => Math.min(productsTotalPages, p + 1))}
-                                            disabled={productsPage === productsTotalPages}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
+                                                return (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setProductsPage(page)}
+                                                        className={`w-10 h-10 rounded-lg transition-all font-medium ${productsPage === page ? "shadow-md" : ""}`}
+                                                        style={{
+                                                            backgroundColor: productsPage === page ? styles.primary : "transparent",
+                                                            color: productsPage === page ? "white" : styles.secondary,
+                                                            border: productsPage === page ? "none" : `1px solid ${styles.secondary}30`,
+                                                        }}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                )
+                                            })}
+                                            <button
+                                                onClick={() => setProductsPage((p) => Math.min(productsTotalPages, p + 1))}
+                                                disabled={productsPage === productsTotalPages}
+                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                                style={{ color: styles.secondary }}
+                                            >
+                                                <ChevronRight size={18} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
                     </section>
