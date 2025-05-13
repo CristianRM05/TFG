@@ -16,7 +16,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
 
     Route::get('/users', function () {
-        $users = User::paginate(10); // 10 usuarios por página
+        $users = User::paginate(5); // 5 usuarios por página
     
         return response()->json([
             'success' => true,

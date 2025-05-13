@@ -4,6 +4,8 @@ export interface Product {
     description: string;
     num_reference: string;
     weight: number;
+    discount_percent: number;
+    final_price: number;
     volume: number;
     price: number;
     created_at?: string;

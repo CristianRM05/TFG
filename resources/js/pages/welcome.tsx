@@ -67,11 +67,38 @@ export default function PaginaBebidas() {
 
     return (
         <div className={`${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-800'} min-h-screen`}>
-          <Head title="BebidasPro" />
+          <Head title="Swapify" />
 
-          {/* Toggle Dark/Light y Newsletter buttons */}
+        
 
-          {/* Navbar */}
+      {/* Newsletter */}
+      <button
+        onClick={() => setModalNewsletter(true)}
+        className="fixed bottom-20 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-white/20 cursor-pointer"
+      >
+        📩 Newsletter
+      </button>
+
+      {/* Navbar */}
+      <nav className="absolute top-0 w-full py-6 px-8 flex justify-between items-center z-20">
+        <span className="text-4xl font-bold">🍹 Swapify</span>
+        <div className="space-x-4">
+          {auth.user ? (
+            <Link href={route('dashboard')} className="inline-block px-4 py-2 bg-amber-600 rounded-full text-white hover:bg-amber-700 transition-colors">
+              Panel
+            </Link>
+          ) : (
+            <>
+              <Link href={route('login')} className="inline-block px-4 py-2 hover:underline">
+                Iniciar Sesión
+              </Link>
+              <Link href={route('register')} className="inline-block px-4 py-2 bg-amber-600 rounded-full text-white hover:bg-amber-700 transition-colors">
+                Registrarse
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
 
           {/* Hero Section con parallax */}
           <header className="relative flex items-center justify-center h-screen overflow-hidden">
@@ -158,8 +185,28 @@ export default function PaginaBebidas() {
               </Link>
             </div>
           </section>
-
-          {/* Beneficios, Categorías, Testimonios y modal Newsletter */}
+          {modalNewsletter && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white text-gray-800 p-8 rounded-xl max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-center">¡Suscríbete y recibe ofertas!</h2>
+            <input
+              type="email"
+              placeholder="Tu correo"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full px-4 py-2 mb-4 border rounded-full"
+            />
+            <div className="flex justify-center space-x-4">
+              <button onClick={handleSubscribe} className="px-6 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors">
+                Suscribirme
+              </button>
+              <button onClick={() => setModalNewsletter(false)} className="px-6 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         </div>
       );
   }
