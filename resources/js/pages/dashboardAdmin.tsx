@@ -53,26 +53,26 @@ export default function AdminDashboard() {
     // Para productos
     const [productsPage, setProductsPage] = useState(1)
     const [productsTotalPages, setProductsTotalPages] = useState(1)
-    const [productsPerPage, setProductsPerPage] = useState(5)
+    const [productsPerPage, setProductsPerPage] = useState(10)
     const [totalProducts, setTotalProducts] = useState(0)
     // Obtén TODAS las props necesarias en un solo hook
     const { auth, shelves: shelvesFromProps, roles, products: productsFromProps } = usePage<{
         auth: { user: User | null };
-        shelves: Array<{
-            id: number;
-            code: string;
-            location: string;
-            max_capacity: number;
-            total_stock: number;
-            products_count: number;
-            capacity_percentage: number;
-        }>;
-        roles: Array<{
-            value: string;
-            label: string;
-        }>;
-        products: ExtendedProduct[];
-    }>().props;
+    shelves: Array<{
+        id: number;
+        code: string;
+        location: string;
+        max_capacity: number;
+        total_stock: number;
+        products_count: number;
+        capacity_percentage: number;
+    }>;
+    roles: Array<{
+        value: string;
+        label: string;
+    }>;
+    products: ExtendedProduct[];
+}>().props;
     const allShelvesForProducts = shelvesFromProps || [];
 
     // Verificación
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
 
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
-    const [perPage, setPerPage] = useState(5)
+    const [perPage, setPerPage] = useState(10)
     const [totalUsers, setTotalUsers] = useState(0)
     const [products, setProducts] = useState<ExtendedProduct[]>([])
     const [openSection, setOpenSection] = useState<string | null>("null") // 'users', 'shelves', 'products' o null
@@ -138,14 +138,13 @@ export default function AdminDashboard() {
         const fetchUsers = async () => {
             setLoading((prev) => ({ ...prev, users: true }))
             try {
-                const response = await fetch(`/admin/users?page=${currentPage}&per_page=${perPage}`)
+                const response = await fetch(`/admin/users?page=${currentPage}`)
                 if (!response.ok) throw new Error("Error al cargar usuarios")
                 const data = await response.json()
                 if (data.success) {
-                    console.log('Usuarios recibidos:', data.users.length); // <-- Añade esto
-
                     setUsers(data.users)
                     setTotalPages(data.pagination.last_page)
+                    setPerPage(data.pagination.per_page)
                     setTotalUsers(data.pagination.total)
                 } else {
                     throw new Error("Error en la respuesta del servidor")
@@ -172,7 +171,6 @@ export default function AdminDashboard() {
                 const data = await response.json();
 
                 if (data.success) {
-
                     const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
                         ...shelf,
                         total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
@@ -231,7 +229,7 @@ export default function AdminDashboard() {
     if (!auth?.user) return <div>Cargando o no autenticado</div>
     const user = auth.user
     // Funciones para calcular la capacidad
-    const getShelfCapacityPercentage = (shelf: Shelf) => {
+   /* const getShelfCapacityPercentage = (shelf: Shelf) => {
         if (!shelf.max_capacity || shelf.max_capacity === 0) return 0;
         const currentStock = shelf.total_stock || 0;
         return Math.min(100, Math.round((currentStock / shelf.max_capacity) * 100));
@@ -239,7 +237,8 @@ export default function AdminDashboard() {
 
     const getShelfCapacityInfo = (shelf: Shelf) => {
         return `${shelf.total_stock || 0} / ${shelf.max_capacity} unidades`;
-    };
+    };*/
+
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault()
         post("/admin/products", {
@@ -321,8 +320,6 @@ export default function AdminDashboard() {
                 router.delete(`/admin/shelves/${shelfId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
-                        setShelves((prev) => prev.filter(shelf => shelf.id !== shelfId));
-                        setTotalShelves((prev) => prev - 1);
                         Swal.fire({
                             title: '¡Borrado!',
                             text: 'La estantería ha sido eliminada.',
@@ -543,49 +540,49 @@ export default function AdminDashboard() {
                                 {loading.users ? (
                                     <LoadingSpinner />
                                 ) : (
-                                    <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                        <thead style={{ backgroundColor: `${styles.secondary}10` }}>
-                                            <tr>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Nombre
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Email
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Teléfono
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Rol
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Acciones
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                            {users.length > 0 ? (
-                                                users.map((user) => (
-                                                    <tr key={user.id} className="hover:bg-gray-50">
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <div className="flex items-center">
-                                                                {user.avatar ? (
-                                                                    <img
+                                        <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                                            <thead style={{ backgroundColor: `${styles.secondary}10` }}>
+                                                <tr>
+                                                    <th
+                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                        style={{ color: styles.secondary }}
+                                                    >
+                                                        Nombre
+                                                    </th>
+                                                    <th
+                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                        style={{ color: styles.secondary }}
+                                                    >
+                                                        Email
+                                                    </th>
+                                                    <th
+                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                        style={{ color: styles.secondary }}
+                                                    >
+                                                        Teléfono
+                                                    </th>
+                                                    <th
+                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                        style={{ color: styles.secondary }}
+                                                    >
+                                                        Rol
+                                                    </th>
+                                                    <th
+                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
+                                                        style={{ color: styles.secondary }}
+                                                    >
+                                                        Acciones
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                                                {users.length > 0 ? (
+                                                    users.map((user) => (
+                                                        <tr key={user.id} className="hover:bg-gray-50">
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex items-center">
+                                                                    {user.avatar ? (
+                                                                        <img
                                                                         src={user.avatar || "/placeholder.svg"}
                                                                         alt={`${user.name} ${user.last_name}`}
                                                                         className="h-10 w-10 rounded-full object-cover ring-2"
@@ -612,59 +609,59 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phone}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span
-                                                                className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                                style={{
-                                                                    backgroundColor:
-                                                                        user.role === "Admin"
-                                                                            ? "#fef9c3" // amarillo claro (bg-yellow-100)
-                                                                            : user.role === "Manager"
-                                                                                ? "#dbeafe" // azul claro (bg-blue-100)
-                                                                                : "rgba(0, 128, 0, 0.2)", // verde claro
-                                                                    color:
-                                                                        user.role === "Admin"
-                                                                            ? "#b45309" // amarillo oscuro (text-yellow-700)
-                                                                            : user.role === "Manager"
-                                                                                ? "#1d4ed8" // azul fuerte (text-blue-700)
-                                                                                : "green",
-                                                                }}
-                                                            >
-                                                                {user.role}
-                                                            </span>
+                                                                <span
+                                                                    className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            user.role === "Admin"
+                                                                                ? "#fef9c3" // amarillo claro (bg-yellow-100)
+                                                                                : user.role === "Manager"
+                                                                                    ? "#dbeafe" // azul claro (bg-blue-100)
+                                                                                    : "rgba(0, 128, 0, 0.2)", // verde claro
+                                                                        color:
+                                                                            user.role === "Admin"
+                                                                                ? "#b45309" // amarillo oscuro (text-yellow-700)
+                                                                                : user.role === "Manager"
+                                                                                    ? "#1d4ed8" // azul fuerte (text-blue-700)
+                                                                                    : "green",
+                                                                    }}
+                                                                >
+                                                                    {user.role}
+                                                                </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <button
                                                                 onClick={() => {
-                                                                    Swal.fire({
-                                                                        title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
-                                                                        icon: user.banned_at ? "question" : "warning",
-                                                                        showCancelButton: true,
-                                                                        confirmButtonColor: styles.primary,
-                                                                        cancelButtonColor: styles.secondary,
-                                                                        confirmButtonText: user.banned_at ? "Sí, desbanear" : "Sí, banear",
-                                                                        cancelButtonText: "Cancelar",
-                                                                        background: styles.light,
-                                                                        customClass: {
-                                                                            popup: 'shadow-lg',
-                                                                            confirmButton: 'hover:opacity-90 transition-opacity'
-                                                                        }
-                                                                    }).then((result) => {
-                                                                        if (result.isConfirmed) {
-                                                                            router.patch(
-                                                                                `/admin/users/${user.id}/ban`,
-                                                                                {
-                                                                                    banned: !user.banned_at,
-                                                                                },
-                                                                                {
-                                                                                    preserveScroll: true,
-                                                                                    onSuccess: () => {
-                                                                                        setUsers(
-                                                                                            users.map((u) =>
-                                                                                                u.id === user.id
-                                                                                                    ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
-                                                                                                    : u,
-                                                                                            ),
-                                                                                        )
+                                                                        Swal.fire({
+                                                                            title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
+                                                                            icon: user.banned_at ? "question" : "warning",
+                                                                            showCancelButton: true,
+                                                                            confirmButtonColor: styles.primary,
+                                                                            cancelButtonColor: styles.secondary,
+                                                                            confirmButtonText: user.banned_at ? "Sí, desbanear" : "Sí, banear",
+                                                                            cancelButtonText: "Cancelar",
+                                                                            background: styles.light,
+                                                                            customClass: {
+                                                                                popup: 'shadow-lg',
+                                                                                confirmButton: 'hover:opacity-90 transition-opacity'
+                                                                            }
+                                                                        }).then((result) => {
+                                                                            if (result.isConfirmed) {
+                                                                                router.patch(
+                                                                                    `/admin/users/${user.id}/ban`,
+                                                                                    {
+                                                                                        banned: !user.banned_at,
+                                                                                    },
+                                                                                    {
+                                                                                        preserveScroll: true,
+                                                                                        onSuccess: () => {
+                                                                                            setUsers(
+                                                                                                users.map((u) =>
+                                                                                                    u.id === user.id
+                                                                                                        ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
+                                                                                                        : u,
+                                                                                                ),
+                                                                                            )
                                                                                         Swal.fire({
                                                                                             icon: "success",
                                                                                             title: user.banned_at ? "Usuario desbaneado" : "Usuario baneado",
@@ -700,71 +697,68 @@ export default function AdminDashboard() {
                                                                 style={{
                                                                     backgroundColor: user.banned_at ? "rgba(0, 128, 0, 0.15)" : "rgba(220, 38, 38, 0.15)",
                                                                     color: user.banned_at ? "green" : "#dc2626",
-                                                                    opacity: auth.user.id === user.id ? 0.5 : 1,
-                                                                    cursor: auth.user.id === user.id ? "not-allowed" : "pointer",
                                                                 }}
-                                                                    disabled={auth.user.id === user.id} // <-- deshabilita si es el mismo usuario
-
                                                             >
                                                                 {user.banned_at ? "Desbanear" : "Banear"}
                                                             </button>
                                                         </td>
                                                     </tr>
                                                 ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
-                                                        No hay usuarios registrados
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                                                            No hay usuarios registrados
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
                                 )}
 
                                 {/* Pagination control */}
+                                {totalPages > 1 && (
                                 <div className="flex items-center justify-between p-6">
                                     <div className="text-sm text-gray-600">
                                         Mostrando {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalUsers)} de{" "}
                                         {totalUsers} usuarios
                                     </div>
 
-                                        <div className="flex gap-2 items-center">
-                                            {/* Previous button */}
-                                            <button
-                                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                                disabled={currentPage === 1}
-                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                                style={{ color: styles.secondary }}
-                                            >
-                                                <ChevronLeft size={18} />
-                                            </button>
+                                    <div className="flex gap-2 items-center">
+                                        {/* Previous button */}
+                                        <button
+                                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                            style={{ color: styles.secondary }}
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
 
-                                            {/* Page numbers */}
-                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                                const page =
-                                                    currentPage <= 3
-                                                        ? i + 1
-                                                        : currentPage >= totalPages - 2
-                                                            ? totalPages - 4 + i
-                                                            : currentPage - 2 + i
+                                        {/* Page numbers */}
+                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                            const page =
+                                                currentPage <= 3
+                                                    ? i + 1
+                                                    : currentPage >= totalPages - 2
+                                                        ? totalPages - 4 + i
+                                                        : currentPage - 2 + i
 
-                                                return (
-                                                    <button
-                                                        key={page}
-                                                        onClick={() => setCurrentPage(page)}
-                                                        className={`w-10 h-10 rounded-lg transition-all font-medium ${currentPage === page ? "shadow-md" : ""
-                                                            }`}
-                                                        style={{
-                                                            backgroundColor: currentPage === page ? styles.primary : "transparent",
-                                                            color: currentPage === page ? "white" : styles.secondary,
-                                                            border: currentPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                        }}
-                                                    >
-                                                        {page}
-                                                    </button>
-                                                )
-                                            })}
+                                            return (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setCurrentPage(page)}
+                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${currentPage === page ? "shadow-md" : ""
+                                                        }`}
+                                                    style={{
+                                                        backgroundColor: currentPage === page ? styles.primary : "transparent",
+                                                        color: currentPage === page ? "white" : styles.secondary,
+                                                        border: currentPage === page ? "none" : `1px solid ${styles.secondary}30`,
+                                                    }}
+                                                >
+                                                    {page}
+                                                </button>
+                                            )
+                                        })}
 
                                         {/* Next button */}
                                         <button
@@ -777,6 +771,7 @@ export default function AdminDashboard() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
                             </div>
                         )}
 
@@ -917,9 +912,10 @@ export default function AdminDashboard() {
                                                 </tr>
                                             )}
                                         </tbody>
-                                    </table>
+                                        </table>
 
                                 )}
+                                {shelvesTotalPages > 1 && (
                                 <div className="flex items-center justify-between p-6">
                                     <div className="text-sm text-gray-600">
                                         Mostrando {(shelvesPage - 1) * shelvesPerPage + 1}-{Math.min(shelvesPage * shelvesPerPage, totalShelves)} de {totalShelves} estanterías
@@ -966,6 +962,7 @@ export default function AdminDashboard() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
                             </div>
 
                         )}
@@ -1029,7 +1026,7 @@ export default function AdminDashboard() {
                                                     style={{ color: styles.secondary }}
                                                 >
                                                     Precio
-                                                </th>
+                                                    </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Descuento (%)</th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Precio Final</th>
 
@@ -1113,33 +1110,33 @@ export default function AdminDashboard() {
                                                     <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
                                                         No hay productos registrados
                                                     </td>
-                                                </tr>
+                                                        </tr>
 
                                             )}
                                         </tbody>
                                     </table>
                                 )}
                                 {productsTotalPages > 1 && (
-                                    <div className="flex items-center justify-between p-6">
-                                        <div className="text-sm text-gray-600">
-                                            Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
-                                        </div>
-                                        <div className="flex gap-2 items-center">
-                                            <button
-                                                onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
-                                                disabled={productsPage === 1}
-                                                className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                                style={{ color: styles.secondary }}
-                                            >
-                                                <ChevronLeft size={18} />
-                                            </button>
-                                            {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
-                                                const page =
-                                                    productsPage <= 3
-                                                        ? i + 1
-                                                        : productsPage >= productsTotalPages - 2
-                                                            ? productsTotalPages - 4 + i
-                                                            : productsPage - 2 + i
+                                <div className="flex items-center justify-between p-6">
+                                    <div className="text-sm text-gray-600">
+                                        Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <button
+                                            onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
+                                            disabled={productsPage === 1}
+                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                                            style={{ color: styles.secondary }}
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+                                        {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
+                                            const page =
+                                                productsPage <= 3
+                                                    ? i + 1
+                                                    : productsPage >= productsTotalPages - 2
+                                                        ? productsTotalPages - 4 + i
+                                                        : productsPage - 2 + i
 
                                             return (
                                                 <button
@@ -1166,6 +1163,7 @@ export default function AdminDashboard() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
                             </div>
                         )}
                     </section>
@@ -1180,8 +1178,9 @@ export default function AdminDashboard() {
                 setProductData={setProductData}
                 submitProduct={submitProduct}
                 productErrors={productErrors}
-                processingProduct={processingProduct}
-
+                processingProduct={processingProduct} resetProduct={function (): void {
+                    throw new Error("Function not implemented.")
+                } }
 
             />
 
