@@ -122,7 +122,90 @@ export default function AdminDashboard() {
         products: false,
         categorias: false,
     })
+ useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading((prev) => ({ ...prev, users: true }))
+            try {
+                const response = await fetch(`/admin/users?page=${currentPage}`)
+                if (!response.ok) throw new Error("Error al cargar usuarios")
+                const data = await response.json()
+                if (data.success) {
+                    setUsers(data.users)
+                    setTotalPages(data.pagination.last_page)
+                    setPerPage(data.pagination.per_page)
+                    setTotalUsers(data.pagination.total)
+                } else {
+                    throw new Error("Error en la respuesta del servidor")
+                }
+            } catch (error) {
+                console.error("Error:", error)
+                setTotalPages(1)
+                showError("No se pudieron cargar los usuarios. Por favor, intenta de nuevo más tarde.")
+            } finally {
+                setLoading((prev) => ({ ...prev, users: false }))
+            }
+        }
+        fetchUsers()
+    }, [currentPage])
 
+    // Cargar , estanterías y productos
+    useEffect(() => {
+        // Estanterías paginadas
+        const fetchShelves = async () => {
+            setLoading((prev) => ({ ...prev, shelves: true }));
+            try {
+                const response = await fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`);
+                if (!response.ok) throw new Error("Error al cargar estanterías");
+                const data = await response.json();
+
+                if (data.success) {
+                    const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
+                        ...shelf,
+                        total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
+                        products_count: shelf.products?.length || 0,
+                        capacity_percentage: shelf.max_capacity > 0
+                            ? Math.min(100, ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) / shelf.max_capacity) * 100)
+                            : 0
+                    }));
+
+                    setShelves(shelvesWithCalculations);
+                    setTotalShelves(data.pagination.total);
+                    setShelvesTotalPages(data.pagination.last_page);
+                    setShelvesPerPage(data.pagination.per_page);
+                }
+            } catch (error) {
+                console.error("Error al cargar estanterías:", error);
+                // ...datos de ejemplo
+            } finally {
+                setLoading((prev) => ({ ...prev, shelves: false }));
+            }
+        };
+
+        // Productos paginados
+        const fetchProducts = async () => {
+            setLoading((prev) => ({ ...prev, products: true }));
+            try {
+                const response = await fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`);
+                if (!response.ok) throw new Error("Error al cargar productos");
+                const data = await response.json();
+
+                if (data.success) {
+                    setProducts(data.products);
+                    setTotalProducts(data.pagination.total);
+                    setProductsTotalPages(data.pagination.last_page);
+                    setProductsPerPage(data.pagination.per_page);
+                }
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+                // ...datos de ejemplo
+            } finally {
+                setLoading((prev) => ({ ...prev, products: false }));
+            }
+        };
+
+        fetchShelves();
+        fetchProducts();
+    }, [shelvesPage, shelvesPerPage, productsPage, productsPerPage]);
     // Función para mostrar mensajes de error
     const showError = (message: string) => {
         Swal.fire({
