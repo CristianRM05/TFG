@@ -13,4 +13,5 @@ export interface Product {
     image_url?: string;
     categoria?: string;
     stock?: number;
+    is_visible: boolean;
 }

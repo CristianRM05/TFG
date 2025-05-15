@@ -51,6 +51,11 @@ Route::post('/checkout', action: [OrderController::class, 'checkout'])->name('ch
 Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkout.success');
 Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 
+Route::patch('/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])
+    ->middleware(['auth', 'role:manager,admin']) 
+    ->name('products.toggle-visibility');
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

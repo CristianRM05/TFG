@@ -52,6 +52,7 @@ export interface Product {
 }
 
 export interface StockProduct extends Product {
+    is_visible: any;
     stocks: Stock[];
 }
 // This will set light / dark mode on load...

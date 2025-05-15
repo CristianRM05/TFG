@@ -172,6 +172,38 @@ public function index()
         ]);
     }
 
+    //para mostrar todos los productos a manager
+ public function stockIndexManager()
+    {
+        $products = Product::with('shelf')
+            ->select(['id', 'name', 'num_reference', 'price', 'image_url', 'stock', 'shelf_id', 'is_visible'])
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'num_reference' => $product->num_reference,
+                    'price' => $product->price,
+                    'image_url' => $product->image_url,
+                    'is_visible' => $product->is_visible,
+                    'stocks' => [[
+                        'available_quantity' => $product->stock,
+                        'location' => $product->shelf?->location ?? 'Sin ubicación',
+                        'shelf' => $product->shelf ? [
+                            'max_capacity' => $product->shelf->max_capacity
+                        ] : null
+                    ]]
+                ];
+            });
+
+        return Inertia::render('ManagerPages/stockIndexManager', [
+            'products' => $products,
+            'auth' => [
+                'user' => Auth::user()?->only(['name', 'email']),
+            ],
+        ]);
+    }
+
     public function updateShelf(Product $product, Request $request)
     {
         $product->update([
@@ -292,4 +324,23 @@ public function index()
 
         return response()->json($categorias);
     }
+
+public function toggleVisibility(Product $product)
+{
+    if (! auth()->check()) {
+        abort(403, 'Usuario no autenticado');
+    }
+
+    if (! in_array(auth()->user()->role?->name, ['Manager', 'Admin'])) {
+        abort(403, 'No tienes permisos');
+    }
+
+    $product->is_visible = ! $product->is_visible;
+    $product->save();
+
+    return back();
+}
+
+
+
 }
