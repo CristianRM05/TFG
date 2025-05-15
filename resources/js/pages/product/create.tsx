@@ -24,13 +24,13 @@ interface Props {
     submitProduct: (e: React.FormEvent) => void;
     productErrors: any;
     processingProduct: boolean;
-    resetProduct: () => void;      
+    resetProduct: () => void;
 }
 
 
 
 export default function ProductModal({
-    
+
     open,
     onClose,
     categorias: initialCategorias,
@@ -39,8 +39,8 @@ export default function ProductModal({
     submitProduct,
     productErrors,
     processingProduct,
-    resetProduct,     
-    
+    resetProduct,
+
 
 }: Props) {
     const [categorias, setCategorias] = useState<Categoria[]>(initialCategorias);
@@ -49,7 +49,7 @@ export default function ProductModal({
         clearErrors();  // <-- useForm del modal
         onClose();
     };
-    
+
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         name: "",
         description: "",

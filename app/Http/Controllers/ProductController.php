@@ -14,14 +14,14 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::paginate(6); //se pagina a 6 productos por página
+        $products = Product::paginate(6); 
         return response()->json($products, 200);
     }
 
     public function show(Product $product)
 {
     $product->load('shelf');
-    
+
     return Inertia::render('stock/showProduct', [
         'product' => $product
     ]);
