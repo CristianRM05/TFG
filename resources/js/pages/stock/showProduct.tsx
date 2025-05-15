@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Head } from "@inertiajs/react"
+import { Head, Link } from "@inertiajs/react"
 import AppLayout from "../../layouts/app-layout"
 
 interface Product {
@@ -37,39 +37,39 @@ interface Props {
 
 const ShowProduct: React.FC<Props> = ({ product, auth }) => {
     return (
-        <AppLayout user={auth.user} header={<h2 className="text-2xl font-bold text-white">Detalles del Producto</h2>}>
+        <AppLayout user={auth.user} header={<h2 className="text-2xl font-bold text-[#E17100]">Detalles del Producto</h2>}>
             <Head title={`Detalles de ${product.name}`} />
 
-            <div className="min-h-screen bg-black text-white py-12">
+            <div >
                 <div className="max-w-4xl mx-auto px-6 lg:px-8">
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-lg">
+                    <div className="bg-white border border-[#E17100]/30 rounded-2xl p-8 shadow-lg">
                         {/* Encabezado con imagen y nombre */}
                         <div className="flex flex-col md:flex-row gap-8 mb-8">
                             <div className="w-full md:w-1/3 flex justify-center">
                                 <img
                                     src={product.image_url || "/placeholder.svg"}
                                     alt={product.name}
-                                    className="w-64 h-64 rounded-lg object-cover border border-white/30"
+                                    className="w-64 h-64 rounded-lg object-cover border border-[#E17100]/20"
                                 />
                             </div>
                             <div className="w-full md:w-2/3">
-                                <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+                                <h1 className="text-3xl font-bold mb-2 text-[#E17100]">{product.name}</h1>
                                 <div className="flex items-center gap-4 mb-4">
-                                    <span className="text-2xl font-semibold">
+                                    <span className="text-2xl font-semibold text-green-700">
                                         ${product.final_price ? product.final_price.toFixed(2) : product.price.toFixed(2)}
                                     </span>
                                     {product.discount_percent && (
-                                        <span className="text-sm line-through text-gray-400">
-                                            ${product.price.toFixed(2)}
-                                        </span>
-                                    )}
-                                    {product.discount_percent && (
-                                        <span className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                            -{product.discount_percent}%
-                                        </span>
+                                        <>
+                                            <span className="text-sm line-through text-gray-500">
+                                                ${product.price.toFixed(2)}
+                                            </span>
+                                            <span className="bg-[#E17100] text-white px-2 py-1 rounded-full text-xs font-bold">
+                                                -{product.discount_percent}%
+                                            </span>
+                                        </>
                                     )}
                                 </div>
-                                <p className="text-gray-300 mb-6">
+                                <p className="text-gray-700 mb-6">
                                     {product.description || "No hay descripción disponible."}
                                 </p>
                             </div>
@@ -77,8 +77,8 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
 
                         {/* Detalles del producto */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-black/30 p-4 rounded-lg">
-                                <h2 className="text-lg font-semibold mb-3">Información General</h2>
+                            <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
+                                <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Información General</h2>
                                 <div className="space-y-2">
                                     <p><span className="font-medium">Referencia:</span> {product.num_reference}</p>
                                     <p><span className="font-medium">Categoría:</span> {product.categoria}</p>
@@ -86,8 +86,8 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                 </div>
                             </div>
 
-                            <div className="bg-black/30 p-4 rounded-lg">
-                                <h2 className="text-lg font-semibold mb-3">Ubicación en Almacén</h2>
+                            <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
+                                <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Ubicación en Almacén</h2>
                                 <div className="space-y-2">
                                     {product.shelf ? (
                                         <>
@@ -95,13 +95,13 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                             <p><span className="font-medium">Capacidad máxima:</span> {product.shelf.max_capacity} unidades</p>
                                         </>
                                     ) : (
-                                        <p className="text-gray-400">No asignado a estantería</p>
+                                        <p className="text-gray-500">No asignado a estantería</p>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="bg-black/30 p-4 rounded-lg">
-                                <h2 className="text-lg font-semibold mb-3">Fechas</h2>
+                            <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
+                                <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Fechas</h2>
                                 <div className="space-y-2">
                                     <p>
                                         <span className="font-medium">Creado:</span>{" "}
@@ -134,8 +134,17 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                         </div>
                     </div>
                 </div>
+<div className="mt-10 text-center">
+    <Link
+        href="/manager/stock"
+        className="inline-block bg-[#E17100] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#cc5f00] transition duration-300"
+    >
+        ← Volver a todos los productos
+    </Link>
+</div>
             </div>
         </AppLayout>
+
     )
 }
 

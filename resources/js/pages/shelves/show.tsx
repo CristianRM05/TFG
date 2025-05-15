@@ -109,10 +109,10 @@ export default function ShelfShow({ shelf }: Props) {
 
             <div className="py-6">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="  shadow-sm sm:rounded-lg">
+                        <div className="p-6  border-b border-gray-200 dark:border-gray-700">
                             {/* Shelf details card */}
-                            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-6">
+                            <div className=" dark:bg-gray-700 rounded-lg p-6 mb-6">
                                 <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                                     <div>
                                         <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 mb-2">

@@ -80,7 +80,7 @@ const ProductList: React.FC = () => {
   );
 
     return (
-        <div className="min-h-screen bg-[#F3F3F1] text-[#000000] py-12 px-6 flex flex-col">
+        <div className="min-h-screen  text-[#000000] py-12 px-6 flex flex-col">
             {/* Paneles de productos */}
             <div className="max-w-7xl mx-auto flex-grow">
                 {products.length === 0 ? (

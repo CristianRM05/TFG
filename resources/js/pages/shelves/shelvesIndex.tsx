@@ -20,8 +20,6 @@ interface ShelvesPageProps extends SharedData {
 export default function ShelvesIndex() {
     const { shelves, unassignedProducts, flash, auth } = usePage<ShelvesPageProps>().props
 
-    // Add this to debug available routes
-    console.log("Available routes:", window.Ziggy?.routes || "No routes found")
 
     const [localProducts, setLocalProducts] = useState(unassignedProducts.filter((product) => product.stock > 0))
 
@@ -58,6 +56,8 @@ export default function ShelvesIndex() {
                 toast: true,
                 position: "top",
                 showConfirmButton: false,
+                background: "#F3F3DF",
+                iconColor: "#E17100"
             })
         } else if (flash?.error) {
             Swal.fire({
@@ -69,6 +69,7 @@ export default function ShelvesIndex() {
                 toast: true,
                 position: "top",
                 showConfirmButton: false,
+                background: "#F3F3DF"
             })
         }
     }, [flash])
@@ -102,6 +103,8 @@ export default function ShelvesIndex() {
                             toast: true,
                             position: "top",
                             showConfirmButton: false,
+                            background: "#F3F3DF",
+                            iconColor: "#E17100"
                         })
                     },
                     onError: () => {
@@ -110,7 +113,8 @@ export default function ShelvesIndex() {
                             title: "Error",
                             text: "Error al asignar estantería",
                             icon: "error",
-                            confirmButtonColor: "#3085d6",
+                            background: "#F3F3DF",
+                            confirmButtonColor: "#E17100",
                         })
                     },
                 },
@@ -121,7 +125,8 @@ export default function ShelvesIndex() {
                 title: "Error",
                 text: "Error en la configuración de rutas",
                 icon: "error",
-                confirmButtonColor: "#3085d6",
+                background: "#F3F3DF",
+                confirmButtonColor: "#E17100",
             })
         }
     }
@@ -147,6 +152,14 @@ export default function ShelvesIndex() {
         return Math.min(100, Math.round((currentStock / shelf.max_capacity) * 100))
     }
 
+    // Get progress bar color based on capacity
+    const getProgressBarColor = (percentage: number) => {
+        if (percentage >= 100) return 'bg-black'
+        if (percentage >= 90) return 'bg-red-500'
+        if (percentage > 70) return 'bg-yellow-500'
+        return 'bg-[#E17100]' // Usando el color naranja primario para barras de progreso con espacio disponible
+    }
+
     return (
         <AppLayout
             user={auth.user}
@@ -154,28 +167,28 @@ export default function ShelvesIndex() {
         >
             <Head title="Gestión de Estanterías" />
 
-            <div className="py-6 bg-gray-100 dark:bg-gray-900">
+            <div className="py-6  ">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Productos sin estantería */}
-                    <div className="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg mb-8">
-                        <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg mb-8">
+                        <div className="p-6">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-medium flex items-center text-gray-900 dark:text-white">
+                                <h3 className="text-lg font-medium flex items-center text-[#E17100] dark:text-white">
                                     <span className="mr-2">📦</span>
                                     Productos sin ubicación ({localProducts.length})
                                 </h3>
 
                                 {localProducts.length > 0 && (
-                                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                    <span className="px-3 py-1 bg-[#E17100] text-white rounded-full text-sm font-medium">
                                         {localProducts.length} producto{localProducts.length !== 1 ? "s" : ""} sin asignar
                                     </span>
                                 )}
                             </div>
 
                             {localProducts.length === 0 ? (
-                                <div className="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div className="text-center py-8 bg-[#F3F3DF] dark:bg-gray-700 rounded-lg">
                                     <svg
-                                        className="mx-auto h-12 w-12 text-gray-400"
+                                        className="mx-auto h-12 w-12 text-[#E17100]"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -193,7 +206,7 @@ export default function ShelvesIndex() {
                                         {currentProducts.map((product) => (
                                             <div
                                                 key={product.id}
-                                                className="border dark:border-gray-700 rounded-lg p-4 flex flex-col bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+                                                className="border border-[#E17100]/20 rounded-lg p-4 flex flex-col bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
                                             >
                                                 <div className="flex items-start">
                                                     {product.image_url && (
@@ -204,10 +217,10 @@ export default function ShelvesIndex() {
                                                         />
                                                     )}
                                                     <div>
-                                                        <h4 className="font-medium text-gray-900 dark:text-white">{product.name}</h4>
+                                                        <h4 className="font-medium text-[#E17100] dark:text-white">{product.name}</h4>
                                                         <p className="text-sm text-gray-600 dark:text-gray-300">Ref: {product.num_reference}</p>
                                                         <div className="flex items-center mt-1">
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F3DF] text-[#E17100] dark:bg-[#E17100]/20 dark:text-[#F3F3DF]">
                                                                 Stock: {product.stock}
                                                             </span>
                                                         </div>
@@ -219,7 +232,7 @@ export default function ShelvesIndex() {
                                                         Asignar a:
                                                     </label>
                                                     <select
-                                                        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                                        className="block w-full pl-3 pr-10 py-2 text-base border-[#E17100]/30 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-[#E17100] focus:border-[#E17100] sm:text-sm rounded-md"
                                                         onChange={(e) => handleAssignShelf(product.id, e.target.value)}
                                                         defaultValue=""
                                                     >
@@ -250,7 +263,12 @@ export default function ShelvesIndex() {
                                     {/* Pagination for products */}
                                     {totalPages > 1 && (
                                         <div className="mt-6">
-                                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                            <Pagination
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={setCurrentPage}
+                                                // Custom styling for pagination can be added in the Pagination component
+                                            />
                                         </div>
                                     )}
                                 </>
@@ -259,18 +277,17 @@ export default function ShelvesIndex() {
                     </div>
 
                     {/* Todas las estanterías */}
-                    <div className="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg">
+                        <div className="p-6">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-medium flex items-center text-gray-900 dark:text-white">
+                                <h3 className="text-lg font-medium flex items-center text-[#E17100] dark:text-white">
                                     <span className="mr-2">🏷️</span>
                                     Todas las estanterías ({shelves.length})
                                 </h3>
 
-                                {/* Replace route with a hardcoded URL or check if it exists first */}
                                 <Link
-                                    href="/manager/shelves/create" // Use a hardcoded URL instead of route()
-                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    href="/manager/shelves/create"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#E17100] hover:bg-[#E17100]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E17100]"
                                 >
                                     <svg
                                         className="-ml-1 mr-2 h-5 w-5"
@@ -292,15 +309,15 @@ export default function ShelvesIndex() {
                                 {currentShelves.map((shelf) => (
                                     <div
                                         key={shelf.id}
-                                        className="border dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+                                        className="border border-[#E17100]/20 rounded-lg p-4 bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
                                     >
                                         <div className="flex flex-col h-full">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
-                                                    <h4 className="font-bold text-gray-900 dark:text-white">{shelf.code}</h4>
+                                                    <h4 className="font-bold text-[#E17100] dark:text-white">{shelf.code}</h4>
                                                     <p className="text-sm text-gray-600 dark:text-gray-300">{shelf.location}</p>
                                                 </div>
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F3DF] text-[#E17100] dark:bg-[#E17100]/20 dark:text-[#F3F3DF]">
                                                     {shelf.products?.length || 0} productos
                                                 </span>
                                             </div>
@@ -309,22 +326,13 @@ export default function ShelvesIndex() {
                                                 <div className="mt-2 mb-4">
                                                     <div className="flex justify-between text-xs mb-1">
                                                         <span className="text-gray-600 dark:text-gray-300">Capacidad</span>
-                                                        <span className="font-medium text-gray-900 dark:text-white">
+                                                        <span className="font-medium text-[#E17100] dark:text-white">
                                                             {getShelfCapacityInfo(shelf)}
                                                         </span>
                                                     </div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                                    <div className="w-full bg-[#F3F3DF] rounded-full h-2.5 dark:bg-gray-700">
                                                         <div
-                                                            className={`h-2.5 rounded-full ${getShelfCapacityPercentage(shelf) >= 100
-                                                                    ? 'bg-black'
-                                                                    : getShelfCapacityPercentage(shelf) >= 99
-                                                                        ? 'bg-red-500'
-                                                                        : getShelfCapacityPercentage(shelf) > 85
-                                                                            ? 'bg-red-500'
-                                                                            : getShelfCapacityPercentage(shelf) > 50
-                                                                                ? 'bg-yellow-500'
-                                                                                : 'bg-green-500'
-                                                                }`}
+                                                            className={`h-2.5 rounded-full ${getProgressBarColor(getShelfCapacityPercentage(shelf))}`}
                                                             style={{ width: `${getShelfCapacityPercentage(shelf)}%` }}
                                                         ></div>
                                                     </div>
@@ -332,10 +340,9 @@ export default function ShelvesIndex() {
                                             )}
 
                                             <div className="mt-auto pt-2">
-                                                {/* Replace route with a hardcoded URL */}
                                                 <Link
-                                                    href={`/manager/shelves/${shelf.id}`} // Use a hardcoded URL pattern
-                                                    className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-600 dark:text-white dark:border-gray-500 dark:hover:bg-gray-500"
+                                                    href={`/manager/shelves/${shelf.id}`}
+                                                    className="w-full inline-flex justify-center items-center px-4 py-2 border border-[#E17100]/30 shadow-sm text-sm font-medium rounded-md text-[#E17100] bg-white hover:bg-[#F3F3DF] dark:bg-[#E17100] dark:text-white dark:border-[#E17100]/50 dark:hover:bg-[#E17100]/90"
                                                 >
                                                     Ver detalles
                                                 </Link>
