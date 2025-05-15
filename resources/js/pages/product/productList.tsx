@@ -142,7 +142,7 @@ const ProductList: React.FC = () => {
 
                       {/* Botón "Add to Cart" y Stock */}
                       <div className="flex flex-col items-start space-y-2">
-                        {product.stock > 0 && (
+                        {product.stock && product.stock > 0 && (
                           <button
                             onClick={() => handleAddToCart(product.id)}
                             className={`
@@ -156,7 +156,7 @@ const ProductList: React.FC = () => {
                         )}
 
                         {/* Indicador de stock */}
-                        {product.stock > 0 ? (
+                        {product.stock && product.stock > 0 ? (
                           <p className="text-sm text-green-600 w-full text-center">
                             {product.stock} disponibles
                           </p>

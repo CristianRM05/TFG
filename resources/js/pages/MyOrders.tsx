@@ -14,11 +14,11 @@ interface Order {
   id: number;
   ref: string;
   created_at: string;
-  status: 'Paid' | 'In progress' | 'Completed';
+  status: 'paid' | 'In progress' | 'Completed';
   items: OrderItem[];
 }
 
-interface MyOrdersProps {
+interface MyOrdersProps extends Record<string, unknown> {
   auth: { user: { name: string } };
   orders: {
     data: Order[];
@@ -32,7 +32,7 @@ interface MyOrdersProps {
 export default function MyOrders() {
   const { auth, orders } = usePage<MyOrdersProps>().props;
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
-  const [selectedStatuses, setSelectedStatuses] = useState<Order['status'][]>(['Paid', 'In progress', 'Completed']);
+  const [selectedStatuses, setSelectedStatuses] = useState<Order['status'][]>(['paid', 'In progress', 'Completed']);
 
   const toggle = (id: number) => setExpandedOrderId(prev => (prev === id ? null : id));
 
@@ -42,7 +42,7 @@ export default function MyOrders() {
 
   // Status configuration
   const statusConfig = {
-    'Paid': {
+    'paid': {
       label: 'Pagado',
       color: 'bg-blue-100 text-blue-800 border-blue-200',
       darkColor: 'bg-blue-900 text-blue-300 border-blue-800'
