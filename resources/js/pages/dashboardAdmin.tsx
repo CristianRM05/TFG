@@ -53,7 +53,7 @@ export default function AdminDashboard() {
     // Para productos
     const [productsPage, setProductsPage] = useState(1)
     const [productsTotalPages, setProductsTotalPages] = useState(1)
-    const [productsPerPage, setProductsPerPage] = useState(10)
+    const [productsPerPage, setProductsPerPage] = useState(5)
     const [totalProducts, setTotalProducts] = useState(0)
     // Obtén TODAS las props necesarias en un solo hook
     const { auth, shelves: shelvesFromProps, roles, products: productsFromProps } = usePage<{

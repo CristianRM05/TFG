@@ -1,4 +1,4 @@
-import {  router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 // resources/js/pages/dashboard.tsx
 
 import React from 'react';
@@ -8,7 +8,7 @@ import type { BreadcrumbItem, User } from '@/types';
 import ProductList from './product/productList';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Dashboard', href: '/dashboard' },
 ];
 
 export default function Dashboard() {
@@ -28,32 +28,42 @@ export default function Dashboard() {
         }
     }
 
-  if (!auth?.user) {
+    if (!auth?.user) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-white dark:bg-gray-900">
+                <span className="text-gray-500 dark:text-gray-400">Cargando datos del usuario…</span>
+            </div>
+        );
+    }
+
     return (
-      <div className="flex items-center justify-center h-screen bg-white dark:bg-gray-900">
-        <span className="text-gray-500 dark:text-gray-400">Cargando datos del usuario…</span>
-      </div>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Panel de trabajador" />
+
+            {/* Hero */}
+            <section
+                className="
+    relative
+    bg-center bg-cover
+    bg-blend-overlay
+    filter brightness-75
+    h-[600px]
+    flex items-center justify-center
+    px-4
+    border-4 border-white/30
+    rounded-2x1
+  "
+                style={{
+                    backgroundImage: `url('/images/imgCatalogo.png')`,
+                }}
+            >
+
+            </section>
+
+            {/* Contenedor con fondo claro para el listado */}
+            <div className="w-full px-4 md:px-8 py-12  ">
+                <ProductList />
+            </div>
+        </AppLayout>
     );
-  }
-
-  return (
-    <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Panel de trabajador" />
-
-      {/* Hero */}
-      <section className="bg-black/70 text-white text-center py-16 px-4">
-        <h1 className="text-4xl md:text-6xl font-extrabold mb-2">
-          Bienvenido, {auth.user.name}
-        </h1>
-        <p className="text-lg md:text-2xl">
-          Explora y gestiona tus productos
-        </p>
-      </section>
-
-      {/* Contenedor con fondo claro para el listado */}
-      <div className="w-full px-4 md:px-8 py-12  ">
-        <ProductList />
-      </div>
-    </AppLayout>
-  );
 }
