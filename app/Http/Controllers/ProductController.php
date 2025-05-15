@@ -13,15 +13,22 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-public function index()
-{
-    $products = Product::where('is_visible', true)
+    public function index()
+    {
+        $products = Product::where('is_visible', true)
         ->where('stock', '>', 0)
         ->paginate(6);
+        return response()->json($products, 200);
+    }
 
-    return response()->json($products, 200);
+    public function show(Product $product)
+{
+    $product->load('shelf');
+
+    return Inertia::render('stock/showProduct', [
+        'product' => $product
+    ]);
 }
-
 
     public function store(Request $request)
     {
@@ -138,7 +145,7 @@ public function index()
     }
 
     /**
-     * ✅ Muestra solo productos visibles y con stock > 0
+     * Muestra solo productos visibles y con stock > 0
      */
     public function stockIndex()
     {

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import Swal from 'sweetalert2';
 import { X } from 'lucide-react';
-import { useEffect } from 'react'; 
+import { useEffect } from 'react';
 
 const COLORS = {
     primary: '#8F5C0C',
@@ -38,7 +38,7 @@ export default function ShelfModal({
     submitShelf,
     shelfErrors,
     processingShelf,
-    clearErrors, 
+    clearErrors,
 }: Props) {
     useEffect(() => {
         if (!open) {
