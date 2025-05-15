@@ -229,7 +229,7 @@ export default function AdminDashboard() {
     if (!auth?.user) return <div>Cargando o no autenticado</div>
     const user = auth.user
     // Funciones para calcular la capacidad
-    const getShelfCapacityPercentage = (shelf: Shelf) => {
+   /* const getShelfCapacityPercentage = (shelf: Shelf) => {
         if (!shelf.max_capacity || shelf.max_capacity === 0) return 0;
         const currentStock = shelf.total_stock || 0;
         return Math.min(100, Math.round((currentStock / shelf.max_capacity) * 100));
@@ -237,7 +237,8 @@ export default function AdminDashboard() {
 
     const getShelfCapacityInfo = (shelf: Shelf) => {
         return `${shelf.total_stock || 0} / ${shelf.max_capacity} unidades`;
-    };
+    };*/
+
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault()
         post("/admin/products", {
@@ -715,6 +716,7 @@ export default function AdminDashboard() {
                                 )}
 
                                 {/* Pagination control */}
+                                {totalPages > 1 && (
                                 <div className="flex items-center justify-between p-6">
                                     <div className="text-sm text-gray-600">
                                         Mostrando {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalUsers)} de{" "}
@@ -769,6 +771,7 @@ export default function AdminDashboard() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
                             </div>
                         )}
 
@@ -912,6 +915,7 @@ export default function AdminDashboard() {
                                         </table>
 
                                 )}
+                                {shelvesTotalPages > 1 && (
                                 <div className="flex items-center justify-between p-6">
                                     <div className="text-sm text-gray-600">
                                         Mostrando {(shelvesPage - 1) * shelvesPerPage + 1}-{Math.min(shelvesPage * shelvesPerPage, totalShelves)} de {totalShelves} estanterías
@@ -958,6 +962,7 @@ export default function AdminDashboard() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
                             </div>
 
                         )}
@@ -1111,6 +1116,7 @@ export default function AdminDashboard() {
                                         </tbody>
                                     </table>
                                 )}
+                                {productsTotalPages > 1 && (
                                 <div className="flex items-center justify-between p-6">
                                     <div className="text-sm text-gray-600">
                                         Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
@@ -1157,6 +1163,7 @@ export default function AdminDashboard() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
                             </div>
                         )}
                     </section>
@@ -1171,8 +1178,9 @@ export default function AdminDashboard() {
                 setProductData={setProductData}
                 submitProduct={submitProduct}
                 productErrors={productErrors}
-                processingProduct={processingProduct}
-
+                processingProduct={processingProduct} resetProduct={function (): void {
+                    throw new Error("Function not implemented.")
+                } }
 
             />
 
