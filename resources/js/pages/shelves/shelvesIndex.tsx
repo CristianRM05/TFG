@@ -167,7 +167,7 @@ export default function ShelvesIndex() {
         >
             <Head title="Gestión de Estanterías" />
 
-            <div className="py-6  ">
+            <div >
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Productos sin estantería */}
                     <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg mb-8">

@@ -53,7 +53,7 @@ const ProductList: React.FC = () => {
 
   // categorías dinámicas
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(products.map(p => p.category)));
+    const cats = Array.from(new Set(products.map(p => p.categoria)));
     return ['todas', ...cats];
   }, [products]);
 
@@ -63,7 +63,7 @@ const ProductList: React.FC = () => {
     const max = maxPrice !== '' ? parseFloat(maxPrice) : Infinity;
     return products.filter(p => {
       const matchesName = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCat = categoryFilter === 'todas' || p.category === categoryFilter;
+      const matchesCat = categoryFilter === 'todas' || p.categoria === categoryFilter;
       const matchesPrice = p.price >= min && p.price <= max;
       return matchesName && matchesCat && matchesPrice;
     });
@@ -154,7 +154,7 @@ const ProductList: React.FC = () => {
 
                                     {/* Botón "Add to Cart" y Stock */}
                                     <div className="flex flex-col items-start space-y-2">
-                                        {product.stock > 0 && (
+                                        {product.stock && product.stock > 0 && (
                                             <button
                                                 onClick={() => handleAddToCart(product.id)}
                                                 className={`
@@ -168,7 +168,7 @@ const ProductList: React.FC = () => {
                                         )}
 
                                         {/* Indicador si esta disponible o no */}
-                                        {product.stock > 0 ? (
+                                        {(product.stock ?? 0) > 0 ? (
                                             <p className="text-sm text-green-600 w-full text-center">
                                                  disponibles
                                             </p>

@@ -19,7 +19,7 @@ interface Order {
 }
 
 interface MyOrdersProps extends Record<string, unknown> {
-  auth: { user: { name: string } };
+  auth: { user: { name: string; email: string } };
   orders: {
     data: Order[];
     current_page: number;
@@ -78,10 +78,9 @@ export default function MyOrders() {
       user={auth.user}
       breadcrumbs={breadcrumbs}
       header="Mis Pedidos"
-      className="bg-gray-100 dark:bg-gray-900"
     >
       <Head title="Mis Pedidos" />
-      <div className="min-h-screen py-12 px-6">
+      <div className="min-h-screen  px-6">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Mis Pedidos</h1>
