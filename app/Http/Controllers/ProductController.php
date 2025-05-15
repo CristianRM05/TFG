@@ -9,27 +9,22 @@ use App\Models\Shelf;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Enums\categoryProducts;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    public function index()
-    {
-        $products = Product::paginate(6); //se pagina a 6 productos por página
-        return response()->json($products, 200);
-    }
-
-    public function show(Product $product)
+public function index()
 {
-    $product->load('shelf');
-    
-    return Inertia::render('stock/showProduct', [
-        'product' => $product
-    ]);
+    $products = Product::where('is_visible', true)
+        ->where('stock', '>', 0)
+        ->paginate(6);
+
+    return response()->json($products, 200);
 }
+
 
     public function store(Request $request)
     {
-        // Validación (sin el campo stock)
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -38,22 +33,19 @@ class ProductController extends Controller
             'image_url' => 'nullable|string',
             'weight' => 'nullable|numeric|min:0',
             'volume' => 'nullable|numeric|min:0',
-            'categoria' => 'required|nullable|string',
+            'categoria' => 'required|string',
             'stock' => 'nullable|numeric|min:0',
         ]);
 
-        // Crear el producto
         $product = Product::create($validated);
 
-        // Crear el registro de stock asociado
         $product->stock()->create([
-            'available_quantity' => $request->stock ?? 0, // Valor por defecto
-            'location' => 'Almacén Principal'
+            'available_quantity' => $request->stock ?? 0,
+            'location' => 'Almacén Principal',
         ]);
 
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
-
 
     public function update(Request $request, $id)
     {
@@ -62,7 +54,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'num_reference' => 'sometimes|string|max:50|' . $product->id,
+            'num_reference' => 'sometimes|string|max:50',
             'stock' => 'sometimes|numeric|min:0',
             'price' => 'sometimes|numeric|min:0',
             'image_url' => 'nullable|image|max:2048',
@@ -81,21 +73,14 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Producto actualizado con éxito');
     }
 
-
     public function unassignedProducts()
     {
         return inertia('shelves/shelvesIndex', [
-            'unassignedProducts' => Product::whereNull('shelf_id')
-                ->with('shelf')
-                ->get(),
-
+            'unassignedProducts' => Product::whereNull('shelf_id')->with('shelf')->get(),
             'shelves' => Shelf::with(['products' => function ($query) {
                 $query->select('id', 'shelf_id', 'stock');
-            }])
-                ->orderBy('location')
-                ->get(),
-
-            'flash' => session()->only(['success', 'error'])
+            }])->orderBy('location')->get(),
+            'flash' => session()->only(['success', 'error']),
         ]);
     }
 
@@ -105,7 +90,6 @@ class ProductController extends Controller
             'unassignedProducts' => Product::whereNull('shelf_id')
                 ->select(['id', 'name', 'num_reference', 'image_url', 'stock'])
                 ->get(),
-
             'shelves' => Shelf::with(['products' => function ($query) {
                 $query->select('id', 'shelf_id', 'stock');
             }])
@@ -115,8 +99,7 @@ class ProductController extends Controller
                     $shelf->total_stock = $shelf->products->sum('stock');
                     return $shelf->only(['id', 'code', 'location', 'max_capacity', 'total_stock']);
                 }),
-
-            'flash' => session()->only(['success', 'error'])
+            'flash' => session()->only(['success', 'error']),
         ]);
     }
 
@@ -154,9 +137,14 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * ✅ Muestra solo productos visibles y con stock > 0
+     */
     public function stockIndex()
     {
-        $products = Product::with(['shelf'])
+        $products = Product::with('shelf')
+            ->where('is_visible', true)
+            ->where('stock', '>', 0)
             ->select(['id', 'name', 'num_reference', 'price', 'image_url', 'stock', 'shelf_id'])
             ->get()
             ->map(function ($product) {
@@ -166,20 +154,21 @@ class ProductController extends Controller
                     'num_reference' => $product->num_reference,
                     'price' => $product->price,
                     'image_url' => $product->image_url,
-                    'stocks' => [ // Mantenemos la estructura de array que espera el frontend
-                        [
-                            'available_quantity' => $product->stock, // Usamos el campo directo
-                            'location' => $product->shelf?->location ?? 'Sin ubicación',
-                            'shelf' => $product->shelf ? [
-                                'max_capacity' => $product->shelf->max_capacity
-                            ] : null
-                        ]
-                    ]
+                    'stocks' => [[
+                        'available_quantity' => $product->stock,
+                        'location' => $product->shelf?->location ?? 'Sin ubicación',
+                        'shelf' => $product->shelf ? [
+                            'max_capacity' => $product->shelf->max_capacity
+                        ] : null
+                    ]]
                 ];
             });
 
         return Inertia::render('stock/stockIndex', [
-            'products' => $products
+            'products' => $products,
+            'auth' => [
+                'user' => Auth::user()?->only(['name', 'email']),
+            ],
         ]);
     }
 
@@ -293,14 +282,14 @@ class ProductController extends Controller
     }
 
     public function getCategorias()
-{
-    $categorias = collect(categoryProducts::cases())->map(function ($case) {
-        return [
-            'value' => $case->value,
-            'name' => ucfirst($case->name),
-        ];
-    });
+    {
+        $categorias = collect(categoryProducts::cases())->map(function ($case) {
+            return [
+                'value' => $case->value,
+                'name' => ucfirst($case->name),
+            ];
+        });
 
-    return response()->json($categorias);
-}
+        return response()->json($categorias);
+    }
 }

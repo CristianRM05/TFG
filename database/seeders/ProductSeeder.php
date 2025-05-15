@@ -27,6 +27,7 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/MxsbRXhD/etiqueta-Azul.png',
                 'categoria' => categoryProducts::refresco->value,
                 'shelf_id' => $shelfId,
+                'is_visible' => true,
             ],
             [
                 'name' => 'Whisky Jack Daniel’s 700ml',
@@ -38,6 +39,7 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/r2C9jVNr/etiqueta-Negra.png',
                 'categoria' => categoryProducts::whisky->value,
                 'shelf_id' => $shelfId,
+                'is_visible' => true,
             ],
             [
                 'name' => 'Ron Barceló Añejo 700ml',
@@ -49,6 +51,7 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/b56q07dX/tequila2.png',
                 'categoria' => categoryProducts::ron->value,
                 'shelf_id' => $shelfId,
+                'is_visible' => true,
             ],
             [
                 'name' => 'Vodka Absolut 1L',
@@ -60,6 +63,7 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/tw4Lbppk/scotch-Whisky.png',
                 'categoria' => categoryProducts::vodka->value,
                 'shelf_id' => $shelfId,
+                'is_visible' => true,
             ],
             [
                 'name' => 'Vodka Absolut 1L',
@@ -71,10 +75,11 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/SwTh3vZY/malt-Whiskey.png',
                 'categoria' => categoryProducts::vodka->value,
                 'shelf_id' => $shelfId,
+                'is_visible' => true,
             ],
             [
-                'name' => 'Vodka Absolut 1L',
-                'description' => 'Vodka sueco puro y suave ideal para cócteles.',
+                'name' => 'Producto Oculto',
+                'description' => 'Este producto no deberia aparecer.',
                 'num_reference' => 'REF-1004',
                 'stock' => 40,
                 'price' => 15.00,
@@ -82,6 +87,7 @@ class ProductSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/3ms0N4fr/whiskey.png',
                 'categoria' => categoryProducts::vodka->value,
                 'shelf_id' => $shelfId,
+                'is_visible' => false,
             ],
         ];
 
