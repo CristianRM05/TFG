@@ -1,71 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { getProducts, addToCart } from '@/services/productService';
 import { Product } from '@/types/products';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
 const ProductList: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [lastPage, setLastPage] = useState<number>(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const data = await getProducts(currentPage);
-                setProducts(data.data);
-                setLastPage(data.last_page);
-            } catch (error) {
-                MySwal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Hubo un error al cargar los productos.',
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
+  // filtros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('todas');
+  const [minPrice, setMinPrice] = useState(''); // usar string para poder vaciar
+  const [maxPrice, setMaxPrice] = useState('');
 
-        fetchProducts();
-    }, [currentPage]);
-
-    const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= lastPage) {
-            setCurrentPage(page);
-        }
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts(currentPage);
+        setProducts(data.data);
+        setLastPage(data.last_page);
+      } catch {
+        MySwal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cargar los productos.',
+        });
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchProducts();
+  }, [currentPage]);
 
-    const handleAddToCart = async (productId: number) => {
-        try {
-            await addToCart(productId);
-            MySwal.fire({
-                icon: 'success',
-                title: '¡Producto añadido!',
-                text: 'Producto añadido al carrito correctamente.',
-                timer: 2000,
-                showConfirmButton: false,
-            });
-        } catch (error) {
-            MySwal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo añadir el producto al carrito.',
-            });
-        }
-    };
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= lastPage) setCurrentPage(page);
+  };
 
-    if (loading) return (
-        <div className="flex justify-center items-center h-64">
-            <div className="relative w-24 h-24">
-                <div className="absolute top-0 left-0 w-full h-full border-8 border-[#7C5F42] rounded-full"></div>
-                <div className="absolute top-0 left-0 w-full h-full border-8 border-transparent border-t-[#8F5C0C] border-r-[#8F5C0C] rounded-full animate-spin"></div>
-                <div className="absolute top-4 left-4 w-16 h-16 bg-[#8F5C0C] rounded-full opacity-30 animate-pulse"></div>
-            </div>
-        </div>
-    );
+  const handleAddToCart = async (id: number) => {
+    try {
+      await addToCart(id);
+      MySwal.fire({ icon: 'success', title: '¡Producto añadido!', timer: 2000, showConfirmButton: false });
+    } catch {
+      MySwal.fire({ icon: 'error', title: 'Error', text: 'No se pudo añadir el producto.' });
+    }
+  };
+
+  // categorías dinámicas
+  const categories = useMemo(() => {
+    const cats = Array.from(new Set(products.map(p => p.category)));
+    return ['todas', ...cats];
+  }, [products]);
+
+  // aplicar filtros client-side
+  const filtered = useMemo(() => {
+    const min = minPrice !== '' ? parseFloat(minPrice) : 0;
+    const max = maxPrice !== '' ? parseFloat(maxPrice) : Infinity;
+    return products.filter(p => {
+      const matchesName = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCat = categoryFilter === 'todas' || p.category === categoryFilter;
+      const matchesPrice = p.price >= min && p.price <= max;
+      return matchesName && matchesCat && matchesPrice;
+    });
+  }, [products, searchTerm, categoryFilter, minPrice, maxPrice]);
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="relative w-24 h-24">
+        <div className="absolute inset-0 border-8 border-[#7C5F42] rounded-full"></div>
+        <div className="absolute inset-0 border-8 border-transparent border-t-[#8F5C0C] border-r-[#8F5C0C] rounded-full animate-spin"></div>
+        <div className="absolute inset-4 bg-[#8F5C0C] rounded-full opacity-30 animate-pulse"></div>
+      </div>
+    </div>
+  );
 
     return (
         <div className="min-h-screen bg-[#F3F3F1] text-[#000000] py-12 px-6 flex flex-col">
@@ -142,7 +154,7 @@ const ProductList: React.FC = () => {
 
                                     {/* Botón "Add to Cart" y Stock */}
                                     <div className="flex flex-col items-start space-y-2">
-                                        {product.stock && product.stock > 0 && (
+                                        {product.stock > 0 && (
                                             <button
                                                 onClick={() => handleAddToCart(product.id)}
                                                 className={`
@@ -156,9 +168,9 @@ const ProductList: React.FC = () => {
                                         )}
 
                                         {/* Indicador si esta disponible o no */}
-                                        {product.stock && product.stock > 0 ? (
+                                        {product.stock > 0 ? (
                                             <p className="text-sm text-green-600 w-full text-center">
-                                                disponibles
+                                                 disponibles
                                             </p>
                                         ) : (
                                             <p className="text-sm text-red-600 w-full text-center">
@@ -179,8 +191,8 @@ const ProductList: React.FC = () => {
                     <div className="flex justify-center space-x-4">
                         <button
                             className={`px-5 py-2 rounded-full font-semibold transition-colors ${currentPage === 1
-                                ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                                : 'bg-amber-600 text-black hover:bg-amber-500'
+                                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                                    : 'bg-amber-600 text-black hover:bg-amber-500'
                                 }`}
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
@@ -194,8 +206,8 @@ const ProductList: React.FC = () => {
 
                         <button
                             className={`px-5 py-2 rounded-full font-semibold transition-colors ${currentPage === lastPage
-                                ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                                : 'bg-amber-600 text-black hover:bg-amber-500'
+                                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                                    : 'bg-amber-600 text-black hover:bg-amber-500'
                                 }`}
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === lastPage}

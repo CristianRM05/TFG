@@ -1,8 +1,11 @@
+"use client"
+
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect } from 'react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { GoogleIcon } from '@/components/icons/google';
+import Swal from 'sweetalert2';
 
 export default function Login({ status, canResetPassword }) {
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -16,11 +19,23 @@ export default function Login({ status, canResetPassword }) {
     post(route('login'), { onFinish: () => reset('password') });
   };
 
+  useEffect(() => {
+    if (errors.banned) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cuenta suspendida',
+        text: errors.banned,
+        confirmButtonText: 'Entendido',
+        background: '#1a1a1a',
+        color: '#fff',
+      });
+    }
+  }, [errors.banned]);
+
   return (
     <section className="min-h-screen bg-black flex items-center justify-center py-12 px-4">
       <Head title="LOG IN" />
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <h2 className="text-5xl font-extrabold uppercase text-white">Welcome Back</h2>
           <p className="mt-2 text-sm text-gray-400">
@@ -31,9 +46,7 @@ export default function Login({ status, canResetPassword }) {
           )}
         </div>
 
-        {/* Form */}
         <form className="space-y-6" onSubmit={submit}>
-          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-xs font-bold uppercase text-white">
               Email Address
@@ -53,7 +66,6 @@ export default function Login({ status, canResetPassword }) {
             <InputError message={errors.email} className="mt-1 text-xs text-red-500" />
           </div>
 
-          {/* Password */}
           <div>
             <label htmlFor="password" className="block text-xs font-bold uppercase text-white">
               Password
@@ -79,7 +91,6 @@ export default function Login({ status, canResetPassword }) {
             )}
           </div>
 
-          {/* Remember */}
           <div className="flex items-center">
             <input
               id="remember"
@@ -94,7 +105,6 @@ export default function Login({ status, canResetPassword }) {
             </label>
           </div>
 
-          {/* Submit */}
           <div>
             <button
               type="submit"
@@ -105,7 +115,6 @@ export default function Login({ status, canResetPassword }) {
             </button>
           </div>
 
-          {/* Divider */}
           <div className="relative my-6">
             <span className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-gray-600" />
@@ -115,7 +124,6 @@ export default function Login({ status, canResetPassword }) {
             </span>
           </div>
 
-          {/* Google Login */}
           <div>
             <button
               type="button"
@@ -128,7 +136,6 @@ export default function Login({ status, canResetPassword }) {
           </div>
         </form>
 
-        {/* Footer */}
         <p className="mt-6 text-center text-sm text-gray-400">
           Don't have an account?{' '}
           <TextLink href={route('register')} className="font-bold hover:underline text-white">
