@@ -52,7 +52,7 @@ const ProductList: React.FC = () => {
   };
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(products.map(p => p.category)));
+    const cats = Array.from(new Set(products.map(p => p.categoria)));
     return ['todas', ...cats];
   }, [products]);
 
@@ -61,7 +61,7 @@ const ProductList: React.FC = () => {
     const max = maxPrice !== '' ? parseFloat(maxPrice) : Infinity;
     return products.filter(p => {
       const matchesName = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCat = categoryFilter === 'todas' || p.category === categoryFilter;
+      const matchesCat = categoryFilter === 'todas' || p.categoria === categoryFilter;
       const matchesPrice = p.price >= min && p.price <= max;
       const isVisible = p.is_visible !== false;
       const hasStock = p.stock > 0;
@@ -126,25 +126,38 @@ const ProductList: React.FC = () => {
 
                   <p className="mb-6 max-w-prose text-[#7C5F42] leading-relaxed">{product.description}</p>
 
-                  <div className="flex flex-col items-start space-y-2">
-                    {product.stock > 0 && (
-                      <button
-                        onClick={() => handleAddToCart(product.id)}
-                        className="px-6 py-3 rounded-full font-semibold uppercase tracking-wide transition bg-[#8F5C0C] text-white hover:bg-opacity-90 w-full"
-                      >
-                        Add to Cart
-                      </button>
-                    )}
-                    <p className={`text-sm w-full text-center ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {product.stock > 0 ? 'Disponibles' : 'Agotado'}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                                    {/* Botón "Add to Cart" y Stock */}
+                                    <div className="flex flex-col items-start space-y-2">
+                                        {product.stock > 0 && (
+                                            <button
+                                                onClick={() => handleAddToCart(product.id)}
+                                                className={`
+                              px-6 py-3 rounded-full font-semibold uppercase tracking-wide transition
+                              bg-[#8F5C0C] text-white hover:bg-opacity-90
+                              w-full
+                            `}
+                                            >
+                                                Add to Cart
+                                            </button>
+                                        )}
+
+                                        {/* Indicador si esta disponible o no */}
+                                        {product.stock > 0 ? (
+                                            <p className="text-sm text-green-600 w-full text-center">
+                                                 disponibles
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-red-600 w-full text-center">
+                                                Agotado
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
 
       {lastPage > 1 && (
         <div className="max-w-7xl mx-auto mt-8">
