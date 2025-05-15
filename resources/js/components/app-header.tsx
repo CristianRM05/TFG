@@ -102,7 +102,7 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
   const navItems = getNavItems();
 
   return (
-    <header className="bg-[#F3F3F1] shadow-lg">
+    <header style={{ backgroundColor: 'var(--nav-bg)' }} className="shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between relative">
           {/* Logo */}
@@ -110,10 +110,9 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
             href="/dashboard"
             className="flex items-center space-x-2 group"
           >
-            <div className="w-24 h-10 bg-[#8F5C0C] rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
-              <span className="text-white font-bold text-lg">Swapify</span>
+            <div style={{ backgroundColor: 'var(--nav-logo-bg)', color: 'var(--nav-logo-text)' }} className="w-24 h-10 rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
+              <span className="font-bold text-lg">Swapify</span>
             </div>
-
           </Link>
 
           {/* Mobile Menu Toggle */}
@@ -122,36 +121,50 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
             className="md:hidden z-50 relative"
           >
             {isMenuOpen ? (
-              <X className="text-[#8F5C0C] w-6 h-6" />
+              <X className="w-6 h-6 text-red" />
             ) : (
-              <Menu className="text-[#8F5C0C] w-6 h-6" />
+              <Menu style={{ color: 'var(--nav-item-icon)' }} className="w-6 h-6" />
             )}
           </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  flex items-center space-x-2 px-3 py-2 rounded-full
-                  transition-all duration-300 group
-                  ${page.url === item.href
-                    ? 'bg-[#8F5C0C] text-white'
-                    : 'text-[#7C5F42] hover:bg-[#8F5C0C]/10 hover:text-[#8F5C0C]'}
-                `}
-              >
-                <item.icon
-                  className={`w-5 h-5 ${
-                    page.url === item.href
-                      ? 'text-white'
-                      : 'text-[#8F5C0C] group-hover:text-[#8F5C0C]'
-                  }`}
-                />
-                <span className="font-medium">{item.title}</span>
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = page.url === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`
+                    flex items-center space-x-2 px-3 py-2 rounded-full
+                    transition-all duration-300 group
+                  `}
+                  style={{
+                    backgroundColor: isActive ? 'var(--nav-item-active-bg)' : 'transparent',
+                    color: isActive ? 'var(--nav-item-active-text)' : 'var(--nav-item-text)'
+                  }}
+                >
+                  {item.icon && (
+                    <item.icon
+                      className="w-5 h-5"
+                      style={{
+                        color: isActive ? 'var(--nav-item-active-text)' : 'var(--nav-item-icon)'
+                      }}
+                    />
+                  )}
+                  <span className="font-medium">{item.title}</span>
+                  <style>{`
+                    .group:hover {
+                      background-color: ${isActive ? 'var(--nav-item-active-bg)' : 'var(--nav-item-hover-bg)'};
+                      color: ${isActive ? 'var(--nav-item-active-text)' : 'var(--nav-item-hover-text)'};
+                    }
+                    .group:hover svg {
+                      color: ${isActive ? 'var(--nav-item-active-text)' : 'var(--nav-item-hover-text)'};
+                    }
+                  `}</style>
+                </Link>
+              );
+            })}
           </nav>
 
           {/* User Actions */}
@@ -160,7 +173,10 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
             {auth.user.role !== "Admin" && auth.user.role !== "Manager" && (
               <Link
                 href="/cart"
-                className="text-[#7C5F42] hover:text-[#8F5C0C] transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--nav-item-text)' }}
+                onMouseOver={(e) => e.currentTarget.style.color = 'var(--nav-item-hover-text)'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'var(--nav-item-text)'}
               >
                 <ShoppingCart className="w-6 h-6" />
               </Link>
@@ -198,12 +214,17 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="size-10 rounded-full p-1">
-                  <Avatar className="size-8 overflow-hidden rounded-full hover:ring-2 hover:ring-[#8F5C0C]">
+                  <Avatar className="size-8 overflow-hidden rounded-full hover:ring-2" style={{ '--ring-color': 'var(--avatar-ring)' } as React.CSSProperties}>
                     <AvatarImage src={auth.user.avatar || undefined} alt={auth.user.name} />
-                    <AvatarFallback className="rounded-lg bg-[#8F5C0C] text-white">
+                    <AvatarFallback className="rounded-lg text-white" style={{ backgroundColor: 'var(--nav-logo-bg)' }}>
                       {getInitials(auth.user.name)}
                     </AvatarFallback>
                   </Avatar>
+                  <style>{`
+                    .hover\:ring-2:hover {
+                      --tw-ring-color: var(--avatar-ring);
+                    }
+                  `}</style>
                 </Button>
               </DropdownMenuTrigger>
 
@@ -227,31 +248,33 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
 
         {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="fixed inset-0 bg-[#F3F3F1] z-40 md:hidden">
+          <div className="fixed inset-0 z-40 md:hidden" style={{ backgroundColor: 'var(--nav-bg)' }}>
             <div className="flex flex-col items-center justify-center h-full space-y-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`
-                    flex items-center space-x-4 px-6 py-3 rounded-full w-64 justify-center
-                    transition-all duration-300
-                    ${page.url === item.href
-                      ? 'bg-[#8F5C0C] text-white'
-                      : 'text-[#7C5F42] hover:bg-[#8F5C0C]/10'}
-                  `}
-                >
-                  <item.icon
-                    className={`w-6 h-6 ${
-                      page.url === item.href
-                        ? 'text-white'
-                        : 'text-[#8F5C0C]'
-                    }`}
-                  />
-                  <span className="text-xl font-medium">{item.title}</span>
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                const isActive = page.url === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center space-x-4 px-6 py-3 rounded-full w-64 justify-center transition-all duration-300"
+                    style={{
+                      backgroundColor: isActive ? 'var(--nav-item-active-bg)' : 'transparent',
+                      color: isActive ? 'var(--nav-item-active-text)' : 'var(--nav-item-text)'
+                    }}
+                  >
+                    {item.icon && (
+                      <item.icon
+                        className="w-6 h-6"
+                        style={{
+                          color: isActive ? 'var(--nav-item-active-text)' : 'var(--nav-item-icon)'
+                        }}
+                      />
+                    )}
+                    <span className="text-xl font-medium">{item.title}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
