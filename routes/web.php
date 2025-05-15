@@ -52,9 +52,10 @@ Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkou
 Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 
 Route::patch('/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])
-    ->middleware(['auth', 'role:manager,admin']) 
+    ->middleware(['auth', 'role:manager,admin'])
     ->name('products.toggle-visibility');
 
+Route::get('/products/categories', [ProductController::class, 'getCategorias']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

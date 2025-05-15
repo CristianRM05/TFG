@@ -13,13 +13,31 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    public function index()
-    {
-        $products = Product::where('is_visible', true)
-        ->where('stock', '>', 0)
-        ->paginate(6);
-        return response()->json($products, 200);
+public function index(Request $request)
+{
+    $query = Product::query()
+        ->where('is_visible', true)
+        ->where('stock', '>', 0);
+
+    if ($request->has('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
     }
+
+    if ($request->filled('category') && $request->category !== 'todas') {
+        $query->where('categoria', $request->category);
+    }
+
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    return response()->json($query->paginate(6));
+}
+
 
     public function show(Product $product)
 {
@@ -174,7 +192,7 @@ class ProductController extends Controller
         return Inertia::render('stock/stockIndex', [
             'products' => $products,
             'auth' => [
-                'user' => Auth::user()?->only(['name', 'email']),
+                'user' => Auth::user() ? ['name' => Auth::user()->name, 'email' => Auth::user()->email] : null,
             ],
         ]);
     }
@@ -206,7 +224,7 @@ class ProductController extends Controller
         return Inertia::render('ManagerPages/stockIndexManager', [
             'products' => $products,
             'auth' => [
-                'user' => Auth::user()?->only(['name', 'email']),
+                'user' => Auth::user() ? Auth::user()->only(['name', 'email']) : null,
             ],
         ]);
     }
