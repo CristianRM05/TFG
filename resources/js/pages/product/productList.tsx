@@ -81,18 +81,21 @@ const ProductList: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#F3F3F1] text-[#000000] py-12 px-6 flex flex-col">
-      <div className="max-w-7xl mx-auto flex-grow">
-        {filtered.length === 0 ? (
-          <p className="text-center text-gray-600 text-lg">No hay productos disponibles.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filtered.map(product => {
-              const hasDiscount = product.discount_percent && product.discount_percent > 0;
-              const finalPrice = hasDiscount
-                ? product.price * (1 - product.discount_percent / 100)
-                : product.price;
+    return (
+        <div className="min-h-screen bg-[#F3F3F1] text-[#000000] py-12 px-6 flex flex-col">
+            {/* Paneles de productos */}
+            <div className="max-w-7xl mx-auto flex-grow">
+                {products.length === 0 ? (
+                    <p className="text-center text-gray-600 text-lg">
+                        No hay productos disponibles.
+                    </p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {products.map((product) => {
+                            const hasDiscount = product.discount_percent && product.discount_percent > 0;
+                            const finalPrice = hasDiscount
+                                ? product.price * (1 - product.discount_percent / 100)
+                                : product.price;
 
               return (
                 <div key={product.id} className="flex flex-col justify-end p-8 rounded-xl bg-[#F3F3F1] text-gray-900 transition-all duration-300 hover:shadow-xl">

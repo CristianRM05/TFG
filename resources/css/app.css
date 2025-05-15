@@ -79,7 +79,7 @@
 }
 
 :root {
-    --background: #F3F3F1  ;
+    --background: #e4e4cb  ;
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -112,6 +112,16 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+     --nav-bg: #f3f3df;
+    --nav-logo-bg: #E17100;
+    --nav-logo-text: white;
+    --nav-item-text: #E17100;
+    --nav-item-icon: #E17100;
+    --nav-item-hover-bg: rgba(219, 218, 216, 0.1); /* #8F5C0C con 10% de opacidad */
+    --nav-item-hover-text: #8F5C0C;
+    --nav-item-active-bg: #e17000c5;
+    --nav-item-active-text: white;
+      --avatar-ring: #8F5C0C;
 }
 
 

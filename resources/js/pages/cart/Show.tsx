@@ -114,7 +114,7 @@ export default function CartShow({
     <AppLayout>
       <Head title="Mi Carrito" />
 
-      <div className="min-h-screen dark:bg-black bg-white text-gray-900 dark:text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen  text-gray-900 dark:text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {success && (
             <div className="fixed top-4 inset-x-0 flex justify-center z-50">
@@ -124,10 +124,8 @@ export default function CartShow({
             </div>
           )}
 
-          {/* grid: 1 col default; 3 cols from ≥1100px */}
           <div className="grid grid-cols-1 gap-8 [@media(min-width:1200px)]:grid-cols-3">
 
-            {/* Carrito items span 2 cols at ≥1100px */}
             <div className="space-y-6 [@media(min-width:1100px)]:col-span-2">
               <h1 className="text-3xl font-bold flex items-center gap-3">
                 <ShoppingBag className="text-amber-600" size={36} />
@@ -168,10 +166,10 @@ export default function CartShow({
                       </span>
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="p-2 bg-white/20 dark:bg-gray-700 rounded-full hover:bg-red-600 hover:text-white transition"
+                        className="p-2 bg-white/40  dark:bg-gray-700 rounded-full hover:bg-red-100 hover:text-white transition"
                         title="Eliminar"
                       >
-                        <Trash2 size={20} />
+                        <Trash2 color='red' size={20} />
                       </button>
                     </div>
                   </div>
