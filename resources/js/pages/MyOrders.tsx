@@ -150,14 +150,14 @@ export default function MyOrders() {
                                         </div>
                                         <p className="text-lg font-bold text-amber-500">€{total}</p>
                                     </button>
-                                 <a
-  href={route('orders.invoice', order.id)}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-block text-amber-600 hover:underline text-sm ml-4"
->
-  Descargar Factura
-</a>
+                                    <a
+                                        href={route('orders.invoice', order.id)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-block text-amber-600 hover:underline text-sm ml-4"
+                                    >
+                                        Descargar Factura
+                                    </a>
 
 
                                     {expandedOrderId === order.id && (
