@@ -19,18 +19,19 @@ export default function Login({ status, canResetPassword }) {
     post(route('login'), { onFinish: () => reset('password') });
   };
 
-  useEffect(() => {
-    if (errors.banned) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Cuenta suspendida',
-        text: errors.banned,
-        confirmButtonText: 'Entendido',
-        background: '#1a1a1a',
-        color: '#fff',
-      });
-    }
-  }, [errors.banned]);
+useEffect(() => {
+  if (errors.banned) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Cuenta suspendida',
+      text: errors.banned,
+      confirmButtonText: 'Entendido',
+      background: '#1a1a1a',
+      color: '#fff',
+    });
+  }
+}, [errors.banned]);
+
 
   return (
     <section className="min-h-screen bg-black flex items-center justify-center py-12 px-4">
