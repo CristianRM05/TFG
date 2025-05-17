@@ -10,6 +10,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutSuccessController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\DeliveryNoteController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -52,8 +53,9 @@ Route::get('/checkout/success', CheckoutSuccessController::class)->name('checkou
 Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 
 Route::patch('/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])
-    ->middleware(['auth', 'role:manager,admin']) 
+    ->middleware(['auth', 'role:manager,admin'])
     ->name('products.toggle-visibility');
+
 
 
 require __DIR__ . '/settings.php';

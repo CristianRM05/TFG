@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\DeliveryNoteController;
 
 
 Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
@@ -59,3 +60,10 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
 Route::patch('/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])
     ->middleware(['auth', 'role:manager,admin']) // Protegida para manager/admin
     ->name('products.toggle-visibility');
+
+
+    Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
+    Route::get('/delivery-notes-page', [DeliveryNoteController::class, 'view'])
+        ->name('manager.delivery-notes.page');
+});
+Route::middleware(['auth:sanctum'])->get('/delivery-notes', [DeliveryNoteController::class, 'index']);

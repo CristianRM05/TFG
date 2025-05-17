@@ -43,6 +43,12 @@ export default function Welcome() {
           desc: 'Resumen del stock disponible.',
           img: '/images/stock.jpg',
         },
+        {
+          title: '📄 Factura y Albaranes',
+          link: '/manager/delivery-notes-page',
+          desc: 'Facturas y albaranes.',
+          img: '/images/albaran.jpg',
+        },
       ];
 
     return (
