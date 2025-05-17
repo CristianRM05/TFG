@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+
 class OrderController extends Controller
 {
     use AuthorizesRequests;
@@ -49,7 +50,7 @@ class OrderController extends Controller
         }
     }
 
-    // 🟢 Si todo OK, seguimos con Stripe
+    // Si todo OK, seguimos con Stripe
     $discount = $request->input('discount', 0);
     $discountFactor = (100 - $discount) / 100;
 
@@ -108,6 +109,18 @@ class OrderController extends Controller
             'orders' => $orders
         ]);
     }
+
+    //para poder descargar el albaran desde manager
+public function downloadInvoiceManager($id)
+{
+    $order = Order::with('items.product')->findOrFail($id);
+
+    $pdf = Pdf::loadView('pdf.invoice', compact('order'));
+
+    return $pdf->download("albaran_pedido_{$order->ref}.pdf");
+}
+
+
 
     public function createOrder($user, $session, $cart, $total)
     {

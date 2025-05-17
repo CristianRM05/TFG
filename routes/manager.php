@@ -7,7 +7,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\DeliveryNoteController;
 
 
 Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
@@ -43,8 +42,10 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
         ->name('orders.manager');
 
     Route::put('/orders/{id}/assign', [OrderController::class, 'assignOrder'])
-        ->name('orders.assign');
+    ->name('orders.assign');
 
+    //albaran
+    Route::get('/orders/{id}/invoice', [OrderController::class, 'downloadInvoiceManager'])->name('orders.invoice');
 });
 
     // Movimientos
@@ -66,4 +67,5 @@ Route::patch('/products/{product}/toggle-visibility', [ProductController::class,
     Route::get('/delivery-notes-page', [DeliveryNoteController::class, 'view'])
         ->name('manager.delivery-notes.page');
 });
-Route::middleware(['auth:sanctum'])->get('/delivery-notes', [DeliveryNoteController::class, 'index']);
+
+

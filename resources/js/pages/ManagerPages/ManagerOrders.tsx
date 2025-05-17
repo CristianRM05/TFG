@@ -162,43 +162,39 @@ export default function ManagerOrdersPage() {
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={() => setFilterStatus('all')}
-                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${
-                                    filterStatus === 'all'
-                                        ? 'text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
+                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${filterStatus === 'all'
+                                    ? 'text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
                                 style={{ backgroundColor: filterStatus === 'all' ? '#E17100' : '' }}
                             >
                                 Todos
                             </button>
                             <button
                                 onClick={() => setFilterStatus('paid')}
-                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${
-                                    filterStatus === 'paid'
-                                        ? 'bg-yellow-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
+                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${filterStatus === 'paid'
+                                    ? 'bg-yellow-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
                             >
                                 Pagados
                             </button>
                             <button
                                 onClick={() => setFilterStatus('In progress')}
-                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${
-                                    filterStatus === 'In progress'
-                                        ? 'text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
+                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${filterStatus === 'In progress'
+                                    ? 'text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
                                 style={{ backgroundColor: filterStatus === 'In progress' ? '#E17100' : '' }}
                             >
                                 En proceso
                             </button>
                             <button
                                 onClick={() => setFilterStatus('Completed')}
-                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${
-                                    filterStatus === 'Completed'
-                                        ? 'bg-green-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
+                                className={`px-5 py-2 rounded-full text-sm font-medium cursor-pointer transform hover:scale-105 transition-transform duration-200 shadow-sm ${filterStatus === 'Completed'
+                                    ? 'bg-green-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
                             >
                                 Completados
                             </button>
@@ -229,9 +225,8 @@ export default function ManagerOrdersPage() {
                             {filteredOrders.map((order) => (
                                 <li
                                     key={order.id}
-                                    className={`p-5 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${
-                                        hoveredOrder === order.id ? 'bg-gray-50' : ''
-                                    }`}
+                                    className={`p-5 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${hoveredOrder === order.id ? 'bg-gray-50' : ''
+                                        }`}
                                     onMouseEnter={() => setHoveredOrder(order.id)}
                                     onMouseLeave={() => setHoveredOrder(null)}
                                 >
@@ -290,7 +285,20 @@ export default function ManagerOrdersPage() {
                                                             </li>
                                                         ))}
                                                     </ul>
-                                                    <div className="mt-5 pt-3 border-t border-gray-200 flex justify-end">
+                                                    {/* Boton para descargar albaran */}
+
+                                                    <div className="mt-5 pt-3 border-t border-gray-200 flex justify-between items-center">
+                                                        {/* Enlace de descarga alineado a la izquierda */}
+                                                        <a
+                                                            href={`/manager/orders/${order.id}/invoice`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                                        >
+                                                            Descargar albarán
+                                                        </a>
+
+                                                        {/* Total del pedido alineado a la derecha */}
                                                         <div className="text-right">
                                                             <span className="text-gray-600">Total del pedido: </span>
                                                             <span className="font-bold text-gray-900 text-lg ml-2" style={{ color: '#E17100' }}>
@@ -298,6 +306,7 @@ export default function ManagerOrdersPage() {
                                                             </span>
                                                         </div>
                                                     </div>
+
                                                 </div>
                                             )}
                                         </div>
@@ -308,6 +317,6 @@ export default function ManagerOrdersPage() {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </AppLayout >
     );
 }

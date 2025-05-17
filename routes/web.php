@@ -10,7 +10,6 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutSuccessController;
 use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\DeliveryNoteController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
