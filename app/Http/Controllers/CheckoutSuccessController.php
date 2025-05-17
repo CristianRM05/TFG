@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
@@ -37,9 +38,8 @@ class CheckoutSuccessController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $total = $cart->items->sum(fn($item) => $item->final_price * $item->quantity);
+        $total = $cart->items->sum(fn($item) => $item->price * $item->quantity);
 
-        // Crear el pedido usando el OrderController
         $orderController = new OrderController();
         $orderController->createOrder($user, $session, $cart, $total);
 

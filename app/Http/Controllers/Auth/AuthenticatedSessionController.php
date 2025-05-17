@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Enums\RolesEmployee;
-use App\Models\User; 
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -35,11 +35,12 @@ class AuthenticatedSessionController extends Controller
     // Primero verifica si el usuario está baneado
     $user = User::where('email', $request->email)->first();
 
-    if ($user && $user->banned_at) {
-        throw ValidationException::withMessages([
-            'email' => __('auth.banned'),
-        ]);
-    }
+ if ($user && $user->banned_at) {
+    throw ValidationException::withMessages([
+        'banned' => 'Tu cuenta ha sido suspendida. Contacta con soporte si crees que es un error.',
+    ]);
+}
+
 
     // Luego intenta la autenticación normal
     if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {

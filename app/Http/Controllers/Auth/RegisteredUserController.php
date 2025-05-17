@@ -48,7 +48,6 @@ class RegisteredUserController extends Controller
             $validated['avatar'] = $request->file('avatar')->store('photos', 'public');
         }
 
-        // Generar número de empleado
 
         // Hashear la contraseña
         $validated['password'] = Hash::make($validated['password']);

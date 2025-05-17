@@ -11,6 +11,7 @@ return [
     'alpha'                  => 'El campo :attribute sólo debe contener letras.',
     'alpha_dash'             => 'El campo :attribute sólo debe contener letras, números, guiones y guiones bajos.',
     'alpha_num'              => 'El campo :attribute sólo debe contener letras y números.',
+    'any_of'                 => 'El campo :attribute no es válido.',
     'array'                  => 'El campo :attribute debe ser un conjunto.',
     'ascii'                  => 'El campo :attribute solo debe contener caracteres alfanuméricos y símbolos de un solo byte.',
     'before'                 => 'El campo :attribute debe ser una fecha anterior a :date.',

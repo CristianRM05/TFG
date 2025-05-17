@@ -22,6 +22,8 @@ interface Props {
   monthlyRevenue: MonthlyRev[];
   thisMonthRevenue: number | string;
   auth: { user: { name: string } };
+[key: string]: any;
+
 }
 
 export default function Movimientos() {
