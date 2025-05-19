@@ -31,7 +31,7 @@ export default function CreateTicketModal({ isOpen, onClose, user }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Fondo oscuro */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50"
+        className="absolute inset-0  bg-opacity-40 backdrop-blur-sm bg-opacity-50"
         onClick={onClose}
       />
 
