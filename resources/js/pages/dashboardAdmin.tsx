@@ -516,8 +516,8 @@ export default function AdminDashboard() {
                     shelfErrors={shelfErrors}
                     processingShelf={processingShelf}
                     clearErrors={clearErrors}
-
-                />
+                    existingLocations={shelves.map(shelf => shelf.location)}
+                    />
             </div>
         </AppLayout>
     )
