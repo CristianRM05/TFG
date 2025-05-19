@@ -56,7 +56,7 @@ Route::patch('/products/{product}/toggle-visibility', [ProductController::class,
     ->name('products.toggle-visibility');
 
 Route::get('/products/categories', [ProductController::class, 'getCategorias']);
-Route::get('/factura/pedido/{order}', [OrderController::class, 'downloadInvoice'])->name('orders.invoice');
+Route::get('/factura/pedido/{order}', [OrderController::class, 'downloadInvoice'])->name('orders.invoice.download');
 
 
 require __DIR__ . '/settings.php';
