@@ -16,6 +16,8 @@ import {
   proceedToCheckout,
   deleteProduct
 } from '@/services/cartService';
+import { Toaster, toast } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MySwal = withReactContent(Swal);
 
@@ -61,7 +63,7 @@ export default function CartShow({
       const res = await proceedToCheckout(discount);
       window.location.href = res.data.url;
     } catch (e: any) {
-      MySwal.fire('Error', e.response?.data?.message || 'Pago fallido', 'error');
+      MySwal.fire('Error', e.response?.data?.message || 'Pago fallido. Revisa tu dirección', 'error');
     }
   };
 
@@ -79,7 +81,15 @@ export default function CartShow({
           ...cart,
           items: cart.items.filter((i: any) => i.id !== id)
         });
-        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Eliminado', timer: 1500 });
+        toast.success('Producto eliminado', {
+          icon: '🗑️',
+          style: {
+            borderRadius: '10px',
+            background: '#dc2626',
+            color: '#fff',
+          },
+          duration: 1500,
+        });
       }
     });
   };
@@ -93,15 +103,40 @@ export default function CartShow({
         i.id === id ? { ...i, quantity: qty } : i
       )
     });
+    toast.success(`Cantidad actualizada: ${qty}`, {
+      icon: '🛒',
+      style: {
+        borderRadius: '10px',
+        background: '#d97706',
+        color: '#fff',
+      },
+      duration: 1500,
+    });
   };
 
   const applyCoupon = async () => {
     try {
       const res = await applyCouponToCart(couponCode);
       setAppliedCoupon({ code: couponCode, discountPercentage: res.data.discount });
-      MySwal.fire('¡Cupón aplicado!', '', 'success');
+      toast.success('¡Cupón aplicado!', {
+        icon: '🎟️',
+        style: {
+          borderRadius: '10px',
+          background: '#16a34a',
+          color: '#fff',
+        },
+        duration: 1500,
+      });
     } catch {
-      MySwal.fire('Error', 'Cupón inválido', 'error');
+      toast.error('Cupón inválido', {
+        icon: '❌',
+        style: {
+          borderRadius: '10px',
+          background: '#dc2626',
+          color: '#fff',
+        },
+        duration: 1500,
+      });
     }
   };
 
@@ -113,6 +148,7 @@ export default function CartShow({
   return (
     <AppLayout>
       <Head title="Mi Carrito" />
+      <Toaster position="top-right" />
 
       <div className="min-h-screen  text-gray-900 dark:text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-8">
@@ -166,7 +202,7 @@ export default function CartShow({
                       </span>
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="p-2 bg-white/40  dark:bg-gray-700 rounded-full hover:bg-red-100 hover:text-white transition"
+                        className="p-2 bg-white/40 dark:bg-gray-700 rounded-full hover:bg-red-100 hover:text-white transition"
                         title="Eliminar"
                       >
                         <Trash2 color='red' size={20} />
