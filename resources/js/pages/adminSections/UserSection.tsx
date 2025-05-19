@@ -43,6 +43,17 @@ const UserSection: React.FC<Props> = ({
 
 }) => {
     const handleBanToggle = (user: User) => {
+
+        if (user.role === "Admin") {
+            Swal.fire({
+                icon: "error",
+                title: "Acción no permitida",
+                text: "No puedes banear a un administrador.",
+                background: styles.light,
+                customClass: { popup: 'shadow-lg' }
+            });
+            return;
+        }
         Swal.fire({
             title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
             icon: user.banned_at ? "question" : "warning",
@@ -212,17 +223,21 @@ const handleRoleChange = (user: User, newRole: string) => {
 </select>
 
                                     </td>
+                                    {/* Acciones */}
                                     <td className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleBanToggle(user)}
-                                            className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
-                                            style={{
-                                                backgroundColor: user.banned_at ? "rgba(0,128,0,0.15)" : "rgba(220,38,38,0.15)",
-                                                color: user.banned_at ? "green" : "#dc2626"
-                                            }}
-                                        >
-                                            {user.banned_at ? "Desbanear" : "Banear"}
-                                        </button>
+                                        {/* Solo muestra el boton de banear para los que no son Admin */}
+                                        {user.role !== "Admin" && (
+                                            <button
+                                                onClick={() => handleBanToggle(user)}
+                                                className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
+                                                style={{
+                                                    backgroundColor: user.banned_at ? "rgba(0,128,0,0.15)" : "rgba(220,38,38,0.15)",
+                                                    color: user.banned_at ? "green" : "#dc2626"
+                                                }}
+                                            >
+                                                {user.banned_at ? "Desbanear" : "Banear"}
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             )) : (
