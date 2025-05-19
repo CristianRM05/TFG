@@ -458,7 +458,7 @@ export default function AdminDashboard() {
                         totalPages={totalPages}
                         perPage={perPage}
                         totalUsers={totalUsers}
-                    />
+                        authUser={auth.user} roles={[]}                    />
 
                     <ShelfSection
                         styles={{ primary: "#E17100", light: "#F3F3DF" }}

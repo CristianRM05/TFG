@@ -12,53 +12,77 @@ use App\Models\Product;
 class AdminDashboardController extends Controller
 {
     public function create()
-{
-    $shelves = Shelf::with(['products'])
-                ->get()
-                ->map(function ($shelf) {
-                    return [
-                        'id' => $shelf->id,
-                        'code' => $shelf->code,
-                        'location' => $shelf->location,
-                        'max_capacity' => $shelf->max_capacity,
-                        'total_stock' => $shelf->products->sum('stock'),
-                        'products_count' => $shelf->products->count(),
-                        'capacity_percentage' => $shelf->max_capacity > 0
-                            ? min(100, ($shelf->products->sum('stock') / $shelf->max_capacity) * 100)
-                            : 0,
-                            'created_at' => $shelf->created_at,
-                    ];
-                });
+    {
+        $shelves = Shelf::with(['products'])
+                    ->get()
+                    ->map(function ($shelf) {
+                        return [
+                            'id' => $shelf->id,
+                            'code' => $shelf->code,
+                            'location' => $shelf->location,
+                            'max_capacity' => $shelf->max_capacity,
+                            'total_stock' => $shelf->products->sum('stock'),
+                            'products_count' => $shelf->products->count(),
+                            'capacity_percentage' => $shelf->max_capacity > 0
+                                ? min(100, ($shelf->products->sum('stock') / $shelf->max_capacity) * 100)
+                                : 0,
+                                'created_at' => $shelf->created_at,
+                        ];
+                    });
 
-    return Inertia::render('dashboardAdmin', [  
-        'shelves' => $shelves,
-        'roles' => RolesEmployee::casesArray(),
-        'products' => Product::with('shelf')->get(),
-        'auth' => ['user' => auth()->user()]
-    ]);
-}
+        // Obtener todos los usuarios para pasar a la vista
+        $users = User::select('id', 'name', 'last_name', 'email', 'phone', 'role', 'avatar', 'banned_at')
+                    ->get();
 
-public function banUser(User $user, Request $request)
+        return Inertia::render('dashboardAdmin', [
+            'shelves' => $shelves,
+            'roles' => RolesEmployee::casesArray(),
+            'products' => Product::with('shelf')->get(),
+            'users' => $users,
+            'totalUsers' => $users->count(),
+            'auth' => ['user' => auth()->user()]
+        ]);
+    }
+
+    public function banUser(User $user, Request $request)
+    {
+        $request->validate([
+            'banned' => 'required|boolean'
+        ]);
+
+        $request->banned ? $user->ban() : $user->unban();
+
+        // Devuelve una respuesta Inertia en lugar de JSON puro
+        return back()->with([
+            'success' => true,
+            'message' => $request->banned
+                ? 'Usuario baneado correctamente'
+                : 'Usuario desbaneado correctamente',
+            'user' => $user->fresh()
+        ]);
+    }
+
+ public function updateUserRole(User $user, Request $request)
 {
+    // Convertimos los enums a strings con ->value
+    $validRoles = array_map(fn($role) => $role->value, RolesEmployee::cases());
+
     $request->validate([
-        'banned' => 'required|boolean'
+        'role' => 'required|string|in:' . implode(',', $validRoles)
     ]);
 
-    $request->banned ? $user->ban() : $user->unban();
+    $user->role = $request->role;
+    $user->save();
 
-    // Devuelve una respuesta Inertia en lugar de JSON puro
-    return back()->with([
+    return response()->json([
         'success' => true,
-        'message' => $request->banned
-            ? 'Usuario baneado correctamente'
-            : 'Usuario desbaneado correctamente',
+        'message' => 'Rol de usuario actualizado correctamente',
         'user' => $user->fresh()
     ]);
-
-
 }
 
- /**
+
+    /**
      * Elimina una estantería (shelf)
      */
     public function deleteShelf(Shelf $shelf, Request $request)
@@ -83,14 +107,13 @@ public function banUser(User $user, Request $request)
     /**
      * Elimina un producto
      */
+    public function deleteProduct(Product $product, Request $request)
+    {
+        $product->delete();
+        return redirect()->back()->with('success', true);
+    }
 
-     public function deleteProduct(Product $product, Request $request)
-     {
-         $product->delete();
-         return redirect()->back()->with('success', true);
-     }
-
-public function storeShelf(Request $request)
+    public function storeShelf(Request $request)
     {
         $validated = $request->validate([
             'code' => 'required|string|max:255|unique:shelves',
@@ -105,7 +128,5 @@ public function storeShelf(Request $request)
             'message' => 'Estantería creada con éxito',
             'shelf' => $shelf
         ]);
-
-}
-
+    }
 }

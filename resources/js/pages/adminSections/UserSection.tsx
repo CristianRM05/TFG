@@ -6,6 +6,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Users } from "lucide
 import Swal from "sweetalert2"
 import { router } from "@inertiajs/react"
 import type { User } from "@/types"
+import axios from 'axios'
 
 interface Props {
     styles: any
@@ -19,6 +20,11 @@ interface Props {
     perPage: number
     totalUsers: number
     setUsers: React.Dispatch<React.SetStateAction<User[]>>
+    roles: string[] // Lista de roles disponibles
+    authUser: {
+  id: number;
+}
+
 }
 
 const UserSection: React.FC<Props> = ({
@@ -32,7 +38,9 @@ const UserSection: React.FC<Props> = ({
     totalPages,
     perPage,
     totalUsers,
-    setUsers
+    setUsers,
+    authUser, // <-- add this line
+
 }) => {
     const handleBanToggle = (user: User) => {
 
@@ -92,6 +100,56 @@ const UserSection: React.FC<Props> = ({
             }
         });
     }
+    const roles = ["Admin", "Manager", "Cliente"];
+
+
+const handleRoleChange = (user: User, newRole: string) => {
+    if (newRole === user.role) return;
+
+    Swal.fire({
+        title: `¿Cambiar rol de ${user.name}?`,
+        text: `¿Estás seguro de querer cambiar el rol de ${user.name} de ${user.role} a ${newRole}?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: styles.primary,
+        cancelButtonColor: styles.secondary,
+        confirmButtonText: "Sí, cambiar rol",
+        cancelButtonText: "Cancelar",
+        background: styles.light,
+        customClass: {
+            popup: 'shadow-lg',
+            confirmButton: 'hover:opacity-90 transition-opacity'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            axios.patch(`/admin/users/${user.id}/role`, { role: newRole })
+                .then((response) => {
+                    setUsers(prev => prev.map(u => u.id === user.id ? {
+                        ...u,
+                        role: newRole
+                    } : u));
+                    Swal.fire({
+                        icon: "success",
+                        title: "Rol actualizado",
+                        text: `El rol de ${user.name} ha sido actualizado a ${newRole}`,
+                        showConfirmButton: false,
+                        timer: 1800,
+                        background: styles.light,
+                        customClass: { popup: 'shadow-lg' }
+                    });
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error en el proceso",
+                        text: "No se pudo actualizar el rol del usuario.",
+                        background: styles.light,
+                        customClass: { popup: 'shadow-lg' }
+                    });
+                });
+        }
+    });
+}
 
     return (
         <>
@@ -144,13 +202,26 @@ const UserSection: React.FC<Props> = ({
                                     <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{user.phone}</td>
                                     <td className="px-6 py-4">
-                                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                            style={{
-                                                backgroundColor: user.role === "Admin" ? "#fef9c3" : user.role === "Manager" ? "#dbeafe" : "rgba(0,128,0,0.2)",
-                                                color: user.role === "Admin" ? "#b45309" : user.role === "Manager" ? "#1d4ed8" : "green"
-                                            }}>
-                                            {user.role}
-                                        </span>
+                                        <select
+  disabled={authUser.id === user.id} // 👈 aquí está la magia
+  className="px-3 py-1 text-xs leading-5 font-semibold rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-opacity-50 cursor-pointer disabled:opacity-60"
+  style={{
+    backgroundColor: user.role === "Admin" ? "#fef9c3" : user.role === "Manager" ? "#dbeafe" : "rgba(0,128,0,0.2)",
+    color: user.role === "Admin" ? "#b45309" : user.role === "Manager" ? "#1d4ed8" : "green",
+    boxShadow: "none",
+    appearance: "auto",
+    focusRingColor: styles.primary
+  }}
+  value={user.role}
+  onChange={(e) => handleRoleChange(user, e.target.value)}
+>
+  {roles.map((role) => (
+    <option key={role} value={role}>
+      {role}
+    </option>
+  ))}
+</select>
+
                                     </td>
                                     {/* Acciones */}
                                     <td className="px-6 py-4">
