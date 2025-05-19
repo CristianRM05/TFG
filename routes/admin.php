@@ -16,7 +16,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
 
     Route::get('/users', function () {
-        $users = User::paginate(5); 
+        $users = User::paginate(5);
 
         return response()->json([
             'success' => true,
@@ -118,6 +118,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     //ruta para borrar products
     Route::delete('/products/{product}', [AdminDashboardController::class, 'deleteProduct'])
         ->name('admin.products.delete');
+    Route::patch('/users/{user}/role', [AdminDashboardController::class, 'updateUserRole'])->name('admin.users.role');
 
 
     //CATEGORIAS, PRODUCTOS Y ESTANTERIAS
