@@ -209,8 +209,7 @@ const handleRoleChange = (user: User, newRole: string) => {
     backgroundColor: user.role === "Admin" ? "#fef9c3" : user.role === "Manager" ? "#dbeafe" : "rgba(0,128,0,0.2)",
     color: user.role === "Admin" ? "#b45309" : user.role === "Manager" ? "#1d4ed8" : "green",
     boxShadow: "none",
-    appearance: "auto",
-    focusRingColor: styles.primary
+    appearance: "auto"
   }}
   value={user.role}
   onChange={(e) => handleRoleChange(user, e.target.value)}
