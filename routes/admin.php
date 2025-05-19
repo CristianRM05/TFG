@@ -9,6 +9,7 @@ use App\Models\Shelf;
 use App\Models\Categoria;
 use App\Models\Product;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TicketController;
 
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -94,15 +95,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         ]);
     })->name('admin.products.index');
 
-    // Ruta para categorías
-    Route::get('/categorias', function () {
-        $categorias = Categoria::all();
-
-        return response()->json([
-            'success' => true,
-            'categorias' => $categorias
-        ]);
-    })->name('admin.categorias.index');
 
 
     // Otras rutas existentes
@@ -126,5 +118,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/products', [ProductController::class, 'store']);
     Route::post('/shelves', [AdminDashboardController::class, 'storeShelf'])
         ->name('admin.shelves.store');
+
+
+         Route::get('/tickets', [TicketController::class, 'adminIndex'])->name('admin.tickets.index');
+    Route::get('/tickets/{id}', [TicketController::class, 'adminShow'])->name('admin.tickets.show');
+    Route::post('/tickets/{id}/reply', [TicketController::class, 'adminReply'])->name('admin.tickets.reply');
+Route::patch('/tickets/{id}', [TicketController::class, 'adminUpdate'])->name('admin.tickets.update');
 
 });

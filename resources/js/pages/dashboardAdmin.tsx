@@ -12,6 +12,7 @@ import { useState, useEffect } from "react"
 import UserSection from "./adminSections/UserSection"
 import ShelfSection from "./adminSections/shelfSection"
 import ProductSection from "./adminSections/productSection"
+import TicketSection from "./adminSections/ticketySection"
 
 // Interfaz para Categoria que coincide con la esperada por ProductModal
 interface CategoriaWithValue {
@@ -116,6 +117,12 @@ export default function AdminDashboard() {
     const [totalUsers, setTotalUsers] = useState(0)
     const [products, setProducts] = useState<ExtendedProduct[]>([])
     const [openSection, setOpenSection] = useState<string | null>("null") // 'users', 'shelves', 'products' o null
+     const [tickets, setTickets] = useState([])
+  const [ticketsPage, setTicketsPage] = useState(1)
+  const [ticketsTotalPages, setTicketsTotalPages] = useState(1)
+  const [ticketsPerPage] = useState(10)
+  const [totalTickets, setTotalTickets] = useState(0)
+  const [loadingTickets, setLoadingTickets] = useState(false)
     const [loading, setLoading] = useState({
         users: false,
         shelves: false,
@@ -392,6 +399,28 @@ export default function AdminDashboard() {
     }
 
 
+  const fetchTickets = async (page = 1) => {
+    setLoadingTickets(true)
+    try {
+      const res = await fetch(`/admin/tickets?per_page=${ticketsPerPage}&page=${page}`)
+      const data = await res.json()
+      if (data.success) {
+        setTickets(data.tickets)
+        setTicketsPage(data.pagination.current_page)
+        setTicketsTotalPages(data.pagination.last_page)
+        setTotalTickets(data.pagination.total)
+      }
+    } catch (error) {
+      console.error("Error al cargar los tickets:", error)
+    } finally {
+      setLoadingTickets(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTickets(ticketsPage)
+  }, [ticketsPage])
+
     return (
         <AppLayout breadcrumbs={breadcrumbs} className="bg-[#F3F3DF] text-[#333]">
             <Head title="Dashboard Admin" />
@@ -488,6 +517,18 @@ export default function AdminDashboard() {
                         allShelvesForProducts={allShelvesForProducts}
                         handleDeleteProduct={handleDeleteProduct}
                     />
+                     <TicketSection
+        styles={styles}
+        tickets={tickets}
+        loading={loadingTickets}
+        openSection={openSection}
+        setOpenSection={setOpenSection}
+        ticketsPage={ticketsPage}
+        setTicketsPage={setTicketsPage}
+        ticketsTotalPages={ticketsTotalPages}
+        ticketsPerPage={ticketsPerPage}
+        totalTickets={totalTickets}
+      />
                 </section>
 
                 {/* Modales */}

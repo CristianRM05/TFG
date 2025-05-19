@@ -43,6 +43,13 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+  <Link href={route('tickets.my')} className="nav-link" onClick={cleanup}>
+    <Package className="mr-2" />
+    Mis Tickets
+  </Link>
+</DropdownMenuItem>
+<DropdownMenuSeparator />
         </>
     );
 }
