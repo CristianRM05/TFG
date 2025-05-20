@@ -32,20 +32,31 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
     Route::get('/shelves', function (\Illuminate\Http\Request $request) {
         $perPage = $request->input('per_page', 10);
-        $shelves = \App\Models\Shelf::with('products')->paginate($perPage);
-
+        
+        $shelves = \App\Models\Shelf::with(['products' => function($query) {
+            $query->select('id', 'shelf_id', 'stock');
+        }])->paginate($perPage);
+    
+        // Transformar los datos para incluir los cálculos
         $shelvesData = $shelves->getCollection()->map(function ($shelf) {
+            $totalStock = $shelf->products->sum('stock');
+            $productsCount = $shelf->products->count();
+            $capacityPercentage = min(100, ($totalStock / $shelf->max_capacity) * 100);
+    
             return [
                 'id' => $shelf->id,
                 'code' => $shelf->code,
                 'location' => $shelf->location,
                 'max_capacity' => $shelf->max_capacity,
+                'total_stock' => $totalStock,
+                'products_count' => $productsCount,
+                'capacity_percentage' => $capacityPercentage,
                 'created_at' => $shelf->created_at,
                 'updated_at' => $shelf->updated_at,
                 'products' => $shelf->products,
             ];
         });
-
+    
         return response()->json([
             'success' => true,
             'shelves' => $shelvesData,

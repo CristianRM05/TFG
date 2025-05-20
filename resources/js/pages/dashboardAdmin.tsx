@@ -251,31 +251,23 @@ export default function AdminDashboard() {
     }
 
     const submitShelf = (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
         postShelf("/admin/shelves", {
-            preserveScroll: true,
+            preserveScroll: true, // Mantiene la posición de scroll
             onSuccess: () => {
-                resetShelf()
-                setOpenShelfModal(false)
+                resetShelf();
+                setOpenShelfModal(false);
+
                 Swal.fire({
                     title: "¡Éxito!",
                     text: "Estantería creada con éxito",
-                    showConfirmButton: false,
                     icon: "success",
-                    confirmButtonColor: styles.primary,
+                    showConfirmButton: false,
                     timer: 3000,
-                })
+                });
 
-                // Recargar la lista de estanterías
-                fetch("/admin/shelves")
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            setShelves(data.shelves)
-                            setTotalShelves(data.total || data.shelves.length)
-                        }
-                    })
-                    .catch((error) => console.error("Error al recargar estanterías:", error))
+                // 🔥 Recarga la página para actualizar la lista (manteniendo paginación)
+                router.reload();
             },
             onError: () => {
                 Swal.fire({
@@ -285,10 +277,10 @@ export default function AdminDashboard() {
                     confirmButtonColor: styles.secondary,
                     showConfirmButton: false,
                     timer: 3000,
-                })
+                });
             },
-        })
-    }
+        });
+    };
 
     const handleDeleteShelf = (shelfId: number) => {
         Swal.fire({
