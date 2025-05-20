@@ -225,7 +225,7 @@ const ProductList: React.FC = () => {
                                         {/* Indicador si esta disponible o no */}
                                         {(product.stock ?? 0) > 0 ? (
                                             <p className="text-sm text-green-600 w-full text-center">
-                                                disponibles
+                                                Disponible
                                             </p>
                                         ) : (
                                             <p className="text-sm text-red-600 w-full text-center">

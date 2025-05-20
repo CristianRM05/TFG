@@ -39,9 +39,18 @@ public function index(Request $request)
 }
 
 
-    public function show(Product $product)
+public function show(Product $product)
 {
-    $product->load('shelf');
+    $product->load(['shelf' => function($query) {
+        $query->withCount('products')
+              ->withSum('products', 'stock');
+    }]);
+
+    if ($product->shelf) {
+        $product->shelf->total_stock = $product->shelf->products_sum_stock;
+        $product->shelf->capacity_percentage = 
+            min(($product->shelf->total_stock / $product->shelf->max_capacity) * 100, 100);
+    }
 
     return Inertia::render('stock/showProduct', [
         'product' => $product
@@ -72,31 +81,22 @@ public function index(Request $request)
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
 
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
+    public function update(Request $request, Product $product)
+{
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'num_reference' => 'sometimes|string|max:50',
-            'stock' => 'sometimes|numeric|min:0',
-            'price' => 'sometimes|numeric|min:0',
-            'image_url' => 'nullable|image|max:2048',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'stock' => 'required|integer|min:0',
+    ]);
 
-        if ($request->hasFile('photograph')) {
-            if ($product->photograph) {
-                Storage::disk('public')->delete($product->photograph);
-            }
+    $product->update($validated);
 
-            $validated['photograph'] = $request->file('photograph')->store('products', 'public');
-        }
-
-        $product->update($validated);
-
-        return redirect()->back()->with('success', 'Producto actualizado con éxito');
-    }
+    return back()->with([
+        'success' => 'Producto actualizado correctamente',
+        'product' => $product->fresh()
+    ]);
+}
 
     public function unassignedProducts()
     {
