@@ -124,7 +124,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/role', [AdminDashboardController::class, 'updateUserRole'])->name('admin.users.role');
 
 
-    //CATEGORIAS, PRODUCTOS Y ESTANTERIAS
+    //CATEGORIAS, PRODUCTOS Y ESTANTERIAS Y TICKETS
     Route::get('/products/categorias', [ProductController::class, 'getCategorias']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::post('/shelves', [AdminDashboardController::class, 'storeShelf'])

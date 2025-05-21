@@ -94,23 +94,30 @@ class TicketController extends Controller
         return back()->with('success', 'Mensaje enviado');
     }
 
-   public function adminIndex(Request $request)
-{
-    $perPage = $request->input('per_page', 10);
-
-    $tickets = Ticket::with('user')->latest()->paginate($perPage);
-
-    return response()->json([
-        'success' => true,
-        'tickets' => $tickets->items(),
-        'pagination' => [
-            'current_page' => $tickets->currentPage(),
-            'last_page' => $tickets->lastPage(),
-            'per_page' => $tickets->perPage(),
-            'total' => $tickets->total(),
-        ]
-    ]);
-}
+    public function adminIndex(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        
+        $query = Ticket::with('user')->latest();
+        
+        // Filtrar por estado si se proporciona
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        
+        $tickets = $query->paginate($perPage);
+        
+        return response()->json([
+            'success' => true,
+            'tickets' => $tickets->items(),
+            'pagination' => [
+                'current_page' => $tickets->currentPage(),
+                'last_page' => $tickets->lastPage(),
+                'per_page' => $tickets->perPage(),
+                'total' => $tickets->total(),
+            ]
+        ]);
+    }
 
  public function adminShow($id)
 {
