@@ -543,14 +543,14 @@ export default function AdminDashboard() {
                         Swal.fire({
                             title: '¡Borrado!',
                             text: 'La estantería ha sido eliminada.',
-                            icon: 'success',
                             showConfirmButton: false,
-                            background: styles.light,
+                            icon: 'success',
                             confirmButtonColor: styles.primary,
+                            background: styles.light,
                             timer: 2000,
                             customClass: {
                                 popup: 'shadow-lg'
-                            }
+                                }
                         });
                     },
                     onError: (errors) => {
@@ -588,6 +588,14 @@ export default function AdminDashboard() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Eliminando producto...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                  });
                 router.delete(`/admin/products/${productId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
