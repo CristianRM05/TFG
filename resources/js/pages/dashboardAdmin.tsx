@@ -740,7 +740,7 @@ export default function AdminDashboard() {
                 </section>
 
                 {/* Estadísticas */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {[
                         {
                             label: "Total Usuarios",
@@ -755,7 +755,7 @@ export default function AdminDashboard() {
                             value: loading.products ? "..." : totalProducts,
                         },
                         {
-                            label: "Tickets Totales",
+                            label: "Total Tickets",
                             value: loadingTickets ? "..." : totalTickets,
                         },
                     ].map((item, i) => (
@@ -817,7 +817,7 @@ export default function AdminDashboard() {
                         handleDeleteProduct={handleDeleteProduct}
                     />
                     <TicketSection
-                        styles={styles}
+                        styles={{ primary: "#E17100", light: "#F3F3DF" }}
                         tickets={tickets}
                         loading={loadingTickets}
                         openSection={openSection}
