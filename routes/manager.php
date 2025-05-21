@@ -15,6 +15,7 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
     Route::get('/stock', [ProductController::class, 'stockIndexManager'])->name('stock.manager');
 
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 
     //descuentos
     Route::prefix('discounts')->group(function () {

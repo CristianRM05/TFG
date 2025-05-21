@@ -148,7 +148,7 @@ const ProductSection: React.FC<Props> = ({
                     )}
 
                     {/* Paginación */}
-                    {productsTotalPages > 1 && (
+                    {(productsTotalPages > 1 || Math.ceil(totalProducts / productsPerPage) > 1) && (
                         <div className="flex items-center justify-between p-6 text-sm text-gray-600">
                             <div>
                                 Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts}
@@ -163,13 +163,21 @@ const ProductSection: React.FC<Props> = ({
                                     <ChevronLeft size={18} />
                                 </button>
                                 {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
-                                    const page = productsPage <= 3
-                                        ? i + 1
-                                        : productsPage >= productsTotalPages - 2
-                                            ? productsTotalPages - 4 + i
-                                            : productsPage - 2 + i
+                                    let page;
+                                    if (productsTotalPages <= 5) {
+                                        page = i + 1;
+                                    } else if (productsPage <= 3) {
+                                        page = i + 1;
+                                    } else if (productsPage >= productsTotalPages - 2) {
+                                        page = (productsTotalPages - 5) + i + 1;  
+                                    } else {
+                                        page = productsPage - 2 + i;
+                                    }
+
                                     return (
-                                        <button key={page} onClick={() => setProductsPage(page)}
+                                        <button
+                                            key={page}
+                                            onClick={() => setProductsPage(page)}
                                             className={`w-10 h-10 rounded-lg font-medium ${productsPage === page ? "shadow-md" : ""}`}
                                             style={{
                                                 backgroundColor: productsPage === page ? styles.primary : "transparent",

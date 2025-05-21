@@ -4,7 +4,7 @@ import type React from "react"
 import { Head, useForm, usePage, router } from "@inertiajs/react"
 import AppLayout from "@/layouts/app-layout"
 import { Button } from "@/components/ui/button"
-import type { BreadcrumbItem, User, Shelf } from "@/types"
+import type { BreadcrumbItem, User } from "@/types"
 import Swal from "sweetalert2"
 import ProductModal from "./product/create"
 import ShelfModal from "./shelves/create"
@@ -45,9 +45,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function AdminDashboard() {
+    const [ticketStatusFilter, setTicketStatusFilter] = useState<string>("all")
     const [users, setUsers] = useState<User[]>([])
     // Para estanterías
-    const [shelves, setShelves] = useState<any[]>([]);
+    const [shelves, setShelves] = useState<any[]>([])
     const [shelvesPage, setShelvesPage] = useState(1)
     const [shelvesTotalPages, setShelvesTotalPages] = useState(1)
     const [shelvesPerPage, setShelvesPerPage] = useState(5)
@@ -58,26 +59,31 @@ export default function AdminDashboard() {
     const [productsTotalPages, setProductsTotalPages] = useState(1)
     const [productsPerPage, setProductsPerPage] = useState(5)
     const [totalProducts, setTotalProducts] = useState(0)
-    const { auth, shelves: shelvesFromProps, roles, products: productsFromProps } = usePage<{
-        auth: { user: User | null };
+    const {
+        auth,
+        shelves: shelvesFromProps,
+        roles,
+        products: productsFromProps,
+    } = usePage<{
+        auth: { user: User | null }
         shelves: Array<{
-            id: number;
-            code: string;
-            location: string;
-            max_capacity: number;
-            total_stock: number;
-            products_count: number;
-            capacity_percentage: number;
-        }>;
+            id: number
+            code: string
+            location: string
+            max_capacity: number
+            total_stock: number
+            products_count: number
+            capacity_percentage: number
+        }>
         roles: Array<{
-            value: string;
-            label: string;
-        }>;
-        products: ExtendedProduct[];
-    }>().props;
-    const allShelvesForProducts = shelvesFromProps || [];
+            value: string
+            label: string
+        }>
+        products: ExtendedProduct[]
+    }>().props
+    const allShelvesForProducts = shelvesFromProps || []
 
-    console.log('Datos completos:', { auth, shelves, roles });
+    console.log("Datos completos:", { auth, shelves, roles })
     const [categorias, setCategorias] = useState<CategoriaWithValue[]>([])
     const [openProductModal, setOpenProductModal] = useState(false)
     const [openShelfModal, setOpenShelfModal] = useState(false)
@@ -117,18 +123,19 @@ export default function AdminDashboard() {
     const [totalUsers, setTotalUsers] = useState(0)
     const [products, setProducts] = useState<ExtendedProduct[]>([])
     const [openSection, setOpenSection] = useState<string | null>("null") // 'users', 'shelves', 'products' o null
-     const [tickets, setTickets] = useState([])
-  const [ticketsPage, setTicketsPage] = useState(1)
-  const [ticketsTotalPages, setTicketsTotalPages] = useState(1)
-  const [ticketsPerPage] = useState(10)
-  const [totalTickets, setTotalTickets] = useState(0)
-  const [loadingTickets, setLoadingTickets] = useState(false)
+    const [tickets, setTickets] = useState([])
+    const [ticketsPage, setTicketsPage] = useState(1)
+    const [ticketsTotalPages, setTicketsTotalPages] = useState(1)
+    const [ticketsPerPage] = useState(5)
+    const [totalTickets, setTotalTickets] = useState(0)
+    const [loadingTickets, setLoadingTickets] = useState(false)
     const [loading, setLoading] = useState({
         users: false,
         shelves: false,
         products: false,
         categorias: false,
     })
+
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading((prev) => ({ ...prev, users: true }))
@@ -154,64 +161,113 @@ export default function AdminDashboard() {
         }
         fetchUsers()
     }, [currentPage])
+    useEffect(() => {
+        // Event listeners para actualizar datos desde el modal de producto
+        const handleUpdateTotalUsers = (e: any) => setTotalUsers(e.detail.total)
+        const handleUpdateTotalShelves = (e: any) => setTotalShelves(e.detail.total)
+        const handleUpdateTotalProducts = (e: any) => {
+            setTotalProducts(e.detail.total)
 
+            // Calcular el número total de páginas basado en el total de productos y productos por página
+            const calculatedTotalPages = Math.ceil(e.detail.total / productsPerPage)
+            setProductsTotalPages(Math.max(calculatedTotalPages, 1))
+
+            console.log("Actualizando paginación:", {
+                total: e.detail.total,
+                perPage: productsPerPage,
+                calculatedPages: calculatedTotalPages,
+            })
+
+            setTimeout(() => {
+                setProductsPage(e.detail.lastPage || 1)
+            }, 100)
+        }
+        const handleUpdateProducts = (e: any) => {
+            setProducts(e.detail.products)
+            setOpenSection("products") // Abrir la sección de productos
+
+            // Si se fuerza la actualización de la paginación, actualizar también el número total de páginas
+            if (e.detail.forceUpdatePagination) {
+                setProductsTotalPages(e.detail.totalPages || 1)
+            }
+        }
+
+        window.addEventListener("updateTotalUsers", handleUpdateTotalUsers)
+        window.addEventListener("updateTotalShelves", handleUpdateTotalShelves)
+        window.addEventListener("updateTotalProducts", handleUpdateTotalProducts)
+        window.addEventListener("updateProducts", handleUpdateProducts)
+
+        return () => {
+            window.removeEventListener("updateTotalUsers", handleUpdateTotalUsers)
+            window.removeEventListener("updateTotalShelves", handleUpdateTotalShelves)
+            window.removeEventListener("updateTotalProducts", handleUpdateTotalProducts)
+            window.removeEventListener("updateProducts", handleUpdateProducts)
+        }
+    }, [])
     // Cargar , estanterías y productos
     useEffect(() => {
         // Estanterías paginadas
         const fetchShelves = async () => {
-            setLoading((prev) => ({ ...prev, shelves: true }));
+            setLoading((prev) => ({ ...prev, shelves: true }))
             try {
-                const response = await fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`);
-                if (!response.ok) throw new Error("Error al cargar estanterías");
-                const data = await response.json();
+                const response = await fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                if (!response.ok) throw new Error("Error al cargar estanterías")
+                const data = await response.json()
 
                 if (data.success) {
                     const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
                         ...shelf,
                         total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
                         products_count: shelf.products?.length || 0,
-                        capacity_percentage: shelf.max_capacity > 0
-                            ? Math.min(100, ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) / shelf.max_capacity) * 100)
-                            : 0
-                    }));
+                        capacity_percentage:
+                            shelf.max_capacity > 0
+                                ? Math.min(
+                                    100,
+                                    ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) /
+                                        shelf.max_capacity) *
+                                    100,
+                                )
+                                : 0,
+                    }))
 
-                    setShelves(shelvesWithCalculations);
-                    setTotalShelves(data.pagination.total);
-                    setShelvesTotalPages(data.pagination.last_page);
-                    setShelvesPerPage(data.pagination.per_page);
+                    setShelves(shelvesWithCalculations)
+                    setTotalShelves(data.pagination.total)
+                    setShelvesTotalPages(data.pagination.last_page)
+                    setShelvesPerPage(data.pagination.per_page)
                 }
             } catch (error) {
-                console.error("Error al cargar estanterías:", error);
+                console.error("Error al cargar estanterías:", error)
                 // ...datos de ejemplo
             } finally {
-                setLoading((prev) => ({ ...prev, shelves: false }));
+                setLoading((prev) => ({ ...prev, shelves: false }))
             }
-        };
+        }
 
         // Productos paginados
+        // Productos paginados
         const fetchProducts = async () => {
-            setLoading((prev) => ({ ...prev, products: true }));
+            setLoading((prev) => ({ ...prev, products: true }))
             try {
-                const response = await fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`);
-                if (!response.ok) throw new Error("Error al cargar productos");
-                const data = await response.json();
+                const response = await fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                if (!response.ok) throw new Error("Error al cargar productos")
+                const data = await response.json()
 
                 if (data.success) {
-                    setProducts(data.products);
-                    setTotalProducts(data.pagination.total);
-                    setProductsTotalPages(data.pagination.last_page);
-                    setProductsPerPage(data.pagination.per_page);
+                    setProducts(data.products)
+                    setTotalProducts(data.pagination.total)
+                    setProductsTotalPages(data.pagination.last_page)
+                    setProductsPerPage(data.pagination.per_page)
                 }
             } catch (error) {
-                console.error("Error al cargar productos:", error);
+                console.error("Error al cargar productos:", error)
             } finally {
-                setLoading((prev) => ({ ...prev, products: false }));
+                setLoading((prev) => ({ ...prev, products: false }))
             }
-        };
+        }
 
-        fetchShelves();
-        fetchProducts();
-    }, [shelvesPage, shelvesPerPage, productsPage, productsPerPage]);
+        fetchShelves()
+        fetchProducts()
+    }, [shelvesPage, shelvesPerPage, productsPage, productsPerPage])
     // Función para mostrar mensajes de error
     const showError = (message: string) => {
         Swal.fire({
@@ -222,39 +278,182 @@ export default function AdminDashboard() {
         })
     }
 
+    // Modifica la función fetchTickets para que siempre obtenga el total de tickets
+    const fetchTickets = async (page = 1) => {
+        setLoadingTickets(true)
+        try {
+            // Obtener tickets filtrados
+            const statusParam = ticketStatusFilter !== "all" ? `&status=${ticketStatusFilter}` : ""
+            const res = await fetch(`/admin/tickets?per_page=${ticketsPerPage}&page=${page}${statusParam}`)
+            const data = await res.json()
+
+            if (data.success) {
+                setTickets(data.tickets)
+                setTicketsPage(data.pagination.current_page)
+                setTicketsTotalPages(data.pagination.last_page)
+
+                // Si no hay filtro, usar el total directamente
+                if (ticketStatusFilter === "all") {
+                    setTotalTickets(data.pagination.total)
+                } else {
+                    // Si hay filtro, hacer una petición adicional para obtener el total sin filtrar
+                    const resAll = await fetch(`/admin/tickets?per_page=1&page=1`)
+                    const dataAll = await resAll.json()
+                    if (dataAll.success) {
+                        setTotalTickets(dataAll.pagination.total)
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar los tickets:", error)
+        } finally {
+            setLoadingTickets(false)
+        }
+    }
 
     useEffect(() => {
-        if (productsFromProps) {
-            setProducts(productsFromProps);
-            setTotalProducts(productsFromProps.length);
-        }
-    }, [productsFromProps]);
+        fetchTickets(ticketsPage)
+    }, [ticketsPage, ticketStatusFilter])
+
+    // Añadir este useEffect para cargar los tickets inicialmente
+    useEffect(() => {
+        fetchTickets(1)
+    }, []) // Este efecto se ejecutará solo una vez al montar el componente
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>
     const user = auth.user
 
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        // Mostrar indicador de carga
+        Swal.fire({
+            title: "Creando producto...",
+            text: "Por favor espera",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+        })
+
         post("/admin/products", {
             preserveScroll: true,
             onSuccess: () => {
                 resetProduct()
                 setOpenProductModal(false)
-                fetch(`/admin/products?page=1&per_page=${productsPerPage}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            const newTotal = data.pagination.total
-                            const newLastPage = data.pagination.last_page
 
-                            setTotalProducts(newTotal)
-                            setProductsPage(newLastPage) // <- aquí se fuerza a ir a la última página
+                // Cerrar el indicador de carga
+                Swal.close()
+
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    title: "¡Éxito!",
+                    text: "Producto creado con éxito",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+
+                // Enfoque 1: Intentar con router.reload() pero con un pequeño retraso
+                setTimeout(() => {
+                    try {
+                        console.log("Intentando recargar la página...")
+                        router.reload({ only: ["products", "shelves"] })
+                    } catch (error) {
+                        console.error("Error al recargar con router:", error)
+
+                        // Enfoque 2: Si falla, intentar con window.location.reload()
+                        try {
+                            console.log("Intentando con window.location.reload()...")
+                            window.location.reload()
+                        } catch (reloadError) {
+                            console.error("Error al recargar la página:", reloadError)
+
+                            // Enfoque 3: Si todo falla, intentar actualizar manualmente
+                            console.log("Intentando actualizar manualmente...")
+                            updateAllData()
                         }
-                    })
+                    }
+                }, 500) // Pequeño retraso para asegurar que el servidor haya procesado todo
+            },
+            onError: (errors) => {
+                // Cerrar el indicador de carga
+                Swal.close()
 
-                    .catch((error) => console.error("Error al recargar productos:", error))
+                console.error("Error al crear producto:", errors)
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al crear el producto",
+                    icon: "error",
+                    confirmButtonColor: "#dc2626",
+                    timer: 3000,
+                })
             },
         })
+
+        // Función para actualizar todos los datos manualmente
+        const updateAllData = () => {
+            console.log("Actualizando todos los datos manualmente...")
+
+            // 1. Actualizar estadísticas generales
+            Promise.all([
+                fetch("/admin/users?page=1").then((res) => res.json()),
+                fetch("/admin/shelves?page=1").then((res) => res.json()),
+                fetch("/admin/products?page=1").then((res) => res.json()),
+            ])
+                .then(([usersData, shelvesData, productsData]) => {
+                    console.log("Datos recibidos:", { usersData, shelvesData, productsData })
+
+                    // Actualizar contadores
+                    if (usersData.success) setTotalUsers(usersData.pagination.total)
+                    if (shelvesData.success) setTotalShelves(shelvesData.pagination.total)
+                    if (productsData.success) {
+                        setTotalProducts(productsData.pagination.total)
+                        setProductsTotalPages(productsData.pagination.last_page)
+
+                        // Navegar a la última página donde estará el nuevo producto
+                        const targetPage = productsData.pagination.last_page
+
+                        console.log("Navegando a la página:", targetPage)
+                        setProductsPage(targetPage)
+
+                        // Obtener productos de la última página
+                        fetch(`/admin/products?page=${targetPage}&per_page=${productsPerPage}`)
+                            .then((response) => response.json())
+                            .then((pageData) => {
+                                console.log("Datos de la página:", pageData)
+
+                                if (pageData.success) {
+                                    // Actualizar productos y abrir la sección
+                                    setProducts(pageData.products)
+                                    setOpenSection("products")
+
+                                    console.log("Productos actualizados:", pageData.products)
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error al cargar productos de la página:", error)
+                            })
+                    }
+
+                    // También actualizar la lista de estanterías
+                    if (shelvesData.success) {
+                        fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                            .then((response) => response.json())
+                            .then((pageData) => {
+                                if (pageData.success) {
+                                    setShelves(pageData.shelves)
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error al cargar estanterías:", error)
+                            })
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error al actualizar datos:", error)
+                })
+        }
     }
 
     const submitShelf = (e: React.FormEvent) => {
@@ -264,25 +463,36 @@ export default function AdminDashboard() {
             onSuccess: () => {
                 resetShelf()
                 setOpenShelfModal(false)
+
                 Swal.fire({
                     title: "¡Éxito!",
                     text: "Estantería creada con éxito",
-                    showConfirmButton: false,
                     icon: "success",
-                    confirmButtonColor: styles.primary,
+                    showConfirmButton: false,
                     timer: 3000,
                 })
 
-                // Recargar la lista de estanterías
-                fetch("/admin/shelves")
+                // Actualizar estanterías
+                fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
                     .then((response) => response.json())
                     .then((data) => {
                         if (data.success) {
                             setShelves(data.shelves)
-                            setTotalShelves(data.total || data.shelves.length)
+                            setTotalShelves(data.pagination.total)
+                            setShelvesTotalPages(data.pagination.last_page)
                         }
                     })
-                    .catch((error) => console.error("Error al recargar estanterías:", error))
+
+                // Importante: Mantener la paginación de productos actualizada
+                fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            setProducts(data.products)
+                            setTotalProducts(data.pagination.total)
+                            setProductsTotalPages(data.pagination.last_page)
+                        }
+                    })
             },
             onError: () => {
                 Swal.fire({
@@ -299,98 +509,196 @@ export default function AdminDashboard() {
 
     const handleDeleteShelf = (shelfId: number) => {
         Swal.fire({
-            title: '¿Estás seguro?',
+            title: "¿Estás seguro?",
             text: "¡Esta acción no se puede deshacer!",
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
             confirmButtonColor: styles.primary,
             cancelButtonColor: styles.secondary,
-            confirmButtonText: 'Sí, borrar',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: "Sí, borrar",
+            cancelButtonText: "Cancelar",
             background: styles.light,
             customClass: {
-                popup: 'shadow-lg',
-                confirmButton: 'hover:opacity-90 transition-opacity'
-            }
+                popup: "shadow-lg",
+                confirmButton: "hover:opacity-90 transition-opacity",
+            },
         }).then((result) => {
             if (result.isConfirmed) {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: "Eliminando estantería...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                })
+
                 router.delete(`/admin/shelves/${shelfId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
-                        handleDeleteWithPagination({
-                            setItems: setShelves,
-                            setTotalItems: setTotalShelves,
-                            items: shelves,
-                            currentPage: shelvesPage,
-                            setCurrentPage: setShelvesPage,
-                            deletedItemId: shelfId
-                        });
+                        // Cerrar el indicador de carga
+                        Swal.close()
 
+                        // Actualizar estanterías haciendo una nueva solicitud al servidor
+                        fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    // Procesar los datos de estanterías como en fetchShelves
+                                    const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
+                                        ...shelf,
+                                        total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
+                                        products_count: shelf.products?.length || 0,
+                                        capacity_percentage:
+                                            shelf.max_capacity > 0
+                                                ? Math.min(
+                                                    100,
+                                                    ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) /
+                                                        shelf.max_capacity) *
+                                                    100,
+                                                )
+                                                : 0,
+                                    }))
+
+                                    setShelves(shelvesWithCalculations)
+                                    setTotalShelves(data.pagination.total)
+                                    setShelvesTotalPages(data.pagination.last_page)
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.shelves.length === 0 && shelvesPage > 1) {
+                                        setShelvesPage(shelvesPage - 1)
+                                    }
+
+                                    console.log("Estanterías actualizadas después de eliminar:", {
+                                        shelves: shelvesWithCalculations,
+                                        total: data.pagination.total,
+                                        pages: data.pagination.last_page,
+                                    })
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error al actualizar estanterías:", error)
+                                // Si hay un error, mostrar mensaje
+                                Swal.fire({
+                                    title: "Error",
+                                    text: "No se pudieron actualizar las estanterías",
+                                    icon: "error",
+                                    confirmButtonColor: styles.primary,
+                                    timer: 3000,
+                                })
+                            })
+
+                        // Importante: Actualizar también la paginación de productos
+                        fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    setProducts(data.products)
+                                    setTotalProducts(data.pagination.total)
+                                    setProductsTotalPages(data.pagination.last_page)
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.products.length === 0 && productsPage > 1) {
+                                        setProductsPage(productsPage - 1)
+                                    }
+                                }
+                            })
+                            .catch((error) => console.error("Error al actualizar productos:", error))
 
                         Swal.fire({
-                            title: '¡Borrado!',
-                            text: 'La estantería ha sido eliminada.',
-                            icon: 'success',
+                            title: "¡Borrado!",
+                            text: "La estantería ha sido eliminada.",
                             showConfirmButton: false,
-                            background: styles.light,
+                            icon: "success",
                             confirmButtonColor: styles.primary,
+                            background: styles.light,
                             timer: 2000,
                             customClass: {
-                                popup: 'shadow-lg'
-                            }
-                        });
-                    }
-                });
+                                popup: "shadow-lg",
+                            },
+                        })
+                    },
+                    onError: (errors) => {
+                        // Cerrar el indicador de carga
+                        Swal.close()
+
+                        console.error("Error al eliminar estantería:", errors)
+                        Swal.fire({
+                            title: "Error",
+                            text: "Hubo un problema al eliminar la estantería",
+                            icon: "error",
+                            confirmButtonColor: styles.primary,
+                            timer: 3000,
+                        })
+                    },
+                })
             }
-        });
-    };
+        })
+    }
 
     const handleDeleteProduct = (productId: number) => {
         Swal.fire({
-            title: '¿Estás seguro?',
+            title: "¿Estás seguro?",
             text: "¡Esta acción no se puede deshacer!",
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
             confirmButtonColor: styles.primary,
             cancelButtonColor: styles.secondary,
-            confirmButtonText: 'Sí, borrar',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: "Sí, borrar",
+            cancelButtonText: "Cancelar",
             background: styles.light,
             customClass: {
-                popup: 'shadow-lg',
-                confirmButton: 'hover:opacity-90 transition-opacity'
-            }
+                popup: "shadow-lg",
+                confirmButton: "hover:opacity-90 transition-opacity",
+            },
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Eliminando producto...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                })
                 router.delete(`/admin/products/${productId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
-                        handleDeleteWithPagination({
-                            setItems: setProducts,
-                            setTotalItems: setTotalProducts,
-                            items: products,
-                            currentPage: productsPage,
-                            setCurrentPage: setProductsPage,
-                            deletedItemId: productId,
-                        })
+                        // Actualizar productos
+                        fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    setProducts(data.products)
+                                    setTotalProducts(data.pagination.total)
+                                    setProductsTotalPages(data.pagination.last_page)
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.products.length === 0 && productsPage > 1) {
+                                        setProductsPage(productsPage - 1)
+                                    }
+                                }
+                            })
+                            .catch((error) => console.error("Error al actualizar productos:", error))
 
                         Swal.fire({
-                            title: '¡Borrado!',
-                            text: 'El producto ha sido eliminado.',
+                            title: "¡Borrado!",
+                            text: "El producto ha sido eliminado.",
                             showConfirmButton: false,
-                            icon: 'success',
+                            icon: "success",
                             confirmButtonColor: styles.primary,
                             background: styles.light,
                             timer: 2000,
                             customClass: {
-                                popup: 'shadow-lg'
-                            }
-                        });
-                    }
-                });
+                                popup: "shadow-lg",
+                            },
+                        })
+                    },
+                })
             }
-        });
-    };
+        })
+    }
     const styles = {
         primary: "#8F5C0C",
         secondary: "#7C5F42",
@@ -398,39 +706,17 @@ export default function AdminDashboard() {
         light: "#F3F3F1",
     }
 
-
-  const fetchTickets = async (page = 1) => {
-    setLoadingTickets(true)
-    try {
-      const res = await fetch(`/admin/tickets?per_page=${ticketsPerPage}&page=${page}`)
-      const data = await res.json()
-      if (data.success) {
-        setTickets(data.tickets)
-        setTicketsPage(data.pagination.current_page)
-        setTicketsTotalPages(data.pagination.last_page)
-        setTotalTickets(data.pagination.total)
-      }
-    } catch (error) {
-      console.error("Error al cargar los tickets:", error)
-    } finally {
-      setLoadingTickets(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchTickets(ticketsPage)
-  }, [ticketsPage])
-
     return (
         <AppLayout breadcrumbs={breadcrumbs} className="bg-[#F3F3DF] text-[#333]">
             <Head title="Dashboard Admin" />
             <div className="max-w-6xl mx-auto space-y-8 py-10 px-4">
-
                 {/* Bienvenida */}
                 <section className="bg-[#E17100] text-[#F3F3DF] p-6 rounded-2xl shadow-lg">
                     <div className="flex flex-col md:flex-row justify-between gap-6">
                         <div>
-                            <h1 className="text-3xl font-bold mb-2">Bienvenido, {user.name} {user.last_name}</h1>
+                            <h1 className="text-3xl font-bold mb-2">
+                                Bienvenido, {user.name} {user.last_name}
+                            </h1>
                             <span className="bg-[#F3F3DF] text-[#E17100] px-3 py-1 rounded-full text-sm font-medium inline-block">
                                 {user.role}
                             </span>
@@ -454,18 +740,29 @@ export default function AdminDashboard() {
                 </section>
 
                 {/* Estadísticas */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[{
-                        label: "Total Usuarios",
-                        value: loading.users ? "..." : totalUsers,
-                    }, {
-                        label: "Total Estanterías",
-                        value: loading.shelves ? "..." : totalShelves,
-                    }, {
-                        label: "Total Productos",
-                        value: loading.products ? "..." : totalProducts,
-                    }].map((item, i) => (
-                        <div key={i} className="bg-white border-l-4 border-[#E17100] p-6 rounded-2xl shadow hover:shadow-lg transition">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    {[
+                        {
+                            label: "Total Usuarios",
+                            value: loading.users ? "..." : totalUsers,
+                        },
+                        {
+                            label: "Total Estanterías",
+                            value: loading.shelves ? "..." : totalShelves,
+                        },
+                        {
+                            label: "Total Productos",
+                            value: loading.products ? "..." : totalProducts,
+                        },
+                        {
+                            label: "Total Tickets",
+                            value: loadingTickets ? "..." : totalTickets,
+                        },
+                    ].map((item, i) => (
+                        <div
+                            key={i}
+                            className="bg-white border-l-4 border-[#E17100] p-6 rounded-2xl shadow hover:shadow-lg transition"
+                        >
                             <h3 className="text-lg font-semibold text-gray-700">{item.label}</h3>
                             <p className="text-3xl font-bold mt-3 text-[#E17100]">{item.value}</p>
                             <p className="text-sm text-gray-500 mt-1">Información actualizada</p>
@@ -487,7 +784,9 @@ export default function AdminDashboard() {
                         totalPages={totalPages}
                         perPage={perPage}
                         totalUsers={totalUsers}
-                        authUser={auth.user} roles={[]}                    />
+                        authUser={auth.user}
+                        roles={[]}
+                    />
 
                     <ShelfSection
                         styles={{ primary: "#E17100", light: "#F3F3DF" }}
@@ -517,18 +816,20 @@ export default function AdminDashboard() {
                         allShelvesForProducts={allShelvesForProducts}
                         handleDeleteProduct={handleDeleteProduct}
                     />
-                     <TicketSection
-        styles={styles}
-        tickets={tickets}
-        loading={loadingTickets}
-        openSection={openSection}
-        setOpenSection={setOpenSection}
-        ticketsPage={ticketsPage}
-        setTicketsPage={setTicketsPage}
-        ticketsTotalPages={ticketsTotalPages}
-        ticketsPerPage={ticketsPerPage}
-        totalTickets={totalTickets}
-      />
+                    <TicketSection
+                        styles={{ primary: "#E17100", light: "#F3F3DF" }}
+                        tickets={tickets}
+                        loading={loadingTickets}
+                        openSection={openSection}
+                        setOpenSection={setOpenSection}
+                        ticketsPage={ticketsPage}
+                        setTicketsPage={setTicketsPage}
+                        ticketsTotalPages={ticketsTotalPages}
+                        ticketsPerPage={ticketsPerPage}
+                        totalTickets={totalTickets}
+                        statusFilter={ticketStatusFilter}
+                        setStatusFilter={setTicketStatusFilter}
+                    />
                 </section>
 
                 {/* Modales */}
@@ -557,7 +858,7 @@ export default function AdminDashboard() {
                     shelfErrors={shelfErrors}
                     processingShelf={processingShelf}
                     clearErrors={clearErrors}
-
+                    existingLocations={shelves.map((shelf) => shelf.location)}
                 />
             </div>
         </AppLayout>
@@ -571,22 +872,20 @@ export default function AdminDashboard() {
         setCurrentPage,
         deletedItemId,
     }: {
-        setItems: React.Dispatch<React.SetStateAction<T[]>>,
-        setTotalItems: React.Dispatch<React.SetStateAction<number>>,
-        items: T[],
-        currentPage: number,
-        setCurrentPage: React.Dispatch<React.SetStateAction<number>>,
-        deletedItemId: number,
+        setItems: React.Dispatch<React.SetStateAction<T[]>>
+        setTotalItems: React.Dispatch<React.SetStateAction<number>>
+        items: T[]
+        currentPage: number
+        setCurrentPage: React.Dispatch<React.SetStateAction<number>>
+        deletedItemId: number
     }) {
-        const updatedItems = items.filter(item => (item as any).id !== deletedItemId);
-        setTotalItems(prev => prev - 1);
+        const updatedItems = items.filter((item) => (item as any).id !== deletedItemId)
+        setTotalItems((prev) => prev - 1)
 
         if (updatedItems.length === 0 && currentPage > 1) {
-            setCurrentPage(currentPage - 1);
+            setCurrentPage(currentPage - 1)
         } else {
-            setItems(updatedItems);
+            setItems(updatedItems)
         }
     }
-
-
 }

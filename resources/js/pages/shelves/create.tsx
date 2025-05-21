@@ -27,7 +27,8 @@ interface Props {
     submitShelf: (e: React.FormEvent) => void;
     shelfErrors: any;
     processingShelf: boolean;
-    clearErrors: () => void; // Añade esta prop
+    clearErrors: () => void;
+    existingLocations: string[]; // Nueva prop para las ubicaciones existentes
 }
 
 export default function ShelfModal({
@@ -39,6 +40,7 @@ export default function ShelfModal({
     shelfErrors,
     processingShelf,
     clearErrors,
+    existingLocations = [], // Valor por defecto array vacío
 }: Props) {
     useEffect(() => {
         if (!open) {
@@ -47,17 +49,33 @@ export default function ShelfModal({
             setShelfData('location', '');
             setShelfData('max_capacity', '');
             clearErrors();
-
         }
-    }, [open, setShelfData]);
+    }, [open, setShelfData, clearErrors]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validación básica
+        // Validación básica de capacidad
         if (parseFloat(shelfData.max_capacity) <= 0) {
             Swal.fire({
                 title: 'Error',
                 text: 'La capacidad debe ser mayor que cero',
+                icon: 'error',
+                confirmButtonColor: COLORS.primary,
+            });
+            return;
+        }
+
+        // Validación de ubicación única
+        const normalizedInput = shelfData.location.trim().toLowerCase();
+        const isLocationTaken = existingLocations.some(
+            loc => loc.trim().toLowerCase() === normalizedInput
+        );
+
+        if (isLocationTaken) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Esta ubicación ya está registrada en el sistema',
                 icon: 'error',
                 confirmButtonColor: COLORS.primary,
             });

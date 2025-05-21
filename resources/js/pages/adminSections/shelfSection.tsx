@@ -142,22 +142,35 @@ const ShelfSection: React.FC<Props> = ({
                                     <ChevronLeft size={18} />
                                 </button>
                                 {Array.from({ length: Math.min(5, shelvesTotalPages) }, (_, i) => {
-                                    const page = shelvesPage <= 3
-                                        ? i + 1
-                                        : shelvesPage >= shelvesTotalPages - 2
-                                            ? shelvesTotalPages - 4 + i
-                                            : shelvesPage - 2 + i
+                                    let page;
+                                    if (shelvesTotalPages <= 5) {
+                                        // Si hay 5 o menos páginas, muestra todas (1, 2, 3, 4, 5)
+                                        page = i + 1;
+                                    } else if (shelvesPage <= 3) {
+                                        // Si estamos en las primeras 3 páginas, muestra (1, 2, 3, 4, 5)
+                                        page = i + 1;
+                                    } else if (shelvesPage >= shelvesTotalPages - 2) {
+                                        // Si estamos en las últimas 3 páginas, muestra (total-4, total-3, total-2, total-1, total)
+                                        page = shelvesTotalPages - 4 + i;
+                                    } else {
+                                        // Páginas intermedias: muestra (current-2, current-1, current, current+1, current+2)
+                                        page = shelvesPage - 2 + i;
+                                    }
+
                                     return (
-                                        <button key={page} onClick={() => setShelvesPage(page)}
+                                        <button
+                                            key={page}
+                                            onClick={() => setShelvesPage(page)}
                                             className={`w-10 h-10 rounded-lg font-medium ${shelvesPage === page ? "shadow-md" : ""}`}
                                             style={{
                                                 backgroundColor: shelvesPage === page ? styles.primary : "transparent",
                                                 color: shelvesPage === page ? "white" : styles.secondary,
                                                 border: shelvesPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                            }}>
+                                            }}
+                                        >
                                             {page}
                                         </button>
-                                    )
+                                    );
                                 })}
                                 <button onClick={() => setShelvesPage(Math.min(shelvesTotalPages, shelvesPage + 1))}
                                     disabled={shelvesPage === shelvesTotalPages}
