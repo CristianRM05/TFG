@@ -464,18 +464,64 @@ export default function AdminDashboard() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: "Eliminando estantería...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 router.delete(`/admin/shelves/${shelfId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
-                        // Actualizar estanterías
-                        handleDeleteWithPagination({
-                            setItems: setShelves,
-                            setTotalItems: setTotalShelves,
-                            items: shelves,
-                            currentPage: shelvesPage,
-                            setCurrentPage: setShelvesPage,
-                            deletedItemId: shelfId,
-                        });
+                        // Cerrar el indicador de carga
+                        Swal.close();
+
+                        // Actualizar estanterías haciendo una nueva solicitud al servidor
+                        fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Procesar los datos de estanterías como en fetchShelves
+                                    const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
+                                        ...shelf,
+                                        total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
+                                        products_count: shelf.products?.length || 0,
+                                        capacity_percentage: shelf.max_capacity > 0
+                                            ? Math.min(100, ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) / shelf.max_capacity) * 100)
+                                            : 0
+                                    }));
+
+                                    setShelves(shelvesWithCalculations);
+                                    setTotalShelves(data.pagination.total);
+                                    setShelvesTotalPages(data.pagination.last_page);
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.shelves.length === 0 && shelvesPage > 1) {
+                                        setShelvesPage(shelvesPage - 1);
+                                    }
+
+                                    console.log("Estanterías actualizadas después de eliminar:", {
+                                        shelves: shelvesWithCalculations,
+                                        total: data.pagination.total,
+                                        pages: data.pagination.last_page
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error al actualizar estanterías:", error);
+                                // Si hay un error, mostrar mensaje
+                                Swal.fire({
+                                    title: "Error",
+                                    text: "No se pudieron actualizar las estanterías",
+                                    icon: "error",
+                                    confirmButtonColor: styles.primary,
+                                    timer: 3000
+                                });
+                            });
 
                         // Importante: Actualizar también la paginación de productos
                         fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
@@ -494,7 +540,6 @@ export default function AdminDashboard() {
                             })
                             .catch(error => console.error("Error al actualizar productos:", error));
 
-
                         Swal.fire({
                             title: '¡Borrado!',
                             text: 'La estantería ha sido eliminada.',
@@ -507,11 +552,24 @@ export default function AdminDashboard() {
                                 popup: 'shadow-lg'
                             }
                         });
+                    },
+                    onError: (errors) => {
+                        // Cerrar el indicador de carga
+                        Swal.close();
+
+                        console.error("Error al eliminar estantería:", errors);
+                        Swal.fire({
+                            title: "Error",
+                            text: "Hubo un problema al eliminar la estantería",
+                            icon: "error",
+                            confirmButtonColor: styles.primary,
+                            timer: 3000
+                        });
                     }
                 });
             }
         });
-    };
+      };
 
     const handleDeleteProduct = (productId: number) => {
         Swal.fire({
