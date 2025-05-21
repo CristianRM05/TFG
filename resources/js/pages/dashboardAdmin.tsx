@@ -278,17 +278,31 @@ export default function AdminDashboard() {
         })
     }
 
+    // Modifica la función fetchTickets para que siempre obtenga el total de tickets
     const fetchTickets = async (page = 1) => {
         setLoadingTickets(true)
         try {
+            // Obtener tickets filtrados
             const statusParam = ticketStatusFilter !== "all" ? `&status=${ticketStatusFilter}` : ""
             const res = await fetch(`/admin/tickets?per_page=${ticketsPerPage}&page=${page}${statusParam}`)
             const data = await res.json()
+
             if (data.success) {
                 setTickets(data.tickets)
                 setTicketsPage(data.pagination.current_page)
                 setTicketsTotalPages(data.pagination.last_page)
-                setTotalTickets(data.pagination.total)
+
+                // Si no hay filtro, usar el total directamente
+                if (ticketStatusFilter === "all") {
+                    setTotalTickets(data.pagination.total)
+                } else {
+                    // Si hay filtro, hacer una petición adicional para obtener el total sin filtrar
+                    const resAll = await fetch(`/admin/tickets?per_page=1&page=1`)
+                    const dataAll = await resAll.json()
+                    if (dataAll.success) {
+                        setTotalTickets(dataAll.pagination.total)
+                    }
+                }
             }
         } catch (error) {
             console.error("Error al cargar los tickets:", error)

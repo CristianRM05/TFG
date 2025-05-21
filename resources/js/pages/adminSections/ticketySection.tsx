@@ -182,7 +182,7 @@ const TicketSection: React.FC<Props> = ({
                     )}
 
                     {/* Paginación */}
-                    {(ticketsTotalPages > 1 || totalTickets > ticketsPerPage) && (
+                    {ticketsTotalPages > 1 && (
                         <div className="flex items-center justify-between p-6 text-sm text-gray-600">
                             <div>
                                 Mostrando {(ticketsPage - 1) * ticketsPerPage + 1}-
