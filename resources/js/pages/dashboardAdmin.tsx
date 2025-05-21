@@ -122,6 +122,7 @@ export default function AdminDashboard() {
         products: false,
         categorias: false,
     })
+    
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading((prev) => ({ ...prev, users: true }))
@@ -147,7 +148,49 @@ export default function AdminDashboard() {
         }
         fetchUsers()
     }, [currentPage])
+    useEffect(() => {
+        // Event listeners para actualizar datos desde el modal de producto
+        const handleUpdateTotalUsers = (e: any) => setTotalUsers(e.detail.total);
+        const handleUpdateTotalShelves = (e: any) => setTotalShelves(e.detail.total);
+        const handleUpdateTotalProducts = (e: any) => {
+            setTotalProducts(e.detail.total)
 
+            // Calcular el número total de páginas basado en el total de productos y productos por página
+            const calculatedTotalPages = Math.ceil(e.detail.total / productsPerPage)
+            setProductsTotalPages(Math.max(calculatedTotalPages, 1))
+
+            console.log("Actualizando paginación:", {
+                total: e.detail.total,
+                perPage: productsPerPage,
+                calculatedPages: calculatedTotalPages
+            })
+
+            setTimeout(() => {
+                setProductsPage(e.detail.lastPage || 1)
+            }, 100)
+          }
+        const handleUpdateProducts = (e: any) => {
+            setProducts(e.detail.products)
+            setOpenSection("products") // Abrir la sección de productos
+
+            // Si se fuerza la actualización de la paginación, actualizar también el número total de páginas
+            if (e.detail.forceUpdatePagination) {
+                setProductsTotalPages(e.detail.totalPages || 1)
+            }
+          };
+
+        window.addEventListener('updateTotalUsers', handleUpdateTotalUsers);
+        window.addEventListener('updateTotalShelves', handleUpdateTotalShelves);
+        window.addEventListener('updateTotalProducts', handleUpdateTotalProducts);
+        window.addEventListener('updateProducts', handleUpdateProducts);
+
+        return () => {
+            window.removeEventListener('updateTotalUsers', handleUpdateTotalUsers);
+            window.removeEventListener('updateTotalShelves', handleUpdateTotalShelves);
+            window.removeEventListener('updateTotalProducts', handleUpdateTotalProducts);
+            window.removeEventListener('updateProducts', handleUpdateProducts);
+        };
+    }, []);
     // Cargar , estanterías y productos
     useEffect(() => {
         // Estanterías paginadas
@@ -182,6 +225,7 @@ export default function AdminDashboard() {
         };
 
         // Productos paginados
+        // Productos paginados
         const fetchProducts = async () => {
             setLoading((prev) => ({ ...prev, products: true }));
             try {
@@ -200,7 +244,7 @@ export default function AdminDashboard() {
             } finally {
                 setLoading((prev) => ({ ...prev, products: false }));
             }
-        };
+  };
 
         fetchShelves();
         fetchProducts();
@@ -216,44 +260,146 @@ export default function AdminDashboard() {
     }
 
 
-    useEffect(() => {
-        if (productsFromProps) {
-            setProducts(productsFromProps);
-            setTotalProducts(productsFromProps.length);
-        }
-    }, [productsFromProps]);
+    
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>
     const user = auth.user
 
     const submitProduct = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
+
+        // Mostrar indicador de carga
+        Swal.fire({
+            title: "Creando producto...",
+            text: "Por favor espera",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         post("/admin/products", {
             preserveScroll: true,
             onSuccess: () => {
-                resetProduct()
-                setOpenProductModal(false)
-                fetch(`/admin/products?page=1&per_page=${productsPerPage}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            const newTotal = data.pagination.total
-                            const newLastPage = data.pagination.last_page
+                resetProduct();
+                setOpenProductModal(false);
 
-                            setTotalProducts(newTotal)
-                            setProductsPage(newLastPage) // <- aquí se fuerza a ir a la última página
+                // Cerrar el indicador de carga
+                Swal.close();
+
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    title: "¡Éxito!",
+                    text: "Producto creado con éxito",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 2000,
+                });
+
+                // Enfoque 1: Intentar con router.reload() pero con un pequeño retraso
+                setTimeout(() => {
+                    try {
+                        console.log("Intentando recargar la página...");
+                        router.reload({ only: ['products', 'shelves'] });
+                    } catch (error) {
+                        console.error("Error al recargar con router:", error);
+
+                        // Enfoque 2: Si falla, intentar con window.location.reload()
+                        try {
+                            console.log("Intentando con window.location.reload()...");
+                            window.location.reload();
+                        } catch (reloadError) {
+                            console.error("Error al recargar la página:", reloadError);
+
+                            // Enfoque 3: Si todo falla, intentar actualizar manualmente
+                            console.log("Intentando actualizar manualmente...");
+                            updateAllData();
                         }
-                    })
-
-                    .catch((error) => console.error("Error al recargar productos:", error))
+                    }
+                }, 500); // Pequeño retraso para asegurar que el servidor haya procesado todo
             },
-        })
-    }
+            onError: (errors) => {
+                // Cerrar el indicador de carga
+                Swal.close();
+
+                console.error("Error al crear producto:", errors);
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al crear el producto",
+                    icon: "error",
+                    confirmButtonColor: "#dc2626",
+                    timer: 3000,
+                });
+            }
+        });
+
+        // Función para actualizar todos los datos manualmente
+        const updateAllData = () => {
+            console.log("Actualizando todos los datos manualmente...");
+
+            // 1. Actualizar estadísticas generales
+            Promise.all([
+                fetch('/admin/users?page=1').then(res => res.json()),
+                fetch('/admin/shelves?page=1').then(res => res.json()),
+                fetch('/admin/products?page=1').then(res => res.json())
+            ]).then(([usersData, shelvesData, productsData]) => {
+                console.log("Datos recibidos:", { usersData, shelvesData, productsData });
+
+                // Actualizar contadores
+                if (usersData.success) setTotalUsers(usersData.pagination.total);
+                if (shelvesData.success) setTotalShelves(shelvesData.pagination.total);
+                if (productsData.success) {
+                    setTotalProducts(productsData.pagination.total);
+                    setProductsTotalPages(productsData.pagination.last_page);
+
+                    // Navegar a la última página donde estará el nuevo producto
+                    const targetPage = productsData.pagination.last_page;
+
+                    console.log("Navegando a la página:", targetPage);
+                    setProductsPage(targetPage);
+
+                    // Obtener productos de la última página
+                    fetch(`/admin/products?page=${targetPage}&per_page=${productsPerPage}`)
+                        .then(response => response.json())
+                        .then(pageData => {
+                            console.log("Datos de la página:", pageData);
+
+                            if (pageData.success) {
+                                // Actualizar productos y abrir la sección
+                                setProducts(pageData.products);
+                                setOpenSection("products");
+
+                                console.log("Productos actualizados:", pageData.products);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error al cargar productos de la página:", error);
+                        });
+                }
+
+                // También actualizar la lista de estanterías
+                if (shelvesData.success) {
+                    fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                        .then(response => response.json())
+                        .then(pageData => {
+                            if (pageData.success) {
+                                setShelves(pageData.shelves);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error al cargar estanterías:", error);
+                        });
+                }
+            }).catch(error => {
+                console.error("Error al actualizar datos:", error);
+            });
+        };
+    };
 
     const submitShelf = (e: React.FormEvent) => {
         e.preventDefault();
         postShelf("/admin/shelves", {
-            preserveScroll: true, // Mantiene la posición de scroll
+            preserveScroll: true,
             onSuccess: () => {
                 resetShelf();
                 setOpenShelfModal(false);
@@ -266,8 +412,27 @@ export default function AdminDashboard() {
                     timer: 3000,
                 });
 
-                // 🔥 Recarga la página para actualizar la lista (manteniendo paginación)
-                router.reload();
+                // Actualizar estanterías
+                fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            setShelves(data.shelves);
+                            setTotalShelves(data.pagination.total);
+                            setShelvesTotalPages(data.pagination.last_page);
+                        }
+                    });
+
+                // Importante: Mantener la paginación de productos actualizada
+                fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            setProducts(data.products);
+                            setTotalProducts(data.pagination.total);
+                            setProductsTotalPages(data.pagination.last_page);
+                        }
+                    });
             },
             onError: () => {
                 Swal.fire({
@@ -280,7 +445,7 @@ export default function AdminDashboard() {
                 });
             },
         });
-    };
+      };
 
     const handleDeleteShelf = (shelfId: number) => {
         Swal.fire({
@@ -302,14 +467,32 @@ export default function AdminDashboard() {
                 router.delete(`/admin/shelves/${shelfId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
+                        // Actualizar estanterías
                         handleDeleteWithPagination({
                             setItems: setShelves,
                             setTotalItems: setTotalShelves,
                             items: shelves,
                             currentPage: shelvesPage,
                             setCurrentPage: setShelvesPage,
-                            deletedItemId: shelfId
+                            deletedItemId: shelfId,
                         });
+
+                        // Importante: Actualizar también la paginación de productos
+                        fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    setProducts(data.products);
+                                    setTotalProducts(data.pagination.total);
+                                    setProductsTotalPages(data.pagination.last_page);
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.products.length === 0 && productsPage > 1) {
+                                        setProductsPage(productsPage - 1);
+                                    }
+                                }
+                            })
+                            .catch(error => console.error("Error al actualizar productos:", error));
 
 
                         Swal.fire({
@@ -350,16 +533,24 @@ export default function AdminDashboard() {
                 router.delete(`/admin/products/${productId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
-                        handleDeleteWithPagination({
-                            setItems: setProducts,
-                            setTotalItems: setTotalProducts,
-                            items: products,
-                            currentPage: productsPage,
-                            setCurrentPage: setProductsPage,
-                            deletedItemId: productId,
-                        })
+                        // Actualizar productos
+                        fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    setProducts(data.products);
+                                    setTotalProducts(data.pagination.total);
+                                    setProductsTotalPages(data.pagination.last_page);
 
-                        Swal.fire({
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.products.length === 0 && productsPage > 1) {
+                                        setProductsPage(productsPage - 1);
+                                    }
+                                }
+                            })
+                            .catch(error => console.error("Error al actualizar productos:", error));
+
+                  Swal.fire({
                             title: '¡Borrado!',
                             text: 'El producto ha sido eliminado.',
                             showConfirmButton: false,
