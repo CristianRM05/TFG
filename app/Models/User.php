@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Cart;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -40,7 +40,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
- 
+
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',

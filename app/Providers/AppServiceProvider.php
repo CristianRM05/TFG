@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Console\Commands\CompleteInProgressOrders;
+use Illuminate\Support\Facades\URL;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -31,5 +32,8 @@ class AppServiceProvider extends ServiceProvider
                 ];
             },
         ]);
+         if (app()->environment('local')) {
+        URL::forceScheme('https');
+    }
     }
 }
