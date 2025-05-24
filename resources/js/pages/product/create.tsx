@@ -24,13 +24,13 @@ interface Props {
     submitProduct: (e: React.FormEvent) => void;
     productErrors: any;
     processingProduct: boolean;
-    resetProduct: () => void;      
+    resetProduct: () => void;
 }
 
 
 
 export default function ProductModal({
-    
+
     open,
     onClose,
     categorias: initialCategorias,
@@ -39,8 +39,8 @@ export default function ProductModal({
     submitProduct,
     productErrors,
     processingProduct,
-    resetProduct,     
-    
+    resetProduct,
+
 
 }: Props) {
     const [categorias, setCategorias] = useState<Categoria[]>(initialCategorias);
@@ -49,7 +49,7 @@ export default function ProductModal({
         clearErrors();  // <-- useForm del modal
         onClose();
     };
-    
+
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         name: "",
         description: "",
@@ -59,6 +59,7 @@ export default function ProductModal({
         price: "",
         image_url: "",
     });
+    
     useEffect(() => {
         if (open) {
             setData({
@@ -100,14 +101,14 @@ export default function ProductModal({
         const price = parseFloat(data.price);
         const stock = parseInt(data.stock);
 
-        if (price < 0 || stock < 0) {
+        if (price <= 0 || stock <= 0) {
             Swal.fire({
                 title: 'Error',
-                text: 'El precio y el stock no pueden ser negativos.',
+                text: 'El precio y el stock no pueden ser 0.',
                 icon: 'error',
-                confirmButtonText: 'Aceptar',
-                confirmButtonColor: COLORS.primary,
-            });
+                showConfirmButton: false,
+                timer: 1800,
+});
             return;
         }
 
@@ -151,7 +152,71 @@ export default function ProductModal({
                 });
                 reset();
                 onClose();
-            },
+                fetch('/admin/users?page=1')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Actualizar el contador de usuarios en el componente padre
+                            window.dispatchEvent(new CustomEvent('updateTotalUsers', {
+                                detail: { total: data.pagination.total }
+                            }));
+                        }
+                    });
+
+                fetch('/admin/shelves?page=1')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Actualizar el contador de estanterías en el componente padre
+                            window.dispatchEvent(new CustomEvent('updateTotalShelves', {
+                                detail: { total: data.pagination.total }
+                            }));
+                        }
+                    });
+
+                fetch('/admin/products?page=1')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const newTotal = data.pagination.total;
+                            const newLastPage = data.pagination.last_page;
+
+                            // Actualizar el contador de productos en el componente padre
+                            window.dispatchEvent(new CustomEvent('updateTotalProducts', {
+                                detail: {
+                                    total: newTotal,
+                                    lastPage: newLastPage
+                                }
+                            }));
+
+                            // Obtener productos de la última página
+                            fetch(`/admin/products?page=${newLastPage}&per_page=5`)
+                                .then(response => response.json())
+                                .then(pageData => {
+                                    if (pageData.success) {
+                                        // Actualizar la lista de productos en el componente padre
+                                        // Calcular el número correcto de páginas
+                                        const totalPages = Math.ceil(newTotal / 5); // Asumiendo 5 productos por página
+
+                                        window.dispatchEvent(new CustomEvent('updateTotalProducts', {
+                                            detail: {
+                                                total: newTotal,
+                                                lastPage: newLastPage,
+                                                totalPages: totalPages,
+                                                perPage: 5 // Asegúrate de que este valor coincida con productsPerPage
+                                            }
+                                        }));
+
+                                        console.log("Enviando evento updateTotalProducts:", {
+                                            total: newTotal,
+                                            lastPage: newLastPage,
+                                            totalPages: totalPages
+                                        });
+                                    }
+                                });
+                        }
+                    });
+        },
             onError: (errors) => {
                 console.error('Error al crear producto:', errors);
                 Swal.fire({

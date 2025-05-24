@@ -31,6 +31,7 @@ class Product extends Model
         'image_url',
         'categoria',
         'shelf_id',
+        'is_visible',
 
     ];
 

@@ -4,7 +4,7 @@ const translationData = {
     es
 };
 
-let currentLang = localStorage.getItem('lang') || 'en';
+let currentLang = localStorage.getItem('lang') || 'es';
 
 export function __(key) {
 

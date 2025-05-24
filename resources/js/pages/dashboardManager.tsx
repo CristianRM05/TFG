@@ -47,8 +47,7 @@ export default function Welcome() {
 
     return (
         <AppLayout>
-        <div className="min-h-screen  dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 flex flex-col">
-        <Head title="Inicio - Almacén" />
+<div className="min-h-screen text-neutral-900 dark:text-neutral-100 flex flex-col bg-transparent">        <Head title="Inicio - Almacén" />
 
 
 

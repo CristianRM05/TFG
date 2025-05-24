@@ -10,10 +10,16 @@ use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderAssignedMail;
+use App\Mail\NewOrderMail;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+
 class OrderController extends Controller
 {
+    use AuthorizesRequests;
 
 
     public function checkout(Request $request)
@@ -44,7 +50,7 @@ class OrderController extends Controller
         }
     }
 
-    // 🟢 Si todo OK, seguimos con Stripe
+    // Si todo OK, seguimos con Stripe
     $discount = $request->input('discount', 0);
     $discountFactor = (100 - $discount) / 100;
 
@@ -104,6 +110,18 @@ class OrderController extends Controller
         ]);
     }
 
+    //para poder descargar el albaran desde manager
+public function downloadInvoiceManager($id)
+{
+    $order = Order::with('items.product')->findOrFail($id);
+
+    $pdf = Pdf::loadView('pdf.invoice', compact('order'));
+
+    return $pdf->download("albaran_pedido_{$order->ref}.pdf");
+}
+
+
+
     public function createOrder($user, $session, $cart, $total)
     {
         return DB::transaction(function () use ($user, $session, $cart, $total) {
@@ -143,6 +161,8 @@ class OrderController extends Controller
 
                 $product->stock -= $item->quantity;
                 $product->save();
+                Mail::to($user->email)->send(new NewOrderMail($order));
+
             }
 
             return $order;
@@ -158,6 +178,24 @@ class OrderController extends Controller
 
         return $ref;
     }
+  public function downloadInvoice(Order $order)
+{
+    // Validación manual: solo el dueño puede ver su factura
+    if ($order->user_id !== auth()->id()) {
+        abort(403, 'No tienes permiso para ver esta factura.');
+    }
+
+    $order->load('items.product');
+
+    $pdf = Pdf::loadView('invoices.invoice', [
+        'order' => $order,
+        'user' => $order->user,
+        'date' => now()->format('d/m/Y'),
+    ]);
+
+    return $pdf->download("Factura_{$order->ref}.pdf");
+}
+
 
     public function assignOrder($id)
     {

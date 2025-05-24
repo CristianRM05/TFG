@@ -12,8 +12,10 @@ use App\Http\Controllers\AnalyticsController;
 Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
     Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
     //ruta a stock y productos
-    Route::get('/stock', [ProductController::class, 'stockIndex'])->name('stock.index');
+    Route::get('/stock', [ProductController::class, 'stockIndexManager'])->name('stock.manager');
+
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 
     //descuentos
     Route::prefix('discounts')->group(function () {
@@ -41,8 +43,10 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
         ->name('orders.manager');
 
     Route::put('/orders/{id}/assign', [OrderController::class, 'assignOrder'])
-        ->name('orders.assign');
+    ->name('orders.assign');
 
+    //albaran
+    Route::get('/orders/{id}/invoice', [OrderController::class, 'downloadInvoiceManager'])->name('orders.invoice');
 });
 
     // Movimientos
@@ -54,3 +58,15 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
          Route::get('/movimientos', [AnalyticsController::class,'index'])
               ->name('movimientos.index');
      });
+
+Route::patch('/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])
+    ->middleware(['auth', 'role:manager,admin']) // Protegida para manager/admin
+    ->name('products.toggle-visibility');
+
+
+    Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
+    Route::get('/delivery-notes-page', [DeliveryNoteController::class, 'view'])
+        ->name('manager.delivery-notes.page');
+});
+
+

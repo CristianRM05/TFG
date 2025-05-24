@@ -1,8 +1,30 @@
+
+// services/productService.ts
 import axios from 'axios';
 
-export const getProducts = async (page = 1) => {
-  const response = await axios.get(`/products?page=${page}&limit=6`); //defino la paginacion con el &limit=6 para que sean 6 por pagina
+export const getProducts = async (
+  page = 1,
+  search = '',
+  category = '',
+  minPrice = '',
+  maxPrice = ''
+) => {
+  const response = await axios.get('/products', {
+    params: {
+      page,
+      limit: 6, // sigue siendo 6 por página
+      search,
+      category,
+      min_price: minPrice,
+      max_price: maxPrice,
+    },
+  });
+
   return response.data;
+};
+export const getCategories = async () => {
+  const response = await axios.get('/products/categories');
+  return response.data; // array con value y name
 };
 export const addToCart = async (productId: number) => {
     try {

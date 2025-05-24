@@ -9,6 +9,7 @@ use App\Models\Shelf;
 use App\Models\Categoria;
 use App\Models\Product;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TicketController;
 
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -16,8 +17,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
 
     Route::get('/users', function () {
-        $users = User::paginate(10); // 10 usuarios por página
-    
+        $users = User::paginate(5);
+
         return response()->json([
             'success' => true,
             'users' => $users->items(),
@@ -29,17 +30,28 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             ]
         ]);
     })->name('admin.users.index');
-    
+
     Route::get('/shelves', function (\Illuminate\Http\Request $request) {
         $perPage = $request->input('per_page', 10);
-        $shelves = \App\Models\Shelf::with('products')->paginate($perPage);
+        
+        $shelves = \App\Models\Shelf::with(['products' => function($query) {
+            $query->select('id', 'shelf_id', 'stock');
+        }])->paginate($perPage);
     
+        // Transformar los datos para incluir los cálculos
         $shelvesData = $shelves->getCollection()->map(function ($shelf) {
+            $totalStock = $shelf->products->sum('stock');
+            $productsCount = $shelf->products->count();
+            $capacityPercentage = min(100, ($totalStock / $shelf->max_capacity) * 100);
+    
             return [
                 'id' => $shelf->id,
                 'code' => $shelf->code,
                 'location' => $shelf->location,
                 'max_capacity' => $shelf->max_capacity,
+                'total_stock' => $totalStock,
+                'products_count' => $productsCount,
+                'capacity_percentage' => $capacityPercentage,
                 'created_at' => $shelf->created_at,
                 'updated_at' => $shelf->updated_at,
                 'products' => $shelf->products,
@@ -57,12 +69,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             ]
         ]);
     })->name('admin.shelves.index');
-    
+
     // Ruta para productos - EXACTAMENTE IGUAL QUE USUARIOS
     Route::get('/products', function (\Illuminate\Http\Request $request) {
         $perPage = $request->input('per_page', 10);
         $products = \App\Models\Product::with('shelf')->paginate($perPage);
-    
+
         $productsData = $products->getCollection()->map(function ($product) {
             return [
                 'id' => $product->id,
@@ -81,7 +93,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
                 'shelf' => $product->shelf,
             ];
         });
-    
+
         return response()->json([
             'success' => true,
             'products' => $productsData,
@@ -93,17 +105,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             ]
         ]);
     })->name('admin.products.index');
-    
-    // Ruta para categorías
-    Route::get('/categorias', function () {
-        $categorias = Categoria::all();
-        
-        return response()->json([
-            'success' => true,
-            'categorias' => $categorias
-        ]);
-    })->name('admin.categorias.index');
-    
+
+
 
     // Otras rutas existentes
     Route::post('/create-coupon', [CouponController::class, 'store']);
@@ -114,16 +117,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         //ruta para borrar shelves
     Route::delete('/shelves/{shelf}', [AdminDashboardController::class, 'deleteShelf'])
         ->name('admin.shelves.delete');
-        
+
     //ruta para borrar products
     Route::delete('/products/{product}', [AdminDashboardController::class, 'deleteProduct'])
         ->name('admin.products.delete');
+    Route::patch('/users/{user}/role', [AdminDashboardController::class, 'updateUserRole'])->name('admin.users.role');
 
 
-    //CATEGORIAS, PRODUCTOS Y ESTANTERIAS
+    //CATEGORIAS, PRODUCTOS Y ESTANTERIAS Y TICKETS
     Route::get('/products/categorias', [ProductController::class, 'getCategorias']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::post('/shelves', [AdminDashboardController::class, 'storeShelf'])
         ->name('admin.shelves.store');
+
+
+         Route::get('/tickets', [TicketController::class, 'adminIndex'])->name('admin.tickets.index');
+    Route::get('/tickets/{id}', [TicketController::class, 'adminShow'])->name('admin.tickets.show');
+    Route::post('/tickets/{id}/reply', [TicketController::class, 'adminReply'])->name('admin.tickets.reply');
+Route::patch('/tickets/{id}', [TicketController::class, 'adminUpdate'])->name('admin.tickets.update');
 
 });

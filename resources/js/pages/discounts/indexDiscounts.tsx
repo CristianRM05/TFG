@@ -8,9 +8,10 @@ import type { Product, SharedData } from "@/types"
 import { useState, useEffect } from "react"
 import Swal from "sweetalert2"
 import { Pagination } from "@/components/pagination"
+
 interface DiscountsPageProps extends SharedData {
-    products?: Product[] // Hacer opcional
-    productsWithoutDiscount?: Product[] // Hacer opcional
+    products?: Product[]
+    productsWithoutDiscount?: Product[]
     flash?: {
         success?: string
         error?: string
@@ -55,6 +56,8 @@ export default function DiscountsIndex() {
                 toast: true,
                 position: "top",
                 showConfirmButton: false,
+                background: "#F3F3DF",
+                iconColor: "#E17100"
             })
         } else if (flash?.error) {
             Swal.fire({
@@ -66,6 +69,7 @@ export default function DiscountsIndex() {
                 toast: true,
                 position: "top",
                 showConfirmButton: false,
+                background: "#F3F3DF"
             })
         }
     }, [flash])
@@ -87,6 +91,8 @@ export default function DiscountsIndex() {
                         toast: true,
                         position: "top",
                         showConfirmButton: false,
+                        background: "#F3F3DF",
+                        iconColor: "#E17100"
                     })
                     setFormData({ product_id: "", discount_percent: "" })
                 },
@@ -95,7 +101,8 @@ export default function DiscountsIndex() {
                         title: "Error",
                         text: "No se pudo aplicar el descuento",
                         icon: "error",
-                        confirmButtonColor: "#3085d6",
+                        confirmButtonColor: "#E17100",
+                        background: "#F3F3DF"
                     })
                     console.error("Error details:", errors)
                 },
@@ -113,10 +120,11 @@ export default function DiscountsIndex() {
             text: "¿Estás seguro de eliminar este descuento?",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
+            confirmButtonColor: "#E17100",
+            cancelButtonColor: "#6B7280",
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
+            background: "#F3F3DF"
         }).then((result) => {
             if (result.isConfirmed) {
                 router.delete(`/manager/discounts/${productId}`, {
@@ -131,6 +139,8 @@ export default function DiscountsIndex() {
                             toast: true,
                             position: "top",
                             showConfirmButton: false,
+                            background: "#F3F3DF",
+                            iconColor: "#E17100"
                         })
                     },
                     onError: () => {
@@ -138,7 +148,8 @@ export default function DiscountsIndex() {
                             title: "Error",
                             text: "No se pudo eliminar el descuento",
                             icon: "error",
-                            confirmButtonColor: "#3085d6",
+                            confirmButtonColor: "#E17100",
+                            background: "#F3F3DF"
                         })
                     },
                 })
@@ -160,23 +171,45 @@ export default function DiscountsIndex() {
     return (
         <AppLayout
             user={auth.user}
-            header={<h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Gestión de Descuentos</h2>}
+            header={<h2 className="text-xl font-semibold text-gray-800">Gestión de Descuentos</h2>}
         >
             <Head title="Gestión de Descuentos" />
 
-            <div className="py-6">
+            <div className="py-6" >
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                    <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+                        {/* Header con fondo naranja */}
+                        <div className="px-6 py-4" style={{ backgroundColor: "#E17100" }}>
+                            <h2 className="text-xl font-bold text-white">Gestión de Descuentos</h2>
+                        </div>
+
                         {/* Formulario para añadir descuento */}
-                        <div className="mb-8 p-6 border rounded-lg bg-gray-50 dark:bg-gray-700">
-                            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Añadir Nuevo Descuento</h3>
+                        <div className="mb-8 p-6 border-b border-gray-200" style={{ backgroundColor: "#F3F3DF" }}>
+                            <h3 className="text-lg font-semibold mb-4 text-gray-800 flex items-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 mr-2"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="#E17100"
+                                    strokeWidth={2}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                    />
+                                </svg>
+                                Añadir Nuevo Descuento
+                            </h3>
                             <form onSubmit={handleSubmit}>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Producto</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
                                         <select
                                             name="product_id"
-                                            className="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
+                                            style={{ borderColor: "#E17100" }}
                                             value={formData.product_id}
                                             onChange={handleInputChange}
                                             required
@@ -191,7 +224,7 @@ export default function DiscountsIndex() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Porcentaje de Descuento (%)
                                         </label>
                                         <div className="mt-1 relative rounded-md shadow-sm">
@@ -201,13 +234,14 @@ export default function DiscountsIndex() {
                                                 min="0"
                                                 max="100"
                                                 step="0.01"
-                                                className="block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
+                                                style={{ borderColor: "#E17100" }}
                                                 value={formData.discount_percent}
                                                 onChange={handleInputChange}
                                                 required
                                             />
                                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                                <span className="text-gray-500 dark:text-gray-400">%</span>
+                                                <span className="text-gray-500">%</span>
                                             </div>
                                         </div>
                                     </div>
@@ -215,7 +249,8 @@ export default function DiscountsIndex() {
                                     <div className="flex items-end">
                                         <button
                                             type="submit"
-                                            className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                            className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50"
+                                            style={{ backgroundColor: "#E17100" }}
                                             disabled={loading}
                                         >
                                             {loading ? (
@@ -266,18 +301,27 @@ export default function DiscountsIndex() {
                         </div>
 
                         {/* Lista de descuentos activos */}
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Descuentos Activos</h3>
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100">
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
+                                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="#E17100" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    Descuentos Activos
+                                </h3>
+                                <span
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                                    style={{ backgroundColor: "#E17100", color: "white" }}
+                                >
                                     {discounts.length} descuento{discounts.length !== 1 ? "s" : ""}
                                 </span>
                             </div>
 
                             {discounts.length === 0 ? (
-                                <div className="text-center py-12 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div className="text-center py-12 rounded-lg" style={{ backgroundColor: "#F3F3DF" }}>
                                     <svg
-                                        className="mx-auto h-12 w-12 text-gray-400"
+                                        className="mx-auto h-12 w-12"
+                                        style={{ color: "#E17100" }}
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -289,70 +333,74 @@ export default function DiscountsIndex() {
                                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                         />
                                     </svg>
-                                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay descuentos</h3>
-                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    <h3 className="mt-2 text-sm font-medium text-gray-900">No hay descuentos</h3>
+                                    <p className="mt-1 text-sm text-gray-500">
                                         No hay productos con descuento actualmente.
                                     </p>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead className="bg-gray-50 dark:bg-gray-700">
+                                    <div className="overflow-x-auto rounded-lg border border-gray-200">
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead style={{ backgroundColor: "#F3F3DF" }}>
                                                 <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                                         Producto
                                                     </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                                         Precio Original
                                                     </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                                         Descuento
                                                     </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                                         Precio Final
                                                     </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                                         Acciones
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tbody className="bg-white divide-y divide-gray-200">
                                                 {currentDiscounts.map((product) => (
-                                                    <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <tr key={product.id} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <div className="flex items-center">
                                                                 {product.image_url && (
-                                                                    <img
-                                                                        src={product.image_url || "/placeholder.svg"}
-                                                                        alt={product.name}
-                                                                        className="h-10 w-10 rounded-full mr-3 object-cover"
-                                                                    />
+                                                                    <div className="h-10 w-10 flex-shrink-0 rounded-md overflow-hidden mr-3">
+                                                                        <img
+                                                                            src={product.image_url || "/placeholder.svg"}
+                                                                            alt={product.name}
+                                                                            className="h-full w-full object-cover"
+                                                                        />
+                                                                    </div>
                                                                 )}
-                                                                <div className="text-sm font-medium text-gray-900 dark:text-white">{product.name}</div>
+                                                                <div className="text-sm font-medium text-gray-900">{product.name}</div>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                             ${product.price?.toFixed(2)}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.discount_percent >= 50 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' :
-                                                                product.discount_percent >= 30 ? 'bg-amber-100 text-amber-700 dark:bg-amber-600/40 dark:text-amber-50' :
-                                                                        product.discount_percent > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
-                                                                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                                                                }`}>
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                                (product.discount_percent ?? 0) >= 50 ? 'bg-red-100 text-red-800' :
+                                                                (product.discount_percent ?? 0) >= 30 ? 'bg-amber-100 text-amber-700' :
+                                                                (product.discount_percent ?? 0) > 0 ? 'bg-green-100 text-green-800' :
+                                                                'bg-gray-100 text-gray-800'
+                                                            }`}>
                                                                 {product.discount_percent}%
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className="font-bold text-green-600 dark:text-green-400">
-                                                                ${calculateFinalPrice(product.price, product.discount_percent).toFixed(2)}
+                                                            <span className="font-bold" style={{ color: "#E17100" }}>
+                                                                ${calculateFinalPrice(product.price ?? 0, product.discount_percent ?? 0).toFixed(2)}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                             <button
                                                                 onClick={() => handleDelete(product.id)}
-                                                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                                style={{ backgroundColor: "#E17100" }}
                                                             >
                                                                 <svg
                                                                     className="-ml-0.5 mr-1 h-4 w-4"
@@ -378,7 +426,14 @@ export default function DiscountsIndex() {
                                     {/* Pagination */}
                                     {totalPages > 1 && (
                                         <div className="mt-6">
-                                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                            <Pagination
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={setCurrentPage}
+                                                buttonClassName="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                activeClassName="bg-orange-50 border-orange-500 text-orange-600"
+                                                textClassName="text-gray-700"
+                                            />
                                         </div>
                                     )}
                                 </>

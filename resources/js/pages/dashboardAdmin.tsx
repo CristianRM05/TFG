@@ -4,12 +4,15 @@ import type React from "react"
 import { Head, useForm, usePage, router } from "@inertiajs/react"
 import AppLayout from "@/layouts/app-layout"
 import { Button } from "@/components/ui/button"
-import type { BreadcrumbItem, User, Shelf } from "@/types"
+import type { BreadcrumbItem, User } from "@/types"
 import Swal from "sweetalert2"
 import ProductModal from "./product/create"
 import ShelfModal from "./shelves/create"
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Package, Package2, Trash2, Users } from "lucide-react"
+import UserSection from "./adminSections/UserSection"
+import ShelfSection from "./adminSections/shelfSection"
+import ProductSection from "./adminSections/productSection"
+import TicketSection from "./adminSections/ticketySection"
 
 // Interfaz para Categoria que coincide con la esperada por ProductModal
 interface CategoriaWithValue {
@@ -42,9 +45,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function AdminDashboard() {
+    const [ticketStatusFilter, setTicketStatusFilter] = useState<string>("all")
     const [users, setUsers] = useState<User[]>([])
     // Para estanterías
-    const [shelves, setShelves] = useState<any[]>([]);
+    const [shelves, setShelves] = useState<any[]>([])
     const [shelvesPage, setShelvesPage] = useState(1)
     const [shelvesTotalPages, setShelvesTotalPages] = useState(1)
     const [shelvesPerPage, setShelvesPerPage] = useState(5)
@@ -53,30 +57,33 @@ export default function AdminDashboard() {
     // Para productos
     const [productsPage, setProductsPage] = useState(1)
     const [productsTotalPages, setProductsTotalPages] = useState(1)
-    const [productsPerPage, setProductsPerPage] = useState(10)
+    const [productsPerPage, setProductsPerPage] = useState(5)
     const [totalProducts, setTotalProducts] = useState(0)
-    // Obtén TODAS las props necesarias en un solo hook
-    const { auth, shelves: shelvesFromProps, roles, products: productsFromProps } = usePage<{
-        auth: { user: User | null };
-    shelves: Array<{
-        id: number;
-        code: string;
-        location: string;
-        max_capacity: number;
-        total_stock: number;
-        products_count: number;
-        capacity_percentage: number;
-    }>;
-    roles: Array<{
-        value: string;
-        label: string;
-    }>;
-    products: ExtendedProduct[];
-}>().props;
-    const allShelvesForProducts = shelvesFromProps || [];
+    const {
+        auth,
+        shelves: shelvesFromProps,
+        roles,
+        products: productsFromProps,
+    } = usePage<{
+        auth: { user: User | null }
+        shelves: Array<{
+            id: number
+            code: string
+            location: string
+            max_capacity: number
+            total_stock: number
+            products_count: number
+            capacity_percentage: number
+        }>
+        roles: Array<{
+            value: string
+            label: string
+        }>
+        products: ExtendedProduct[]
+    }>().props
+    const allShelvesForProducts = shelvesFromProps || []
 
-    // Verificación
-    console.log('Datos completos:', { auth, shelves, roles });
+    console.log("Datos completos:", { auth, shelves, roles })
     const [categorias, setCategorias] = useState<CategoriaWithValue[]>([])
     const [openProductModal, setOpenProductModal] = useState(false)
     const [openShelfModal, setOpenShelfModal] = useState(false)
@@ -116,6 +123,12 @@ export default function AdminDashboard() {
     const [totalUsers, setTotalUsers] = useState(0)
     const [products, setProducts] = useState<ExtendedProduct[]>([])
     const [openSection, setOpenSection] = useState<string | null>("null") // 'users', 'shelves', 'products' o null
+    const [tickets, setTickets] = useState([])
+    const [ticketsPage, setTicketsPage] = useState(1)
+    const [ticketsTotalPages, setTicketsTotalPages] = useState(1)
+    const [ticketsPerPage] = useState(5)
+    const [totalTickets, setTotalTickets] = useState(0)
+    const [loadingTickets, setLoadingTickets] = useState(false)
     const [loading, setLoading] = useState({
         users: false,
         shelves: false,
@@ -123,17 +136,6 @@ export default function AdminDashboard() {
         categorias: false,
     })
 
-    // Función para mostrar mensajes de error
-    const showError = (message: string) => {
-        Swal.fire({
-            title: "Error",
-            text: message,
-            icon: "error",
-            confirmButtonColor: styles.secondary,
-        })
-    }
-
-    // Cargar usuarios
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading((prev) => ({ ...prev, users: true }))
@@ -159,104 +161,299 @@ export default function AdminDashboard() {
         }
         fetchUsers()
     }, [currentPage])
+    useEffect(() => {
+        // Event listeners para actualizar datos desde el modal de producto
+        const handleUpdateTotalUsers = (e: any) => setTotalUsers(e.detail.total)
+        const handleUpdateTotalShelves = (e: any) => setTotalShelves(e.detail.total)
+        const handleUpdateTotalProducts = (e: any) => {
+            setTotalProducts(e.detail.total)
 
+            // Calcular el número total de páginas basado en el total de productos y productos por página
+            const calculatedTotalPages = Math.ceil(e.detail.total / productsPerPage)
+            setProductsTotalPages(Math.max(calculatedTotalPages, 1))
+
+            console.log("Actualizando paginación:", {
+                total: e.detail.total,
+                perPage: productsPerPage,
+                calculatedPages: calculatedTotalPages,
+            })
+
+            setTimeout(() => {
+                setProductsPage(e.detail.lastPage || 1)
+            }, 100)
+        }
+        const handleUpdateProducts = (e: any) => {
+            setProducts(e.detail.products)
+            setOpenSection("products") // Abrir la sección de productos
+
+            // Si se fuerza la actualización de la paginación, actualizar también el número total de páginas
+            if (e.detail.forceUpdatePagination) {
+                setProductsTotalPages(e.detail.totalPages || 1)
+            }
+        }
+
+        window.addEventListener("updateTotalUsers", handleUpdateTotalUsers)
+        window.addEventListener("updateTotalShelves", handleUpdateTotalShelves)
+        window.addEventListener("updateTotalProducts", handleUpdateTotalProducts)
+        window.addEventListener("updateProducts", handleUpdateProducts)
+
+        return () => {
+            window.removeEventListener("updateTotalUsers", handleUpdateTotalUsers)
+            window.removeEventListener("updateTotalShelves", handleUpdateTotalShelves)
+            window.removeEventListener("updateTotalProducts", handleUpdateTotalProducts)
+            window.removeEventListener("updateProducts", handleUpdateProducts)
+        }
+    }, [])
     // Cargar , estanterías y productos
     useEffect(() => {
         // Estanterías paginadas
         const fetchShelves = async () => {
-            setLoading((prev) => ({ ...prev, shelves: true }));
+            setLoading((prev) => ({ ...prev, shelves: true }))
             try {
-                const response = await fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`);
-                if (!response.ok) throw new Error("Error al cargar estanterías");
-                const data = await response.json();
+                const response = await fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                if (!response.ok) throw new Error("Error al cargar estanterías")
+                const data = await response.json()
 
                 if (data.success) {
                     const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
                         ...shelf,
                         total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
                         products_count: shelf.products?.length || 0,
-                        capacity_percentage: shelf.max_capacity > 0
-                            ? Math.min(100, ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) / shelf.max_capacity) * 100)
-                            : 0
-                    }));
+                        capacity_percentage:
+                            shelf.max_capacity > 0
+                                ? Math.min(
+                                    100,
+                                    ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) /
+                                        shelf.max_capacity) *
+                                    100,
+                                )
+                                : 0,
+                    }))
 
-                    setShelves(shelvesWithCalculations);
-                    setTotalShelves(data.pagination.total);
-                    setShelvesTotalPages(data.pagination.last_page);
-                    setShelvesPerPage(data.pagination.per_page);
+                    setShelves(shelvesWithCalculations)
+                    setTotalShelves(data.pagination.total)
+                    setShelvesTotalPages(data.pagination.last_page)
+                    setShelvesPerPage(data.pagination.per_page)
                 }
             } catch (error) {
-                console.error("Error al cargar estanterías:", error);
+                console.error("Error al cargar estanterías:", error)
                 // ...datos de ejemplo
             } finally {
-                setLoading((prev) => ({ ...prev, shelves: false }));
+                setLoading((prev) => ({ ...prev, shelves: false }))
             }
-        };
+        }
 
         // Productos paginados
+        // Productos paginados
         const fetchProducts = async () => {
-            setLoading((prev) => ({ ...prev, products: true }));
+            setLoading((prev) => ({ ...prev, products: true }))
             try {
-                const response = await fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`);
-                if (!response.ok) throw new Error("Error al cargar productos");
-                const data = await response.json();
+                const response = await fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                if (!response.ok) throw new Error("Error al cargar productos")
+                const data = await response.json()
 
                 if (data.success) {
-                    setProducts(data.products);
-                    setTotalProducts(data.pagination.total);
-                    setProductsTotalPages(data.pagination.last_page);
-                    setProductsPerPage(data.pagination.per_page);
+                    setProducts(data.products)
+                    setTotalProducts(data.pagination.total)
+                    setProductsTotalPages(data.pagination.last_page)
+                    setProductsPerPage(data.pagination.per_page)
                 }
             } catch (error) {
-                console.error("Error al cargar productos:", error);
-                // ...datos de ejemplo
+                console.error("Error al cargar productos:", error)
             } finally {
-                setLoading((prev) => ({ ...prev, products: false }));
+                setLoading((prev) => ({ ...prev, products: false }))
             }
-        };
+        }
 
-        fetchShelves();
-        fetchProducts();
-    }, [shelvesPage, shelvesPerPage, productsPage, productsPerPage]);
+        fetchShelves()
+        fetchProducts()
+    }, [shelvesPage, shelvesPerPage, productsPage, productsPerPage])
+    // Función para mostrar mensajes de error
+    const showError = (message: string) => {
+        Swal.fire({
+            title: "Error",
+            text: message,
+            icon: "error",
+            confirmButtonColor: styles.secondary,
+        })
+    }
+
+    // Modifica la función fetchTickets para que siempre obtenga el total de tickets
+    const fetchTickets = async (page = 1) => {
+        setLoadingTickets(true)
+        try {
+            // Obtener tickets filtrados
+            const statusParam = ticketStatusFilter !== "all" ? `&status=${ticketStatusFilter}` : ""
+            const res = await fetch(`/admin/tickets?per_page=${ticketsPerPage}&page=${page}${statusParam}`)
+            const data = await res.json()
+
+            if (data.success) {
+                setTickets(data.tickets)
+                setTicketsPage(data.pagination.current_page)
+                setTicketsTotalPages(data.pagination.last_page)
+
+                // Si no hay filtro, usar el total directamente
+                if (ticketStatusFilter === "all") {
+                    setTotalTickets(data.pagination.total)
+                } else {
+                    // Si hay filtro, hacer una petición adicional para obtener el total sin filtrar
+                    const resAll = await fetch(`/admin/tickets?per_page=1&page=1`)
+                    const dataAll = await resAll.json()
+                    if (dataAll.success) {
+                        setTotalTickets(dataAll.pagination.total)
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar los tickets:", error)
+        } finally {
+            setLoadingTickets(false)
+        }
+    }
 
     useEffect(() => {
-        if (productsFromProps) {
-            setProducts(productsFromProps);
-            setTotalProducts(productsFromProps.length);
-        }
-    }, [productsFromProps]);
+        fetchTickets(ticketsPage)
+    }, [ticketsPage, ticketStatusFilter])
+
+    // Añadir este useEffect para cargar los tickets inicialmente
+    useEffect(() => {
+        fetchTickets(1)
+    }, []) // Este efecto se ejecutará solo una vez al montar el componente
 
     if (!auth?.user) return <div>Cargando o no autenticado</div>
     const user = auth.user
-    // Funciones para calcular la capacidad
-    const getShelfCapacityPercentage = (shelf: Shelf) => {
-        if (!shelf.max_capacity || shelf.max_capacity === 0) return 0;
-        const currentStock = shelf.total_stock || 0;
-        return Math.min(100, Math.round((currentStock / shelf.max_capacity) * 100));
-    };
 
-    const getShelfCapacityInfo = (shelf: Shelf) => {
-        return `${shelf.total_stock || 0} / ${shelf.max_capacity} unidades`;
-    };
     const submitProduct = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        // Mostrar indicador de carga
+        Swal.fire({
+            title: "Creando producto...",
+            text: "Por favor espera",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+        })
+
         post("/admin/products", {
             preserveScroll: true,
             onSuccess: () => {
                 resetProduct()
                 setOpenProductModal(false)
-                // Recargar la lista de productos
-                fetch("/admin/products")
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            setProducts(data.products)
-                            setTotalProducts(data.total || data.products.length)
+
+                // Cerrar el indicador de carga
+                Swal.close()
+
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    title: "¡Éxito!",
+                    text: "Producto creado con éxito",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+
+                // Enfoque 1: Intentar con router.reload() pero con un pequeño retraso
+                setTimeout(() => {
+                    try {
+                        console.log("Intentando recargar la página...")
+                        router.reload({ only: ["products", "shelves"] })
+                    } catch (error) {
+                        console.error("Error al recargar con router:", error)
+
+                        // Enfoque 2: Si falla, intentar con window.location.reload()
+                        try {
+                            console.log("Intentando con window.location.reload()...")
+                            window.location.reload()
+                        } catch (reloadError) {
+                            console.error("Error al recargar la página:", reloadError)
+
+                            // Enfoque 3: Si todo falla, intentar actualizar manualmente
+                            console.log("Intentando actualizar manualmente...")
+                            updateAllData()
                         }
-                    })
-                    .catch((error) => console.error("Error al recargar productos:", error))
+                    }
+                }, 500) // Pequeño retraso para asegurar que el servidor haya procesado todo
+            },
+            onError: (errors) => {
+                // Cerrar el indicador de carga
+                Swal.close()
+
+                console.error("Error al crear producto:", errors)
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al crear el producto",
+                    icon: "error",
+                    confirmButtonColor: "#dc2626",
+                    timer: 3000,
+                })
             },
         })
+
+        // Función para actualizar todos los datos manualmente
+        const updateAllData = () => {
+            console.log("Actualizando todos los datos manualmente...")
+
+            // 1. Actualizar estadísticas generales
+            Promise.all([
+                fetch("/admin/users?page=1").then((res) => res.json()),
+                fetch("/admin/shelves?page=1").then((res) => res.json()),
+                fetch("/admin/products?page=1").then((res) => res.json()),
+            ])
+                .then(([usersData, shelvesData, productsData]) => {
+                    console.log("Datos recibidos:", { usersData, shelvesData, productsData })
+
+                    // Actualizar contadores
+                    if (usersData.success) setTotalUsers(usersData.pagination.total)
+                    if (shelvesData.success) setTotalShelves(shelvesData.pagination.total)
+                    if (productsData.success) {
+                        setTotalProducts(productsData.pagination.total)
+                        setProductsTotalPages(productsData.pagination.last_page)
+
+                        // Navegar a la última página donde estará el nuevo producto
+                        const targetPage = productsData.pagination.last_page
+
+                        console.log("Navegando a la página:", targetPage)
+                        setProductsPage(targetPage)
+
+                        // Obtener productos de la última página
+                        fetch(`/admin/products?page=${targetPage}&per_page=${productsPerPage}`)
+                            .then((response) => response.json())
+                            .then((pageData) => {
+                                console.log("Datos de la página:", pageData)
+
+                                if (pageData.success) {
+                                    // Actualizar productos y abrir la sección
+                                    setProducts(pageData.products)
+                                    setOpenSection("products")
+
+                                    console.log("Productos actualizados:", pageData.products)
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error al cargar productos de la página:", error)
+                            })
+                    }
+
+                    // También actualizar la lista de estanterías
+                    if (shelvesData.success) {
+                        fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                            .then((response) => response.json())
+                            .then((pageData) => {
+                                if (pageData.success) {
+                                    setShelves(pageData.shelves)
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error al cargar estanterías:", error)
+                            })
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error al actualizar datos:", error)
+                })
+        }
     }
 
     const submitShelf = (e: React.FormEvent) => {
@@ -266,25 +463,36 @@ export default function AdminDashboard() {
             onSuccess: () => {
                 resetShelf()
                 setOpenShelfModal(false)
+
                 Swal.fire({
                     title: "¡Éxito!",
                     text: "Estantería creada con éxito",
-                    showConfirmButton: false,
                     icon: "success",
-                    confirmButtonColor: styles.primary,
+                    showConfirmButton: false,
                     timer: 3000,
                 })
 
-                // Recargar la lista de estanterías
-                fetch("/admin/shelves")
+                // Actualizar estanterías
+                fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
                     .then((response) => response.json())
                     .then((data) => {
                         if (data.success) {
                             setShelves(data.shelves)
-                            setTotalShelves(data.total || data.shelves.length)
+                            setTotalShelves(data.pagination.total)
+                            setShelvesTotalPages(data.pagination.last_page)
                         }
                     })
-                    .catch((error) => console.error("Error al recargar estanterías:", error))
+
+                // Importante: Mantener la paginación de productos actualizada
+                fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            setProducts(data.products)
+                            setTotalProducts(data.pagination.total)
+                            setProductsTotalPages(data.pagination.last_page)
+                        }
+                    })
             },
             onError: () => {
                 Swal.fire({
@@ -301,895 +509,383 @@ export default function AdminDashboard() {
 
     const handleDeleteShelf = (shelfId: number) => {
         Swal.fire({
-            title: '¿Estás seguro?',
+            title: "¿Estás seguro?",
             text: "¡Esta acción no se puede deshacer!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: styles.primary, // Marrón principal
-            cancelButtonColor: styles.secondary, // Marrón secundario
-            confirmButtonText: 'Sí, borrar',
-            cancelButtonText: 'Cancelar',
-            background: styles.light, // Fondo claro
-            customClass: {
-                popup: 'shadow-lg', // Sombra similar a tu diseño
-                confirmButton: 'hover:opacity-90 transition-opacity' // Efecto hover
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(`/admin/shelves/${shelfId}`, {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: '¡Borrado!',
-                            text: 'La estantería ha sido eliminada.',
-                            icon: 'success',
-                            showConfirmButton: false,
-                            confirmButtonColor: styles.primary, // Marrón principal
-                            background: styles.light,
-                            timer: 3000
-                        });
-                        router.reload({ only: ['shelves'] });
-                    }
-                });
-            }
-        });
-    };
-
-    const handleDeleteProduct = (productId: number) => {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: "¡Esta acción no se puede deshacer!",
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
             confirmButtonColor: styles.primary,
             cancelButtonColor: styles.secondary,
-            confirmButtonText: 'Sí, borrar',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: "Sí, borrar",
+            cancelButtonText: "Cancelar",
             background: styles.light,
             customClass: {
-                popup: 'shadow-lg',
-                confirmButton: 'hover:opacity-90 transition-opacity'
-            }
+                popup: "shadow-lg",
+                confirmButton: "hover:opacity-90 transition-opacity",
+            },
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(`/admin/products/${productId}`, {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: "Eliminando estantería...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                })
+
+                router.delete(`/admin/shelves/${shelfId}`, {
                     preserveScroll: true,
                     onSuccess: () => {
-                        // Elimina el producto localmente
-                        setProducts((prev) => prev.filter(p => p.id !== productId));
-                        setTotalProducts((prev) => prev - 1);
+                        // Cerrar el indicador de carga
+                        Swal.close()
+
+                        // Actualizar estanterías haciendo una nueva solicitud al servidor
+                        fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    // Procesar los datos de estanterías como en fetchShelves
+                                    const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
+                                        ...shelf,
+                                        total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
+                                        products_count: shelf.products?.length || 0,
+                                        capacity_percentage:
+                                            shelf.max_capacity > 0
+                                                ? Math.min(
+                                                    100,
+                                                    ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) /
+                                                        shelf.max_capacity) *
+                                                    100,
+                                                )
+                                                : 0,
+                                    }))
+
+                                    setShelves(shelvesWithCalculations)
+                                    setTotalShelves(data.pagination.total)
+                                    setShelvesTotalPages(data.pagination.last_page)
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.shelves.length === 0 && shelvesPage > 1) {
+                                        setShelvesPage(shelvesPage - 1)
+                                    }
+
+                                    console.log("Estanterías actualizadas después de eliminar:", {
+                                        shelves: shelvesWithCalculations,
+                                        total: data.pagination.total,
+                                        pages: data.pagination.last_page,
+                                    })
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error al actualizar estanterías:", error)
+                                // Si hay un error, mostrar mensaje
+                                Swal.fire({
+                                    title: "Error",
+                                    text: "No se pudieron actualizar las estanterías",
+                                    icon: "error",
+                                    confirmButtonColor: styles.primary,
+                                    timer: 3000,
+                                })
+                            })
+
+                        // Importante: Actualizar también la paginación de productos
+                        fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    setProducts(data.products)
+                                    setTotalProducts(data.pagination.total)
+                                    setProductsTotalPages(data.pagination.last_page)
+
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.products.length === 0 && productsPage > 1) {
+                                        setProductsPage(productsPage - 1)
+                                    }
+                                }
+                            })
+                            .catch((error) => console.error("Error al actualizar productos:", error))
 
                         Swal.fire({
-                            title: '¡Borrado!',
-                            text: 'El producto ha sido eliminado.',
+                            title: "¡Borrado!",
+                            text: "La estantería ha sido eliminada.",
                             showConfirmButton: false,
-                            icon: 'success',
+                            icon: "success",
                             confirmButtonColor: styles.primary,
                             background: styles.light,
                             timer: 2000,
                             customClass: {
-                                popup: 'shadow-lg'
-                            }
-                        });
-                    }
-                });
+                                popup: "shadow-lg",
+                            },
+                        })
+                    },
+                    onError: (errors) => {
+                        // Cerrar el indicador de carga
+                        Swal.close()
+
+                        console.error("Error al eliminar estantería:", errors)
+                        Swal.fire({
+                            title: "Error",
+                            text: "Hubo un problema al eliminar la estantería",
+                            icon: "error",
+                            confirmButtonColor: styles.primary,
+                            timer: 3000,
+                        })
+                    },
+                })
             }
-        });
-    };
-    // Custom styles based on the provided color palette
-    const styles = {
-        primary: "#8F5C0C", // warm brown
-        secondary: "#7C5F42", // medium brown
-        dark: "#000000", // black
-        light: "#F3F3F1", // off-white
+        })
     }
 
-    // Componente de carga
-    const LoadingSpinner = () => (
-        <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: styles.primary }}></div>
-        </div>
-    )
+    const handleDeleteProduct = (productId: number) => {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "¡Esta acción no se puede deshacer!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: styles.primary,
+            cancelButtonColor: styles.secondary,
+            confirmButtonText: "Sí, borrar",
+            cancelButtonText: "Cancelar",
+            background: styles.light,
+            customClass: {
+                popup: "shadow-lg",
+                confirmButton: "hover:opacity-90 transition-opacity",
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Eliminando producto...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                })
+                router.delete(`/admin/products/${productId}`, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        // Actualizar productos
+                        fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    setProducts(data.products)
+                                    setTotalProducts(data.pagination.total)
+                                    setProductsTotalPages(data.pagination.last_page)
 
+                                    // Si la página actual ahora está vacía y no es la primera página, ir a la página anterior
+                                    if (data.products.length === 0 && productsPage > 1) {
+                                        setProductsPage(productsPage - 1)
+                                    }
+                                }
+                            })
+                            .catch((error) => console.error("Error al actualizar productos:", error))
 
-    // Debug obligatorio (añade esto justo después)
-    console.log('Shelves data in frontend:', shelves);
+                        Swal.fire({
+                            title: "¡Borrado!",
+                            text: "El producto ha sido eliminado.",
+                            showConfirmButton: false,
+                            icon: "success",
+                            confirmButtonColor: styles.primary,
+                            background: styles.light,
+                            timer: 2000,
+                            customClass: {
+                                popup: "shadow-lg",
+                            },
+                        })
+                    },
+                })
+            }
+        })
+    }
+    const styles = {
+        primary: "#8F5C0C",
+        secondary: "#7C5F42",
+        dark: "#000000",
+        light: "#F3F3F1",
+    }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs} className="bg-red-100">
+        <AppLayout breadcrumbs={breadcrumbs} className="bg-[#F3F3DF] text-[#333]">
             <Head title="Dashboard Admin" />
-            <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: styles.light }}>
-                <div className="max-w-6xl mx-auto space-y-8">
-                    {/* Welcome section */}
-                    <section
-                        className="rounded-2xl p-6 shadow-lg"
-                        style={{
-                            background: `linear-gradient(135deg, ${styles.primary}, ${styles.secondary})`,
-                            color: styles.light,
-                        }}
-                    >
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                            <div>
-                                <h1 className="text-3xl font-bold mb-2">
-                                    Bienvenido, {user.name} {user.last_name}
-                                </h1>
-                                <div
-                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                                    style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}
-                                >
-                                    <span className="mr-2">•</span> {user.role}
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3 w-full md:w-auto">
-                                <Button
-                                    onClick={() => setOpenShelfModal(true)}
-                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
-                                    style={{
-                                        backgroundColor: styles.light,
-                                        color: styles.primary,
-                                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                                    }}
-                                >
-                                    <Package2 size={20} />
-                                    Crear estantería
-                                </Button>
-                                <Button
-                                    onClick={() => setOpenProductModal(true)}
-                                    className="flex items-center gap-2 text-md font-medium rounded-xl px-6 py-3 transition-all w-full md:w-auto justify-center"
-                                    style={{
-                                        backgroundColor: styles.light,
-                                        color: styles.primary,
-                                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                                    }}
-                                >
-                                    <Package size={20} />
-                                    Crear producto
-                                </Button>
-
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Dashboard stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div
-                            className="rounded-2xl p-6 shadow-md border-l-4 transition-all hover:shadow-lg"
-                            style={{
-                                backgroundColor: "white",
-                                borderLeftColor: styles.primary,
-                            }}
-                        >
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-medium text-gray-700">Total Usuarios</h3>
-                                <div className="p-3 rounded-full" style={{ backgroundColor: `${styles.primary}20` }}>
-                                    <Users size={20} style={{ color: styles.primary }} />
-                                </div>
-                            </div>
-                            <p className="text-3xl font-bold mt-4" style={{ color: styles.primary }}>
-                                {loading.users ? "..." : totalUsers}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-2">Usuarios activos en el sistema</p>
+            <div className="max-w-6xl mx-auto space-y-8 py-10 px-4">
+                {/* Bienvenida */}
+                <section className="bg-[#E17100] text-[#F3F3DF] p-6 rounded-2xl shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between gap-6">
+                        <div>
+                            <h1 className="text-3xl font-bold mb-2">
+                                Bienvenido, {user.name} {user.last_name}
+                            </h1>
+                            <span className="bg-[#F3F3DF] text-[#E17100] px-3 py-1 rounded-full text-sm font-medium inline-block">
+                                {user.role}
+                            </span>
                         </div>
 
-                        <div
-                            className="rounded-2xl p-6 shadow-md border-l-4 transition-all hover:shadow-lg"
-                            style={{
-                                backgroundColor: "white",
-                                borderLeftColor: styles.primary,
-                            }}
-                        >
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-medium text-gray-700">Total Estanterías</h3>
-                                <div className="p-3 rounded-full" style={{ backgroundColor: `${styles.primary}20` }}>
-                                    <Package2 size={20} style={{ color: styles.primary }} />
-                                </div>
-                            </div>
-                            <p className="text-3xl font-bold mt-4" style={{ color: styles.primary }}>
-                                {loading.shelves ? "..." : totalShelves}                           </p>
-                            <p className="text-sm text-gray-500 mt-2">Estanterías disponibles</p>
-                        </div>
-
-                        <div
-                            className="rounded-2xl p-6 shadow-md border-l-4 transition-all hover:shadow-lg"
-                            style={{
-                                backgroundColor: "white",
-                                borderLeftColor: styles.primary,
-                            }}
-                        >
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-medium text-gray-700">Total Productos</h3>
-                                <div className="p-3 rounded-full" style={{ backgroundColor: `${styles.primary}20` }}>
-                                    <Package size={20} style={{ color: styles.primary }} />
-                                </div>
-                            </div>
-                            <p className="text-3xl font-bold mt-4" style={{ color: styles.primary }}>
-                                {loading.products ? "..." : totalProducts}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-2">Productos en inventario</p>
+                        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                            <Button
+                                onClick={() => setOpenShelfModal(true)}
+                                className="bg-[#F3F3DF] text-[#E17100] font-semibold px-6 py-3 rounded-xl shadow hover:opacity-90 transition w-full md:w-auto"
+                            >
+                                Crear estantería
+                            </Button>
+                            <Button
+                                onClick={() => setOpenProductModal(true)}
+                                className="bg-[#F3F3DF] text-[#E17100] font-semibold px-6 py-3 rounded-xl shadow hover:opacity-90 transition w-full md:w-auto"
+                            >
+                                Crear producto
+                            </Button>
                         </div>
                     </div>
+                </section>
 
-                    {/* Management sections */}
-                    <section className="bg-white rounded-2xl shadow-md overflow-hidden">
-                        {/* Users Section Header */}
+                {/* Estadísticas */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    {[
+                        {
+                            label: "Total Usuarios",
+                            value: loading.users ? "..." : totalUsers,
+                        },
+                        {
+                            label: "Total Estanterías",
+                            value: loading.shelves ? "..." : totalShelves,
+                        },
+                        {
+                            label: "Total Productos",
+                            value: loading.products ? "..." : totalProducts,
+                        },
+                        {
+                            label: "Total Tickets",
+                            value: loadingTickets ? "..." : totalTickets,
+                        },
+                    ].map((item, i) => (
                         <div
-                            className="p-6 border-b cursor-pointer"
-                            style={{ borderColor: `${styles.secondary}30` }}
-                            onClick={() => setOpenSection(openSection === "users" ? null : "users")}
+                            key={i}
+                            className="bg-white border-l-4 border-[#E17100] p-6 rounded-2xl shadow hover:shadow-lg transition"
                         >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <Users size={24} style={{ color: styles.primary }} />
-                                    <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>
-                                        Gestión de Usuarios
-                                    </h2>
-                                </div>
-                                {openSection === "users" ? (
-                                    <ChevronUp size={24} style={{ color: styles.primary }} />
-                                ) : (
-                                    <ChevronDown size={24} style={{ color: styles.primary }} />
-                                )}
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700">{item.label}</h3>
+                            <p className="text-3xl font-bold mt-3 text-[#E17100]">{item.value}</p>
+                            <p className="text-sm text-gray-500 mt-1">Información actualizada</p>
                         </div>
-
-                        {/* Users Table */}
-                        {openSection === "users" && (
-                            <div className="overflow-x-auto">
-                                {loading.users ? (
-                                    <LoadingSpinner />
-                                ) : (
-                                        <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                            <thead style={{ backgroundColor: `${styles.secondary}10` }}>
-                                                <tr>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Nombre
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Email
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Teléfono
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Rol
-                                                    </th>
-                                                    <th
-                                                        className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                        style={{ color: styles.secondary }}
-                                                    >
-                                                        Acciones
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                                {users.length > 0 ? (
-                                                    users.map((user) => (
-                                                        <tr key={user.id} className="hover:bg-gray-50">
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="flex items-center">
-                                                                    {user.avatar ? (
-                                                                        <img
-                                                                        src={user.avatar || "/placeholder.svg"}
-                                                                        alt={`${user.name} ${user.last_name}`}
-                                                                        className="h-10 w-10 rounded-full object-cover ring-2"
-                                                                        style={{ borderColor: styles.primary }}
-                                                                    />
-                                                                ) : (
-                                                                    <div
-                                                                        className="h-10 w-10 rounded-full flex items-center justify-center text-lg font-medium"
-                                                                        style={{
-                                                                            backgroundColor: `${styles.primary}20`,
-                                                                            color: styles.primary,
-                                                                        }}
-                                                                    >
-                                                                        {user.name.charAt(0)}
-                                                                    </div>
-                                                                )}
-                                                                <div className="ml-4">
-                                                                    <div className="text-sm font-medium" style={{ color: styles.dark }}>
-                                                                        {user.name} {user.last_name}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phone}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                                <span
-                                                                    className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                                    style={{
-                                                                        backgroundColor:
-                                                                            user.role === "Admin"
-                                                                                ? "#fef9c3" // amarillo claro (bg-yellow-100)
-                                                                                : user.role === "Manager"
-                                                                                    ? "#dbeafe" // azul claro (bg-blue-100)
-                                                                                    : "rgba(0, 128, 0, 0.2)", // verde claro
-                                                                        color:
-                                                                            user.role === "Admin"
-                                                                                ? "#b45309" // amarillo oscuro (text-yellow-700)
-                                                                                : user.role === "Manager"
-                                                                                    ? "#1d4ed8" // azul fuerte (text-blue-700)
-                                                                                    : "green",
-                                                                    }}
-                                                                >
-                                                                    {user.role}
-                                                                </span>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <button
-                                                                onClick={() => {
-                                                                        Swal.fire({
-                                                                            title: `¿Estás seguro de querer ${user.banned_at ? "desbanear" : "banear"} a ${user.name}?`,
-                                                                            icon: user.banned_at ? "question" : "warning",
-                                                                            showCancelButton: true,
-                                                                            confirmButtonColor: styles.primary,
-                                                                            cancelButtonColor: styles.secondary,
-                                                                            confirmButtonText: user.banned_at ? "Sí, desbanear" : "Sí, banear",
-                                                                            cancelButtonText: "Cancelar",
-                                                                            background: styles.light,
-                                                                            customClass: {
-                                                                                popup: 'shadow-lg',
-                                                                                confirmButton: 'hover:opacity-90 transition-opacity'
-                                                                            }
-                                                                        }).then((result) => {
-                                                                            if (result.isConfirmed) {
-                                                                                router.patch(
-                                                                                    `/admin/users/${user.id}/ban`,
-                                                                                    {
-                                                                                        banned: !user.banned_at,
-                                                                                    },
-                                                                                    {
-                                                                                        preserveScroll: true,
-                                                                                        onSuccess: () => {
-                                                                                            setUsers(
-                                                                                                users.map((u) =>
-                                                                                                    u.id === user.id
-                                                                                                        ? { ...u, banned_at: user.banned_at ? null : new Date().toISOString() }
-                                                                                                        : u,
-                                                                                                ),
-                                                                                            )
-                                                                                        Swal.fire({
-                                                                                            icon: "success",
-                                                                                            title: user.banned_at ? "Usuario desbaneado" : "Usuario baneado",
-                                                                                            showConfirmButton: false,
-                                                                                            timer: 1800,
-                                                                                            background: styles.light,
-                                                                                            customClass: { popup: 'shadow-lg' }
-                                                                                        });
-                                                                                    },
-                                                                                    onError: () => {
-                                                                                        Swal.fire({
-                                                                                            icon: "error",
-                                                                                            title: "Error en el proceso",
-                                                                                            html: `
-                                                                                          <div style="text-align:left">
-                                                                                            <p>❌ <strong>Fallo al actualizar el estado</strong></p>
-                                                                                            <p><small>Error al procesar la solicitud</small></p>
-                                                                                          </div>
-                                                                                        `,
-                                                                                            confirmButtonText: "Entendido",
-                                                                                            footer:
-                                                                                                '<a href="#" onclick="mostrarDetallesTecnicos()">Ver detalles técnicos</a>',
-                                                                                            background: styles.light,
-                                                                                            customClass: { popup: 'shadow-lg' }
-                                                                                        })
-                                                                                    },
-                                                                                },
-                                                                            )
-                                                                        }
-                                                                    });
-                                                                }}
-                                                                className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
-                                                                style={{
-                                                                    backgroundColor: user.banned_at ? "rgba(0, 128, 0, 0.15)" : "rgba(220, 38, 38, 0.15)",
-                                                                    color: user.banned_at ? "green" : "#dc2626",
-                                                                }}
-                                                            >
-                                                                {user.banned_at ? "Desbanear" : "Banear"}
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
-                                                            No hay usuarios registrados
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                )}
-
-                                {/* Pagination control */}
-                                <div className="flex items-center justify-between p-6">
-                                    <div className="text-sm text-gray-600">
-                                        Mostrando {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalUsers)} de{" "}
-                                        {totalUsers} usuarios
-                                    </div>
-
-                                    <div className="flex gap-2 items-center">
-                                        {/* Previous button */}
-                                        <button
-                                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                            disabled={currentPage === 1}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-
-                                        {/* Page numbers */}
-                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                            const page =
-                                                currentPage <= 3
-                                                    ? i + 1
-                                                    : currentPage >= totalPages - 2
-                                                        ? totalPages - 4 + i
-                                                        : currentPage - 2 + i
-
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setCurrentPage(page)}
-                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${currentPage === page ? "shadow-md" : ""
-                                                        }`}
-                                                    style={{
-                                                        backgroundColor: currentPage === page ? styles.primary : "transparent",
-                                                        color: currentPage === page ? "white" : styles.secondary,
-                                                        border: currentPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                    }}
-                                                >
-                                                    {page}
-                                                </button>
-                                            )
-                                        })}
-
-                                        {/* Next button */}
-                                        <button
-                                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                            disabled={currentPage === totalPages}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Shelves Section Header */}
-                        <div
-                            className="p-6 border-b cursor-pointer"
-                            style={{ borderColor: `${styles.secondary}30` }}
-                            onClick={() => setOpenSection(openSection === "shelves" ? null : "shelves")}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <Package2 size={24} style={{ color: styles.primary }} />
-                                    <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>
-                                        Gestión de Estanterías
-                                    </h2>
-                                </div>
-                                {openSection === "shelves" ? (
-                                    <ChevronUp size={24} style={{ color: styles.primary }} />
-                                ) : (
-                                    <ChevronDown size={24} style={{ color: styles.primary }} />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Shelves Table */}
-                        {openSection === "shelves" && (
-                            <div className="overflow-x-auto">
-                                {loading.shelves ? (
-                                    <LoadingSpinner />
-                                ) : (
-                                    <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                        <thead style={{ backgroundColor: `${styles.secondary}10` }}>
-                                            <tr>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Código
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Ubicación
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Capacidad Máxima
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Fecha Creación
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Acciones
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                            {shelves.length > 0 ? (
-                                                shelves.map((shelf) => (
-                                                    <tr key={shelf.id} className="hover:bg-gray-50">
-                                                        <td
-                                                            className="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                                                            style={{ color: styles.dark }}
-                                                        >
-                                                            {shelf.code}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{shelf.location}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <div className="flex items-center">
-                                                                <div className="w-full mr-2">
-                                                                    <div className="relative pt-1">
-                                                                        <div className="flex items-center justify-between">
-                                                                            <div>
-                                                                                <span className="text-xs font-semibold inline-block text-gray-600">
-                                                                                    {shelf.total_stock} / {shelf.max_capacity} unidades
-                                                                                </span>
-                                                                            </div>
-                                                                            <div>
-                                                                                <span className="text-xs font-semibold inline-block text-gray-600">
-                                                                                    {shelf.products_count} productos
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                                                                            <div
-                                                                                style={{
-                                                                                    width: `${shelf.capacity_percentage}%`
-                                                                                }}
-                                                                                className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center
-                                                                                    ${shelf.capacity_percentage >= 100
-                                                                                        ? 'bg-black'
-                                                                                        : shelf.capacity_percentage >= 99
-                                                                                            ? 'bg-red-500'
-                                                                                            : shelf.capacity_percentage > 85
-                                                                                                ? 'bg-red-500'
-                                                                                                : shelf.capacity_percentage > 50
-                                                                                                    ? 'bg-yellow-500'
-                                                                                                    : 'bg-green-500'
-                                                                                    }`
-                                                                                }
-                                                                            ></div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                            {shelf.created_at ? new Date(shelf.created_at).toLocaleDateString() : "N/A"}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <button
-                                                                onClick={() => handleDeleteShelf(shelf.id)}
-                                                                className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow-md"
-                                                                style={{
-                                                                    backgroundColor: "rgba(220, 38, 38, 0.15)",
-                                                                    color: "#dc2626",
-                                                                }}
-                                                            >
-                                                                <Trash2 className="h-4 w-4 inline mr-1" /> Borrar
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
-                                                        No hay estanterías registradas
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                        </table>
-
-                                )}
-                                <div className="flex items-center justify-between p-6">
-                                    <div className="text-sm text-gray-600">
-                                        Mostrando {(shelvesPage - 1) * shelvesPerPage + 1}-{Math.min(shelvesPage * shelvesPerPage, totalShelves)} de {totalShelves} estanterías
-                                    </div>
-                                    <div className="flex gap-2 items-center">
-                                        <button
-                                            onClick={() => setShelvesPage((p) => Math.max(1, p - 1))}
-                                            disabled={shelvesPage === 1}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-                                        {Array.from({ length: Math.min(5, shelvesTotalPages) }, (_, i) => {
-                                            const page =
-                                                shelvesPage <= 3
-                                                    ? i + 1
-                                                    : shelvesPage >= shelvesTotalPages - 2
-                                                        ? shelvesTotalPages - 4 + i
-                                                        : shelvesPage - 2 + i
-
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setShelvesPage(page)}
-                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${shelvesPage === page ? "shadow-md" : ""}`}
-                                                    style={{
-                                                        backgroundColor: shelvesPage === page ? styles.primary : "transparent",
-                                                        color: shelvesPage === page ? "white" : styles.secondary,
-                                                        border: shelvesPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                    }}
-                                                >
-                                                    {page}
-                                                </button>
-                                            )
-                                        })}
-                                        <button
-                                            onClick={() => setShelvesPage((p) => Math.min(shelvesTotalPages, p + 1))}
-                                            disabled={shelvesPage === shelvesTotalPages}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        )}
-
-                        {/* Products Section Header */}
-                        <div
-                            className="p-6 border-b cursor-pointer"
-                            style={{ borderColor: `${styles.secondary}30` }}
-                            onClick={() => setOpenSection(openSection === "products" ? null : "products")}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <Package size={24} style={{ color: styles.primary }} />
-                                    <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>
-                                        Gestión de Productos
-                                    </h2>
-                                </div>
-                                {openSection === "products" ? (
-                                    <ChevronUp size={24} style={{ color: styles.primary }} />
-                                ) : (
-                                    <ChevronDown size={24} style={{ color: styles.primary }} />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Products Table */}
-                        {openSection === "products" && (
-                            <div className="overflow-x-auto">
-                                {loading.products ? (
-                                    <LoadingSpinner />
-                                ) : (
-                                    <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                        <thead style={{ backgroundColor: `${styles.secondary}10` }}>
-                                            <tr>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Imagen
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Nombre
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Referencia
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Stock
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Precio
-                                                    </th>
-                                                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Descuento (%)</th>
-                                                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: styles.secondary }}>Precio Final</th>
-
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Estantería
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider"
-                                                    style={{ color: styles.secondary }}
-                                                >
-                                                    Acciones
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                                            {products.length > 0 ? (
-                                                products.map((product) => (
-                                                    <tr key={product.id} className="hover:bg-gray-50">
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            {product.image_url ? (
-                                                                <img
-                                                                    src={product.image_url || "/placeholder.svg"}
-                                                                    alt={product.name}
-                                                                    className="h-12 w-12 object-cover rounded-md"
-                                                                />
-                                                            ) : (
-                                                                <div className="h-12 w-12 rounded-md flex items-center justify-center bg-gray-100">
-                                                                    <Package size={20} style={{ color: styles.secondary }} />
-                                                                </div>
-                                                            )}
-                                                        </td>
-                                                        <td
-                                                            className="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                                                            style={{ color: styles.dark }}
-                                                        >
-                                                            {product.name}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                            {product.num_reference}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.stock}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.price}€</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                            {typeof product.discount_percent === "number" ? product.discount_percent + "%" : "0%"}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                            {typeof product.discount_percent === "number"
-                                                                ? ((product.price || 0) * (1 - (product.discount_percent || 0) / 100)).toFixed(2) + "€"
-                                                                : (product.price || 0).toFixed(2) + "€"}
-                                                        </td>
-
-
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                            {product.shelf_id ? (
-                                                                allShelvesForProducts.find((shelf) => shelf.id === product.shelf_id)
-                                                                    ? allShelvesForProducts.find((shelf) => shelf.id === product.shelf_id)!.code
-                                                                    : <span className="text-gray-400">ID: {product.shelf_id}</span>
-                                                            ) : (
-                                                                <span className="text-gray-400">Sin asignar</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <button
-                                                                onClick={() => handleDeleteProduct(product.id)}
-                                                                className="px-3 py-1 rounded-md text-sm font-medium ml-2"
-                                                                style={{
-                                                                    backgroundColor: "rgba(220, 38, 38, 0.15)",
-                                                                    color: "#dc2626",
-                                                                }}
-                                                            >
-                                                                <Trash2 className="h-3 w-3 inline mr-1" /> Borrar
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
-                                                        No hay productos registrados
-                                                    </td>
-                                                        </tr>
-
-                                            )}
-                                        </tbody>
-                                    </table>
-                                )}
-                                <div className="flex items-center justify-between p-6">
-                                    <div className="text-sm text-gray-600">
-                                        Mostrando {(productsPage - 1) * productsPerPage + 1}-{Math.min(productsPage * productsPerPage, totalProducts)} de {totalProducts} productos
-                                    </div>
-                                    <div className="flex gap-2 items-center">
-                                        <button
-                                            onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
-                                            disabled={productsPage === 1}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-                                        {Array.from({ length: Math.min(5, productsTotalPages) }, (_, i) => {
-                                            const page =
-                                                productsPage <= 3
-                                                    ? i + 1
-                                                    : productsPage >= productsTotalPages - 2
-                                                        ? productsTotalPages - 4 + i
-                                                        : productsPage - 2 + i
-
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setProductsPage(page)}
-                                                    className={`w-10 h-10 rounded-lg transition-all font-medium ${productsPage === page ? "shadow-md" : ""}`}
-                                                    style={{
-                                                        backgroundColor: productsPage === page ? styles.primary : "transparent",
-                                                        color: productsPage === page ? "white" : styles.secondary,
-                                                        border: productsPage === page ? "none" : `1px solid ${styles.secondary}30`,
-                                                    }}
-                                                >
-                                                    {page}
-                                                </button>
-                                            )
-                                        })}
-                                        <button
-                                            onClick={() => setProductsPage((p) => Math.min(productsTotalPages, p + 1))}
-                                            disabled={productsPage === productsTotalPages}
-                                            className="p-2 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
-                                            style={{ color: styles.secondary }}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </section>
+                    ))}
                 </div>
+
+                {/* Secciones */}
+                <section className="bg-white rounded-2xl shadow p-4">
+                    <UserSection
+                        styles={{ primary: "#E17100", light: "#F3F3DF" }}
+                        users={users}
+                        setUsers={setUsers}
+                        loading={loading.users}
+                        openSection={openSection}
+                        setOpenSection={setOpenSection}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        totalPages={totalPages}
+                        perPage={perPage}
+                        totalUsers={totalUsers}
+                        authUser={auth.user}
+                        roles={[]}
+                    />
+
+                    <ShelfSection
+                        styles={{ primary: "#E17100", light: "#F3F3DF" }}
+                        shelves={shelves}
+                        loading={loading.shelves}
+                        openSection={openSection}
+                        setOpenSection={setOpenSection}
+                        shelvesPage={shelvesPage}
+                        setShelvesPage={setShelvesPage}
+                        shelvesTotalPages={shelvesTotalPages}
+                        shelvesPerPage={shelvesPerPage}
+                        totalShelves={totalShelves}
+                        handleDeleteShelf={handleDeleteShelf}
+                    />
+
+                    <ProductSection
+                        styles={{ primary: "#E17100", light: "#F3F3DF" }}
+                        products={products}
+                        loading={loading.products}
+                        openSection={openSection}
+                        setOpenSection={setOpenSection}
+                        productsPage={productsPage}
+                        setProductsPage={setProductsPage}
+                        productsTotalPages={productsTotalPages}
+                        productsPerPage={productsPerPage}
+                        totalProducts={totalProducts}
+                        allShelvesForProducts={allShelvesForProducts}
+                        handleDeleteProduct={handleDeleteProduct}
+                    />
+                    <TicketSection
+                        styles={{ primary: "#E17100", light: "#F3F3DF" }}
+                        tickets={tickets}
+                        loading={loadingTickets}
+                        openSection={openSection}
+                        setOpenSection={setOpenSection}
+                        ticketsPage={ticketsPage}
+                        setTicketsPage={setTicketsPage}
+                        ticketsTotalPages={ticketsTotalPages}
+                        ticketsPerPage={ticketsPerPage}
+                        totalTickets={totalTickets}
+                        statusFilter={ticketStatusFilter}
+                        setStatusFilter={setTicketStatusFilter}
+                    />
+                </section>
+
+                {/* Modales */}
+                <ProductModal
+                    open={openProductModal}
+                    onClose={() => setOpenProductModal(false)}
+                    categorias={categorias}
+                    productData={productData}
+                    setProductData={setProductData}
+                    submitProduct={submitProduct}
+                    productErrors={productErrors}
+                    processingProduct={processingProduct}
+                    resetProduct={resetProduct}
+                />
+
+                <ShelfModal
+                    open={openShelfModal}
+                    onClose={() => {
+                        setOpenShelfModal(false)
+                        resetShelf()
+                        clearErrors()
+                    }}
+                    shelfData={shelfData}
+                    setShelfData={setShelfData}
+                    submitShelf={submitShelf}
+                    shelfErrors={shelfErrors}
+                    processingShelf={processingShelf}
+                    clearErrors={clearErrors}
+                    existingLocations={shelves.map((shelf) => shelf.location)}
+                />
             </div>
-
-            <ProductModal
-                open={openProductModal}
-                onClose={() => setOpenProductModal(false)}
-                categorias={categorias}
-                productData={productData}
-                setProductData={setProductData}
-                submitProduct={submitProduct}
-                productErrors={productErrors}
-                processingProduct={processingProduct}
-
-
-            />
-
-            <ShelfModal
-                open={openShelfModal}
-                onClose={() => {
-                    setOpenShelfModal(false)
-                    resetShelf()
-                    clearErrors()
-                }}
-                shelfData={shelfData}
-                setShelfData={setShelfData}
-                submitShelf={submitShelf}
-                shelfErrors={shelfErrors}
-                processingShelf={processingShelf}
-                clearErrors={clearErrors}
-            />
         </AppLayout>
     )
+    // Al final de los imports o justo antes de return:
+    function handleDeleteWithPagination<T>({
+        setItems,
+        setTotalItems,
+        items,
+        currentPage,
+        setCurrentPage,
+        deletedItemId,
+    }: {
+        setItems: React.Dispatch<React.SetStateAction<T[]>>
+        setTotalItems: React.Dispatch<React.SetStateAction<number>>
+        items: T[]
+        currentPage: number
+        setCurrentPage: React.Dispatch<React.SetStateAction<number>>
+        deletedItemId: number
+    }) {
+        const updatedItems = items.filter((item) => (item as any).id !== deletedItemId)
+        setTotalItems((prev) => prev - 1)
+
+        if (updatedItems.length === 0 && currentPage > 1) {
+            setCurrentPage(currentPage - 1)
+        } else {
+            setItems(updatedItems)
+        }
+    }
 }
