@@ -50,7 +50,7 @@ export default function CreateTicketModal({ isOpen, onClose, user }: Props) {
               <input
                 type="email"
                 placeholder="Tu email"
-                className={`w-full p-3 rounded border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full p-3 dark:text-black rounded border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                 value={data.email}
                 onChange={(e) => setData('email', e.target.value)}
                 required
@@ -63,7 +63,7 @@ export default function CreateTicketModal({ isOpen, onClose, user }: Props) {
             <input
               type="text"
               placeholder="Asunto"
-              className={`w-full p-3 rounded border ${errors.subject ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full p-3 rounded dark:text-black border ${errors.subject ? 'border-red-500' : 'border-gray-300'}`}
               value={data.subject}
               onChange={(e) => setData('subject', e.target.value)}
               required
@@ -75,7 +75,7 @@ export default function CreateTicketModal({ isOpen, onClose, user }: Props) {
             <textarea
               placeholder="Mensaje"
               rows={5}
-              className={`w-full p-3 rounded border ${errors.message ? 'border-red-500' : 'border-gray-300'} resize-none`}
+              className={`w-full p-3 dark:text-black rounded border ${errors.message ? 'border-red-500' : 'border-gray-300'} resize-none`}
               value={data.message}
               onChange={(e) => setData('message', e.target.value)}
               required

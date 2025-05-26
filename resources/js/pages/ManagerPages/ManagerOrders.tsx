@@ -138,15 +138,15 @@ export default function ManagerOrdersPage() {
                         <div className="flex space-x-3">
                             <div className="bg-white p-3 rounded-lg shadow-md flex items-center hover:shadow-lg transition-shadow duration-200">
                                 <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-                                <span className="text-sm font-medium">{pendingOrders.length} Pagados</span>
+                                <span className="text-sm font-medium dark:text-black">{pendingOrders.length} Pagados</span>
                             </div>
                             <div className="bg-white p-3 rounded-lg shadow-md flex items-center hover:shadow-lg transition-shadow duration-200">
                                 <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#E17100' }}></div>
-                                <span className="text-sm font-medium">{processingOrders.length} En proceso</span>
+                                <span className="text-sm font-medium dark:text-black">{processingOrders.length} En proceso</span>
                             </div>
                             <div className="bg-white p-3 rounded-lg shadow-md flex items-center hover:shadow-lg transition-shadow duration-200">
                                 <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-                                <span className="text-sm font-medium">{completedOrders.length} Completados</span>
+                                <span className="text-sm font-medium dark:text-black">{completedOrders.length} Completados</span>
                             </div>
                         </div>
                     </div>

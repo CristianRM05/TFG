@@ -82,7 +82,7 @@ const TicketSection: React.FC<Props> = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Mail size={24} style={{ color: styles.primary }} />
-                        <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>
+                        <h2 className="text-2xl font-bold dark:text-black" style={{ color: styles.dark }}>
                             Gestión de Tickets
                         </h2>
                     </div>

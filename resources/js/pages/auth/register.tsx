@@ -12,6 +12,8 @@ const MySwal = withReactContent(Swal);
 
 export default function Register() {
     const [imagen, setImagen] = useState<File | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
 
     const [data, setData] = useState({
         name: '',
@@ -209,38 +211,76 @@ export default function Register() {
                         <InputError message={errors.location?.[0]} className="mt-1 text-xs text-red-500" />
                     </div>
 
-
                     {/* Contraseñas */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <label htmlFor="password" className="block text-xs font-bold uppercase text-white">Contraseña</label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                value={data.password}
-                                onChange={handleInputChange}
-                                disabled={processing}
-                                className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
-                                placeholder="Contraseña"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={data.password}
+                                    onChange={handleInputChange}
+                                    disabled={processing}
+                                    className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2 pr-10"
+                                    placeholder="Contraseña"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                                >
+                                    {showPassword ? (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                            <line x1="1" y1="1" x2="23" y2="23"/>
+                                        </svg>
+                                    ) : (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
                             <InputError message={errors.password?.[0]} className="mt-1 text-xs text-red-500" />
                         </div>
 
                         <div>
                             <label htmlFor="password_confirmation" className="block text-xs font-bold uppercase text-white">Confirmar contraseña</label>
-                            <input
-                                id="password_confirmation"
-                                name="password_confirmation"
-                                type="password"
-                                required
-                                value={data.password_confirmation}
-                                onChange={handleInputChange}
-                                disabled={processing}
-                                className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2"
-                                placeholder="Confirmar contraseña"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="password_confirmation"
+                                    name="password_confirmation"
+                                    type={showPasswordConfirmation ? "text" : "password"}
+                                    required
+                                    value={data.password_confirmation}
+                                    onChange={handleInputChange}
+                                    disabled={processing}
+                                    className="mt-1 w-full bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-500 focus:border-white focus:outline-none py-2 pr-10"
+                                    placeholder="Confirmar contraseña"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                                    className="absolute right-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                                >
+                                    {showPasswordConfirmation ? (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                            <line x1="1" y1="1" x2="23" y2="23"/>
+                                        </svg>
+                                    ) : (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
+                            {/* ✅ CORREGIDO: Laravel envía este error bajo 'password', no 'password_confirmation' */}
                             <InputError message={errors.password?.[0]} className="mt-1 text-xs text-red-500" />
                         </div>
                     </div>

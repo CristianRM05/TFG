@@ -160,7 +160,7 @@ const UserSection: React.FC<Props> = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Users size={24} style={{ color: styles.primary }} />
-                        <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>Gestión de Usuarios</h2>
+                        <h2 className="text-2xl font-bold dark:text-black" style={{ color: styles.dark }}>Gestión de Usuarios</h2>
                     </div>
                     {openSection === "users" ? <ChevronUp size={24} style={{ color: styles.primary }} /> : <ChevronDown size={24} style={{ color: styles.primary }} />}
                 </div>
