@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Head, Link, useForm, router } from "@inertiajs/react"
@@ -32,6 +30,9 @@ interface Product {
         id: number
         location: string
         max_capacity: number
+        total_stock: number
+        products_count?: number
+        capacity_percentage: number
     } | null
 }
 
@@ -47,66 +48,112 @@ interface Props {
 
 const ShowProduct: React.FC<Props> = ({ product, auth }) => {
     const [isEditing, setIsEditing] = useState(false);
+    const [isAddStockModalOpen, setIsAddStockModalOpen] = useState(false);
+    const [stockToAdd, setStockToAdd] = useState(0);
+
     const { data: editedProduct, setData: setEditedProduct, put, processing, errors } = useForm({
         name: product.name,
         description: product.description || "",
-        stock: product.stock
+        stock: product.stock,
+        price: product.price,
     });
 
-    const handleEditClick = () => {
-        setIsEditing(true);
-    };
+    const handleEditClick = () => setIsEditing(true);
 
     const handleCancelEdit = () => {
         setIsEditing(false);
         setEditedProduct({
             name: product.name,
             description: product.description || "",
-            stock: product.stock
+            stock: product.stock,
+            price: product.price,
         });
     };
 
     const handleSave = async () => {
-        try {
-            await router.put(route('products.update', { product: product.id }), {
-                name: editedProduct.name,
-                description: editedProduct.description,
-                stock: editedProduct.stock
-            }, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        title: "¡Éxito!",
-                        text: "Producto actualizado correctamente",
-                        icon: "success",
-                        confirmButtonColor: COLORS.primary,
-                        timer: 2000
-                    });
-                    setIsEditing(false);
-                },
-                onError: (errors) => {
-                    Swal.fire({
-                        title: "Error",
-                        text: errors.message || "Error al actualizar el producto",
-                        icon: "error",
-                        confirmButtonColor: COLORS.primary
-                    });
-                }
-            });
-        } catch (error) {
-            console.error("Error:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Error de conexión",
-                icon: "error",
-                confirmButtonColor: COLORS.primary
-            });
-        }
+    if (editedProduct.price < 0) {
+        Swal.fire({
+            title: "Precio inválido",
+            text: "El precio no puede ser negativo.",
+            icon: "warning",
+            confirmButtonColor: COLORS.primary
+        });
+        return;
+    }
+
+    try {
+        await router.put(route('products.update', { product: product.id }), {
+            name: editedProduct.name,
+            description: editedProduct.description,
+            stock: editedProduct.stock,
+            price: editedProduct.price,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                Swal.fire({
+                    title: "¡Éxito!",
+                    text: "Producto actualizado correctamente",
+                    icon: "success",
+                    confirmButtonColor: COLORS.primary,
+                    timer: 2000
+                });
+                setIsEditing(false);
+            },
+            onError: (errors) => {
+                Swal.fire({
+                    title: "Error",
+                    text: errors.message || "Error al actualizar el producto",
+                    icon: "error",
+                    confirmButtonColor: COLORS.primary
+                });
+            }
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+            title: "Error",
+            text: "Error de conexión",
+            icon: "error",
+            confirmButtonColor: COLORS.primary
+        });
+    }
+};
+
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "stock") {
+        setEditedProduct(name, parseInt(value) || 0);
+    } else if (name === "price") {
+        setEditedProduct(name, parseFloat(value) || 0);
+    } else {
+        setEditedProduct(name, value);
+    }
+};
+
+
+    const handleOpenAddStockModal = () => {
+        setStockToAdd(0);
+        setIsAddStockModalOpen(true);
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setEditedProduct(name, name === "stock" ? parseInt(value) || 0 : value);
+    const handleCloseAddStockModal = () => {
+        setIsAddStockModalOpen(false);
+    };
+
+    const handleConfirmAddStock = () => {
+        const newStock = editedProduct.stock + stockToAdd;
+        setEditedProduct("stock", newStock);
+        setIsAddStockModalOpen(false);
+
+        Swal.fire({
+            title: "¡Stock actualizado!",
+            text: `Se añadieron ${stockToAdd} unidades al inventario.`,
+            icon: "success",
+            confirmButtonColor: COLORS.primary,
+            timer: 2000
+        });
     };
 
     return (
@@ -116,7 +163,6 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
             <div>
                 <div className="max-w-4xl mx-auto px-6 lg:px-8">
                     <div className="bg-white border border-[#E17100]/30 rounded-2xl p-8 shadow-lg relative">
-                        {/* Botón de edición */}
                         <button
                             onClick={handleEditClick}
                             className="absolute top-4 right-4 p-2 rounded-full hover:bg-[#E17100]/10 transition-colors"
@@ -125,7 +171,6 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                             <Edit className="w-5 h-5 text-[#E17100]" />
                         </button>
 
-                        {/* Encabezado con imagen y nombre */}
                         <div className="flex flex-col md:flex-row gap-8 mb-8">
                             <div className="w-full md:w-1/3 flex justify-center">
                                 <img
@@ -136,75 +181,95 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                             </div>
                             <div className="w-full md:w-2/3">
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={editedProduct.name || ''}
-                                        onChange={handleInputChange}
-                                        className="text-3xl font-bold mb-2 text-[#E17100] w-full p-2 border border-[#E17100]/30 rounded"
-                                    />
+                                    <>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={editedProduct.name}
+                                            onChange={handleInputChange}
+                                            maxLength={30}
+                                            className="text-3xl font-bold mb-1 text-[#E17100] w-full p-2 border border-[#E17100]/30 rounded"
+                                        />
+                                        <p className="text-sm text-gray-500 mb-2">{editedProduct.name.length}/30 caracteres</p>
+                                    </>
                                 ) : (
                                     <h1 className="text-3xl font-bold mb-2 text-[#E17100]">{product.name}</h1>
                                 )}
 
                                 <div className="flex items-center gap-4 mb-4">
-                                    <span className="text-2xl font-semibold text-green-700">
-                                        ${product.final_price ? product.final_price.toFixed(2) : product.price.toFixed(2)}
-                                    </span>
-                                    {product.discount_percent !== null && product.discount_percent > 0 && (
+                                    {isEditing ? (
                                         <>
-                                            <span className="text-sm line-through text-gray-500">
-                                                ${product.price.toFixed(2)}
+                                            <input
+                                                type="number"
+                                                name="price"
+                                                value={editedProduct.price}
+                                                onChange={handleInputChange}
+                                                min={0}
+                                                step="0.01"
+                                                className="text-xl font-semibold text-green-700 border border-[#E17100]/30 p-2 rounded w-32"
+                                            />
+                                            <span className="text-sm text-gray-600">USD</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="text-2xl font-semibold text-green-700">
+                                                ${product.final_price ? product.final_price.toFixed(2) : product.price.toFixed(2)}
                                             </span>
-                                            <span className="bg-[#E17100] text-white px-2 py-1 rounded-full text-xs font-bold">
-                                                -{product.discount_percent}%
-                                            </span>
+                                            {product.discount_percent !== null && product.discount_percent > 0 && (
+                                                <>
+                                                    <span className="text-sm line-through text-gray-500">
+                                                        ${product.price.toFixed(2)}
+                                                    </span>
+                                                    <span className="bg-[#E17100] text-white px-2 py-1 rounded-full text-xs font-bold">
+                                                        -{product.discount_percent}%
+                                                    </span>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </div>
 
                                 {isEditing ? (
-                                    <textarea
-                                        name="description"
-                                        value={editedProduct.description}
-                                        onChange={handleInputChange}
-                                        className="text-gray-700 mb-6 w-full p-2 border border-[#E17100]/30 rounded h-32"
-                                    />
+                                    <>
+                                        <textarea
+                                            name="description"
+                                            value={editedProduct.description}
+                                            onChange={handleInputChange}
+                                            maxLength={150}
+                                            className="text-gray-700 mb-1 w-full p-2 border border-[#E17100]/30 rounded h-32"
+                                        />
+                                        <p className="text-sm text-gray-500 mb-6">{editedProduct.description.length}/150 caracteres</p>
+                                    </>
                                 ) : (
                                     <p className="text-gray-700 mb-6">
                                         {product.description || "No hay descripción disponible."}
                                     </p>
                                 )}
+
                             </div>
                         </div>
 
-                        {/* Detalles del producto - LAS 3 CARDS */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Card 1: Información General */}
                             <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
                                 <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Información General</h2>
                                 <div className="space-y-2">
                                     <p><span className="font-medium">Referencia:</span> {product.num_reference}</p>
                                     <p><span className="font-medium">Categoría:</span> {product.categoria}</p>
                                     <p>
-                                        <span className="font-medium">Stock disponible:</span>
-                                        {isEditing ? (
-                                            <input
-                                                type="number"
-                                                name="stock"
-                                                value={editedProduct.stock}
-                                                onChange={handleInputChange}
-                                                className="ml-2 p-1 border border-[#E17100]/30 rounded w-20"
-                                                min="0"
-                                            />
-                                        ) : (
-                                            ` ${product.stock} unidades`
-                                        )}
+                                        <span className="font-medium">Stock disponible: </span>
+                                        {editedProduct.stock} unidades
                                     </p>
+                                    {isEditing && (
+                                        <button
+                                            onClick={handleOpenAddStockModal}
+                                            className="mt-2 inline-block bg-[#E17100] text-white text-sm px-4 py-1 rounded hover:bg-[#cc5f00] transition"
+                                        >
+                                            Añadir Stock +
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Card 2: Ubicación en Almacén */}
                             <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
                                 <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Ubicación en Almacén</h2>
                                 <div className="space-y-2">
@@ -223,12 +288,12 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                             <div className="w-full bg-gray-200 rounded h-2 mt-1 overflow-hidden">
                                                 <div
                                                     className={`h-full ${product.shelf.capacity_percentage >= 100
-                                                            ? 'bg-black'
-                                                            : product.shelf.capacity_percentage > 85
-                                                                ? 'bg-red-500'
-                                                                : product.shelf.capacity_percentage > 50
-                                                                    ? 'bg-yellow-500'
-                                                                    : 'bg-green-500'
+                                                        ? 'bg-black'
+                                                        : product.shelf.capacity_percentage > 85
+                                                            ? 'bg-red-500'
+                                                            : product.shelf.capacity_percentage > 50
+                                                                ? 'bg-yellow-500'
+                                                                : 'bg-green-500'
                                                         }`}
                                                     style={{
                                                         width: `${Math.min(product.shelf.capacity_percentage, 100)}%`
@@ -244,7 +309,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                     )}
                                 </div>
                             </div>
-                            {/* Card 3: Fechas */}
+
                             <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
                                 <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Fechas</h2>
                                 <div className="space-y-2">
@@ -278,7 +343,6 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                             </div>
                         </div>
 
-                        {/* Botones de guardar/cancelar cuando está en modo edición */}
                         {isEditing && (
                             <div className="mt-6 flex justify-end gap-4">
                                 <button
@@ -295,7 +359,6 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                 </button>
                             </div>
                         )}
-
                     </div>
                 </div>
 
@@ -307,9 +370,37 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                         ← Volver a todos los productos
                     </Link>
                 </div>
+
+                {isAddStockModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg w-80 relative">
+                            <button
+                                onClick={handleCloseAddStockModal}
+                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                            >
+                                <X size={20} />
+                            </button>
+                            <h2 className="text-lg font-semibold mb-4 text-[#E17100]">Añadir Stock</h2>
+                            <input
+                                type="number"
+                                value={stockToAdd}
+                                onChange={(e) => setStockToAdd(parseInt(e.target.value) || 0)}
+                                className="w-full border border-[#E17100]/30 p-2 rounded mb-4"
+                                min="0"
+                                placeholder="Cantidad a añadir"
+                            />
+                            <button
+                                onClick={handleConfirmAddStock}
+                                className="w-full bg-[#E17100] text-white py-2 rounded hover:bg-[#cc5f00] transition"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
-    )
-}
+    );
+};
 
-export default ShowProduct
+export default ShowProduct;

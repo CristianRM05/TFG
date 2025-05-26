@@ -48,7 +48,7 @@ public function show(Product $product)
 
     if ($product->shelf) {
         $product->shelf->total_stock = $product->shelf->products_sum_stock;
-        $product->shelf->capacity_percentage = 
+        $product->shelf->capacity_percentage =
             min(($product->shelf->total_stock / $product->shelf->max_capacity) * 100, 100);
     }
 
@@ -88,6 +88,7 @@ public function show(Product $product)
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
         'stock' => 'required|integer|min:0',
+        'price' => 'required|numeric|min:0',
     ]);
 
     $product->update($validated);
