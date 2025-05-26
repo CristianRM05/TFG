@@ -1,6 +1,7 @@
 
 // services/productService.ts
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export const getProducts = async (
   page = 1,
@@ -33,10 +34,10 @@ export const addToCart = async (productId: number) => {
             { quantity: 1 },
             {
                 withCredentials: true,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
+              headers: {
+  'X-Requested-With': 'XMLHttpRequest',
+  'X-CSRF-TOKEN': Cookies.get('XSRF-TOKEN') || '',
+}
             }
         );
         console.log('✅ Producto añadido al carrito correctamente');
