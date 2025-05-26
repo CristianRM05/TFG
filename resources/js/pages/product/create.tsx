@@ -9,10 +9,10 @@ import { useForm } from '@inertiajs/react';
 import { Camera, Upload, X } from 'lucide-react';
 
 const COLORS = {
-    primary: '#8F5C0C',     // Marrón dorado
-    secondary: '#7C5F42',   // Marrón medio
-    black: '#000000',       // Negro
-    white: '#F3F3F1',       // Blanco crema
+    primary: '#8F5C0C',
+    secondary: '#7C5F42',
+    black: '#000000',
+    white: '#F3F3F1',
 };
 
 interface Props {
@@ -59,7 +59,7 @@ export default function ProductModal({
         price: "",
         image_url: "",
     });
-    
+
     useEffect(() => {
         if (open) {
             setData({
@@ -108,7 +108,7 @@ export default function ProductModal({
                 icon: 'error',
                 showConfirmButton: false,
                 timer: 1800,
-});
+            });
             return;
         }
 
@@ -216,7 +216,7 @@ export default function ProductModal({
                                 });
                         }
                     });
-        },
+            },
             onError: (errors) => {
                 console.error('Error al crear producto:', errors);
                 Swal.fire({
@@ -256,7 +256,7 @@ export default function ProductModal({
                     </Dialog.Title>
                     <button
                         onClick={handleClose}
-    className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+                        className="p-1 rounded-full hover:bg-gray-200 transition-colors"
                         aria-label="Cerrar"
                     >
                         <X size={24} style={{ color: COLORS.primary }} />
@@ -321,6 +321,11 @@ export default function ProductModal({
                                 min="0"
                                 value={data.stock}
                                 onChange={e => setData('stock', e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                        e.preventDefault(); // bloquea negativo y notación científica
+                                    }
+                                }}
                                 className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
                                 style={{ borderColor: COLORS.secondary, color: COLORS.black }}
                             />
@@ -338,6 +343,11 @@ export default function ProductModal({
                                 min="0"
                                 value={data.price}
                                 onChange={e => setData('price', e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                        e.preventDefault(); // bloquea negativo y notación científica
+                                    }
+                                }}
                                 className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
                                 style={{ borderColor: COLORS.secondary, color: COLORS.black }}
                             />

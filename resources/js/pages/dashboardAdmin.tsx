@@ -771,7 +771,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Secciones */}
-                <section className="bg-white rounded-2xl shadow p-4">
+                <section className="bg-white rounded-2xl shadow p-4 s">
                     <UserSection
                         styles={{ primary: "#E17100", light: "#F3F3DF" }}
                         users={users}

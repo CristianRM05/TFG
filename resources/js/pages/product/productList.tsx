@@ -142,9 +142,28 @@ const ProductList: React.FC = () => {
                                         type="number"
                                         placeholder="0"
                                         value={minPrice}
-                                        onChange={(e) => setMinPrice(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            const num = parseFloat(value);
+                                            if (value === '' || (num >= 0 && num <= 9999)) {
+                                                setMinPrice(value);
+                                            } else {
+                                                MySwal.fire({
+                                                    icon: 'warning',
+                                                    title: 'Valor inválido',
+                                                    text: 'El precio mínimo debe estar entre 0 y 9999.',
+                                                    confirmButtonColor: '#E17100'
+                                                });
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                                e.preventDefault(); // bloquea negativo y notación científica
+                                            }
+                                        }}
                                         className="flex-grow bg-transparent outline-none border-none"
                                     />
+
                                 </div>
 
                                 <div className="flex items-center space-x-3 bg-[#F3F3DF] rounded-lg px-3 py-2">
@@ -153,7 +172,25 @@ const ProductList: React.FC = () => {
                                         type="number"
                                         placeholder="∞"
                                         value={maxPrice}
-                                        onChange={(e) => setMaxPrice(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            const num = parseFloat(value);
+                                            if (value === '' || (num >= 0 && num <= 9999)) {
+                                                setMaxPrice(value);
+                                            } else {
+                                                MySwal.fire({
+                                                    icon: 'warning',
+                                                    title: 'Valor inválido',
+                                                    text: 'El precio máximo debe estar entre 0 y 9999.',
+                                                    confirmButtonColor: '#E17100'
+                                                });
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                                e.preventDefault(); // bloquea negativo y notación científica
+                                            }
+                                        }}
                                         className="flex-grow bg-transparent outline-none border-none"
                                     />
                                 </div>
