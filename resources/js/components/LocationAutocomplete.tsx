@@ -5,9 +5,17 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   onValidityChange?: (isValid: boolean) => void;
+  className?: string;
+  placeholder?: string;
 }
 
-export default function LocationAutocomplete({ value, onChange, onValidityChange }: Props) {
+export default function LocationAutocomplete({
+  value,
+  onChange,
+  onValidityChange,
+  className = '',
+  placeholder = 'Introduce tu ubicación',
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [autocompleteService, setAutocompleteService] = useState<google.maps.places.AutocompleteService | null>(null);
   const [placesService, setPlacesService] = useState<google.maps.places.PlacesService | null>(null);
@@ -67,7 +75,6 @@ export default function LocationAutocomplete({ value, onChange, onValidityChange
     setPredictions([]);
   };
 
-  // Invalidar si el valor cambia manualmente
   useEffect(() => {
     onValidityChange?.(false);
   }, [value]);
@@ -78,7 +85,8 @@ export default function LocationAutocomplete({ value, onChange, onValidityChange
         ref={inputRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Introduce tu ubicación"
+        placeholder={placeholder}
+        className={className} // ✅ integración visual
       />
 
       {predictions.length > 0 && (

@@ -1,7 +1,7 @@
 // cartService.ts: todas las peticiones relacionadas al carrito
 
 import axios from 'axios';
-import Cookies from 'node_modules/@types/js-cookie';
+import Cookies from 'js-cookie';
 
 export const updateCartQuantity = async (id: number, quantity: number) => {
     return await axios.put(route('cart.updateQuantity', id), {

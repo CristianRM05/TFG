@@ -31,32 +31,28 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'avatar' => 'nullable|image|max:2048',
-        ]);
+  public function store(Request $request): RedirectResponse
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'last_name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'phone' => ['required', 'regex:/^[0-9]{9}$/'],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'avatar' => 'nullable|string|max:2048',
+        'location' => 'nullable|string|max:255',
+    ]);
 
+    // Hashear la contraseña
+    $validated['password'] = Hash::make($validated['password']);
 
-        // Subir foto si existe
-        if ($request->hasFile('avatar')) {
-            $validated['avatar'] = $request->file('avatar')->store('photos', 'public');
-        }
+    // Crear el usuario
+    $user = User::create($validated);
 
+    event(new Registered($user));
+    Auth::login($user);
 
-        // Hashear la contraseña
-        $validated['password'] = Hash::make($validated['password']);
+    return to_route('dashboard');
+}
 
-        $user = User::create($validated);
-
-        event(new Registered($user));
-        Auth::login($user);
-
-        return to_route('dashboard');
-    }
 }

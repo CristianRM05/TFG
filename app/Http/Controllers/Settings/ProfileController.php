@@ -29,7 +29,7 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = $request->user(); 
+        $user = $request->user();
 
         $user->fill($request->validated());
 
@@ -39,16 +39,13 @@ class ProfileController extends Controller
         $user->name = $request->input('name');
         $user->email = $request->input('email');
         $user->location = $request->input('location');
-
+        $user->phone = $request->input('phone');
+        
         if ($request->has('avatar')) {
             $user->avatar = $request->input('avatar');
         }
 
         $user->save();
-        logger('✅ Avatar recibido:', ['avatar' => $request->input('avatar')]);
-
-
-        logger('📦 Todos los datos crudos del request:', $request->all());
 
         return to_route('profile.edit');
     }
