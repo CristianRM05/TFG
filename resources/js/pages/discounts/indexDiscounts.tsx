@@ -75,44 +75,57 @@ export default function DiscountsIndex() {
     }, [flash])
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
+    e.preventDefault();
 
-        try {
-            await router.post(route("discounts.store"), formData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        title: "¡Descuento aplicado!",
-                        text: "El descuento ha sido aplicado correctamente",
-                        icon: "success",
-                        timer: 2000,
-                        timerProgressBar: true,
-                        toast: true,
-                        position: "top",
-                        showConfirmButton: false,
-                        background: "#F3F3DF",
-                        iconColor: "#E17100"
-                    })
-                    setFormData({ product_id: "", discount_percent: "" })
-                },
-                onError: (errors) => {
-                    Swal.fire({
-                        title: "Error",
-                        text: "No se pudo aplicar el descuento",
-                        icon: "error",
-                        confirmButtonColor: "#E17100",
-                        background: "#F3F3DF"
-                    })
-                    console.error("Error details:", errors)
-                },
-            })
-        } catch (error) {
-            console.error("Error applying discount:", error)
-        } finally {
-            setLoading(false)
-        }
+    const discountValue = parseFloat(formData.discount_percent);
+
+    if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+        Swal.fire({
+            title: "Descuento inválido",
+            text: "El porcentaje debe estar entre 0 y 100.",
+            icon: "warning",
+            confirmButtonColor: "#E17100"
+        });
+        return;
     }
+
+    setLoading(true);
+
+    try {
+        await router.post(route("discounts.store"), formData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                Swal.fire({
+                    title: "¡Descuento aplicado!",
+                    text: "El descuento ha sido aplicado correctamente",
+                    icon: "success",
+                    timer: 2000,
+                    toast: true,
+                    position: "top",
+                    showConfirmButton: false,
+                    background: "#F3F3DF",
+                    iconColor: "#E17100"
+                });
+                setFormData({ product_id: "", discount_percent: "" });
+            },
+            onError: (errors) => {
+                Swal.fire({
+                    title: "Error",
+                    text: "No se pudo aplicar el descuento",
+                    icon: "error",
+                    confirmButtonColor: "#E17100",
+                    background: "#F3F3DF"
+                });
+                console.error("Error details:", errors);
+            },
+        });
+    } catch (error) {
+        console.error("Error applying discount:", error);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     const handleDelete = async (productId: number) => {
         Swal.fire({
@@ -231,13 +244,18 @@ export default function DiscountsIndex() {
                                             <input
                                                 type="number"
                                                 name="discount_percent"
-                                                min="0"
+                                                min="1"
                                                 max="100"
                                                 step="0.01"
                                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
                                                 style={{ borderColor: "#E17100" }}
                                                 value={formData.discount_percent}
                                                 onChange={handleInputChange}
+                                                onKeyDown={(e) => {
+    if (e.key === "-" || e.key === "e" || e.key === "E") {
+      e.preventDefault(); // bloquea negativo y notación científica
+    }
+  }}
                                                 required
                                             />
                                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
