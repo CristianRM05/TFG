@@ -71,66 +71,66 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
     };
 
     const handleSave = async () => {
-    if (editedProduct.price < 0) {
-        Swal.fire({
-            title: "Precio inválido",
-            text: "El precio no puede ser negativo.",
-            icon: "warning",
-            confirmButtonColor: COLORS.primary
-        });
-        return;
-    }
+        if (editedProduct.price < 0) {
+            Swal.fire({
+                title: "Precio inválido",
+                text: "El precio no puede ser negativo.",
+                icon: "warning",
+                confirmButtonColor: COLORS.primary
+            });
+            return;
+        }
 
-    try {
-        await router.put(route('products.update', { product: product.id }), {
-            name: editedProduct.name,
-            description: editedProduct.description,
-            stock: editedProduct.stock,
-            price: editedProduct.price,
-        }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                Swal.fire({
-                    title: "¡Éxito!",
-                    text: "Producto actualizado correctamente",
-                    icon: "success",
-                    confirmButtonColor: COLORS.primary,
-                    timer: 2000
-                });
-                setIsEditing(false);
-            },
-            onError: (errors) => {
-                Swal.fire({
-                    title: "Error",
-                    text: errors.message || "Error al actualizar el producto",
-                    icon: "error",
-                    confirmButtonColor: COLORS.primary
-                });
-            }
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        Swal.fire({
-            title: "Error",
-            text: "Error de conexión",
-            icon: "error",
-            confirmButtonColor: COLORS.primary
-        });
-    }
-};
+        try {
+            await router.put(route('products.update', { product: product.id }), {
+                name: editedProduct.name,
+                description: editedProduct.description,
+                stock: editedProduct.stock,
+                price: editedProduct.price,
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "¡Éxito!",
+                        text: "Producto actualizado correctamente",
+                        icon: "success",
+                        confirmButtonColor: COLORS.primary,
+                        timer: 2000
+                    });
+                    setIsEditing(false);
+                },
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "Error",
+                        text: errors.message || "Error al actualizar el producto",
+                        icon: "error",
+                        confirmButtonColor: COLORS.primary
+                    });
+                }
+            });
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire({
+                title: "Error",
+                text: "Error de conexión",
+                icon: "error",
+                confirmButtonColor: COLORS.primary
+            });
+        }
+    };
 
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
 
-    if (name === "stock") {
-        setEditedProduct(name, parseInt(value) || 0);
-    } else if (name === "price") {
-        setEditedProduct(name, parseFloat(value) || 0);
-    } else {
-        setEditedProduct(name, value);
-    }
-};
+        if (name === "stock") {
+            setEditedProduct(name, parseInt(value) || 0);
+        } else if (name === "price") {
+            setEditedProduct(name, parseFloat(value) || 0);
+        } else {
+            setEditedProduct(name, value);
+        }
+    };
 
 
     const handleOpenAddStockModal = () => {
@@ -273,7 +273,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                             <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
                                 <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Ubicación en Almacén</h2>
                                 <div className="space-y-2">
-                                    {product.shelf ? (
+                                    {product.shelf && product.shelf.location ? (
                                         <>
                                             <p><span className="font-medium">Estantería:</span> {product.shelf.location}</p>
                                             <p className="flex flex-col">
@@ -305,10 +305,19 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                             </p>
                                         </>
                                     ) : (
-                                        <p className="text-gray-500">No asignado a estantería</p>
+                                        <>
+                                            <p className="text-gray-500 italic">A la espera de que se ubique la mercancía</p>
+                                            <Link
+                                                href="/manager/shelves"
+                                                className="inline-block bg-[#E17100] text-white px-4 py-2 rounded hover:bg-[#cc5f00] transition"
+                                            >
+                                                Ubicar mercancía
+                                            </Link>
+                                        </>
                                     )}
                                 </div>
                             </div>
+
 
                             <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
                                 <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Fechas</h2>
@@ -399,7 +408,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </AppLayout >
     );
 };
 

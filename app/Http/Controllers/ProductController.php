@@ -41,21 +41,28 @@ public function index(Request $request)
 
 public function show(Product $product)
 {
-    $product->load(['shelf' => function($query) {
+    $product->load(['shelf' => function ($query) {
         $query->withCount('products')
               ->withSum('products', 'stock');
     }]);
 
     if ($product->shelf) {
-        $product->shelf->total_stock = $product->shelf->products_sum_stock;
-        $product->shelf->capacity_percentage =
-            min(($product->shelf->total_stock / $product->shelf->max_capacity) * 100, 100);
+        $totalStock = $product->shelf->products_sum_stock ?? 0;
+        $maxCapacity = $product->shelf->max_capacity ?? 0;
+
+        $product->shelf->total_stock = $totalStock;
+
+        // Solo calcular si max_capacity es mayor que 0
+        $product->shelf->capacity_percentage = $maxCapacity > 0
+            ? min(($totalStock / $maxCapacity) * 100, 100)
+            : 0;
     }
 
     return Inertia::render('stock/showProduct', [
         'product' => $product
     ]);
 }
+
 
     public function store(Request $request)
     {

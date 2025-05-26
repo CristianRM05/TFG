@@ -144,12 +144,19 @@ export default function ShelfModal({
                             min="1"
                             step="1"
                             value={shelfData.max_capacity}
-                            onChange={(e) => setShelfData('max_capacity', e.target.value)}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                // Solo permite números positivos y enteros
+                                if (/^\d*$/.test(value)) {
+                                    setShelfData('max_capacity', value);
+                                }
+                            }}
                             className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
                             style={{ borderColor: COLORS.secondary, color: COLORS.black }}
                             placeholder="Ej: 100"
                         />
-                        <InputError message={shelfErrors.max_capacity} />
+
+
                     </div>
 
                     <div className="flex justify-end gap-3 pt-5 mt-6 border-t" style={{ borderColor: COLORS.secondary }}>
