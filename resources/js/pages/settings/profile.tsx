@@ -143,7 +143,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     return (
         <AppLayout className="bg-black" breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title="Ajustes del perfil" />
             <SettingsLayout>
                 <div className="flex justify-center mb-4">
                     <Avatar className="h-24 w-24 rounded-full ring-2 ring-blue-500 shadow-lg">
@@ -153,7 +153,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 </div>
 
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name, email and location" />
+                    <HeadingSmall title="Informacion del perfil" description="Actualiza tu nombre , email , direccion , telf..." />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
@@ -177,21 +177,21 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             />
                             {errors.location && <InputError className="mt-2" message={errors.location[0]} />}
                         </div>
-                     <div className="grid gap-2">
-  <Label htmlFor="phone">Teléfono</Label>
-  <Input
-    id="phone"
-    name="phone"
-    type="tel"
-    value={form.phone}
-    onChange={handleInputChange}
-    pattern="^[0-9]{9}$"
-    maxLength={9}
-    placeholder="Ej: 612345678"
-    required
-  />
-  <InputError className="mt-2" message={errors.phone?.[0]} />
-</div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="phone">Teléfono</Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                value={form.phone}
+                                onChange={handleInputChange}
+                                pattern="^[0-9]{9}$"
+                                maxLength={9}
+                                placeholder="Ej: 612345678"
+                                required
+                            />
+                            <InputError className="mt-2" message={errors.phone?.[0]} />
+                        </div>
 
 
                         <div className="grid gap-2">

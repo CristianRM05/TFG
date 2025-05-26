@@ -95,12 +95,12 @@ export default function PaginaBebidas() {
                 📩 Newsletter
             </button>
             {!auth.user && (
-               <button
-                onClick={() => setShowModal(true)}
-                className="fixed bottom-36 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-white/20 cursor-pointer"
-            >
-                📝 Crear Ticket
-            </button>
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="fixed bottom-36 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-white/20 cursor-pointer"
+                >
+                    📝 Crear Ticket
+                </button>
             )}
 
             {/* Navbar */}
@@ -127,11 +127,10 @@ export default function PaginaBebidas() {
             {/* Hero Section con parallax condicional */}
             <header className="relative flex items-center justify-center h-screen overflow-hidden">
                 <div
-                    className={`absolute inset-0 bg-no-repeat bg-cover ${
-                        isMobile
+                    className={`absolute inset-0 bg-no-repeat bg-cover ${isMobile
                             ? 'bg-center'
                             : 'bg-fixed bg-right'
-                    }`}
+                        }`}
                     style={{
                         backgroundImage: `url('fondoLandingPage.png')`,
                         backgroundSize: isMobile ? 'cover' : '100%',
@@ -159,47 +158,46 @@ export default function PaginaBebidas() {
             </header>
 
             {/* Sección Swapify con parallax condicional */}
-            <section className="relative flex items-center justify-start h-screen overflow-hidden">
-                <div
-                    className={`absolute inset-0 bg-no-repeat bg-cover ${
-                        isMobile
-                            ? 'bg-center'
-                            : 'bg-fixed bg-center'
-                    }`}
-                    style={{
-                        backgroundImage: `url('/images/hero-swapify.png')`,
-                        backgroundSize: isMobile ? 'cover' : '100%',
-                        backgroundPosition: 'center',
-                    }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black to-black/0" />
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 px-4 md:px-8 lg:px-16 text-left max-w-xs md:max-w-xl">
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-4">
-                        Swapify<br />
-                        Botella<br />
-                        Azul<br />
-                        <span className="text-amber-400">Siente el Hielo</span>
-                    </h1>
-                    <p className="text-base md:text-lg text-gray-200 mb-6 md:mb-8">
-                        100% Blue Agave | Crafted in Mexico | 40% ALC/VOL
-                    </p>
-                    <Link
-                        href={route('dashboard')}
-                        className="inline-block px-6 md:px-8 py-3 md:py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors text-sm md:text-base"
-                    >
-                        COMPRAR
-                    </Link>
-                </div>
-            </section>
+          <section className="relative flex items-center justify-start h-screen overflow-hidden">
+    <div
+        className={`absolute inset-0 bg-no-repeat bg-cover ${
+            isMobile ? 'bg-center' : 'bg-fixed bg-center'
+        }`}
+        style={{
+            backgroundImage: `url('/images/hero-swapify.png')`,
+            backgroundSize: isMobile ? 'cover' : '100%',
+            backgroundPosition: isMobile ? '70% center' : 'center',
+        }}
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black to-black/0" />
+    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 px-4 md:px-8 lg:px-16 text-left max-w-xs md:max-w-xl">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-4">
+            Swapify<br />
+            Botella<br />
+            Azul<br />
+            <span className="text-amber-400">Siente el Hielo</span>
+        </h1>
+        <p className="text-base md:text-lg text-gray-200 mb-6 md:mb-8">
+            100% Blue Agave | Crafted in Mexico | 40% ALC/VOL
+        </p>
+        <Link
+            href={route('dashboard')}
+            className="inline-block px-6 md:px-8 py-3 md:py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors text-sm md:text-base"
+        >
+            COMPRAR
+        </Link>
+    </div>
+</section>
+
+
 
             {/* Sección Cocteles con parallax condicional */}
             <section className="relative flex items-center justify-start h-screen overflow-hidden">
                 <div
-                    className={`absolute inset-0 bg-no-repeat bg-cover ${
-                        isMobile
+                    className={`absolute inset-0 bg-no-repeat bg-cover ${isMobile
                             ? 'bg-center'
                             : 'bg-fixed bg-center'
-                    }`}
+                        }`}
                     style={{
                         backgroundImage: `url('/images/cocteles.png')`,
                         backgroundSize: isMobile ? 'cover' : '100%',

@@ -24,32 +24,34 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                 <DropdownMenuItem asChild>
                     <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2" />
-                        Settings
+                        Ajustes
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
                 <Link href="/my-orders" className="nav-link">
-                <Package className="mr-2" />
+                    <Package className="mr-2" />
                     Mis Pedidos
                 </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />   <DropdownMenuItem asChild>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem asChild>
+                <Link href={route('tickets.my')} className="nav-link" onClick={cleanup}>
+                    <Package className="mr-2" />
+                    Mis Tickets
+                </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+
+          <DropdownMenuItem asChild>
                 <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={cleanup}>
                     <LogOut className="mr-2" />
-                    Log out
-                </Link>
+                    Cerrar sesión                </Link>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-  <Link href={route('tickets.my')} className="nav-link" onClick={cleanup}>
-    <Package className="mr-2" />
-    Mis Tickets
-  </Link>
-</DropdownMenuItem>
-<DropdownMenuSeparator />
         </>
     );
 }

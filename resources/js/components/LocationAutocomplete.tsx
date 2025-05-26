@@ -66,7 +66,7 @@ export default function LocationAutocomplete({
         };
         setSelectedLocation(location);
         onChange(place.formatted_address || prediction.description);
-        onValidityChange?.(true); // ✅ ubicación válida
+        onValidityChange?.(true);
       } else {
         onValidityChange?.(false);
       }
@@ -86,15 +86,15 @@ export default function LocationAutocomplete({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={className} // ✅ integración visual
+        className={className}
       />
 
       {predictions.length > 0 && (
-        <div className="absolute z-10 w-full bg-white border mt-1 rounded shadow">
+        <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 mt-1 rounded shadow text-gray-900 dark:text-gray-100">
           {predictions.map((prediction) => (
             <div
               key={prediction.place_id}
-              className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+              className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700"
               onClick={() => handleSelect(prediction)}
             >
               {prediction.description}
@@ -104,7 +104,10 @@ export default function LocationAutocomplete({
       )}
 
       {selectedLocation && (
-        <div ref={mapRef} className="w-full h-40 mt-2 rounded border shadow-sm" />
+        <div
+          ref={mapRef}
+          className="w-full h-40 mt-2 rounded border border-gray-200 dark:border-neutral-700 shadow-sm"
+        />
       )}
     </div>
   );

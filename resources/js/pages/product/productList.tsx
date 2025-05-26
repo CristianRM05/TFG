@@ -218,8 +218,8 @@ const ProductList: React.FC = () => {
                                                 `}
                                             >
                                                 <ShoppingCart size={18} className="mr-2" />
-                                                Add to Cart
-                                            </button>
+                                                Añadir al carrito
+                                                </button>
                                         )}
 
                                         {/* Indicador si esta disponible o no */}

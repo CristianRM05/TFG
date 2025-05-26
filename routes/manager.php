@@ -64,9 +64,6 @@ Route::patch('/products/{product}/toggle-visibility', [ProductController::class,
     ->name('products.toggle-visibility');
 
 
-    Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
-    Route::get('/delivery-notes-page', [DeliveryNoteController::class, 'view'])
-        ->name('manager.delivery-notes.page');
-});
+
 
 

@@ -74,12 +74,14 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
             ];
         } else if (userRole === "Cliente") {
             return [
+                //lucide icon para ticket
                 {
-                    title: 'Cupones',
+                    title: 'Inicio',
                     href: '/',
-                    icon: Gift,
-
+                    icon: Home
                 },
+                
+
                 {
                     title: 'Productos',
                     href: '/dashboard',
