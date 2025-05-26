@@ -102,7 +102,7 @@ export default function Movimientos() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={topProducts} barSize={40}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="product.name" angle={-10} textAnchor="end" stroke="#94a3b8" interval={0} />
+              <XAxis dataKey="product.name" tick={false} axisLine={false} stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" />
               <Tooltip formatter={(val: any) => `${val} uds`} />
               <Legend />
