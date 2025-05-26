@@ -32,11 +32,11 @@ export default function DeleteUser() {
 
     return (
         <div className="space-y-6">
-            <HeadingSmall title="Eliminar Cuenta" description="Eliminar la cuenta junto con todo los datos " />
+            <HeadingSmall title="Eliminar Cuenta" description="Elimina tu cuenta junto con todos tus datos personales." />
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                    <p className="font-medium">Cuidado</p>
-                    <p className="text-sm">Porfavor piense bien antes de eliminarla , es de manera permante</p>
+                    <p className="font-medium">⚠ Cuidado</p>
+                    <p className="text-sm">Por favor, asegúrate antes de eliminar tu cuenta. Esta acción es permanente.</p>
                 </div>
 
                 <Dialog>
@@ -44,15 +44,15 @@ export default function DeleteUser() {
                         <Button variant="destructive">Eliminar Cuenta</Button>
                     </DialogTrigger>
                     <DialogContent>
-                        <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
+                        <DialogTitle>¿Estás seguro?</DialogTitle>
                         <DialogDescription>
-                            Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password
-                            to confirm you would like to permanently delete your account.
+                            Una vez que elimines tu cuenta, todos sus recursos y datos también serán eliminados permanentemente.
+                            Por favor, introduce tu contraseña para confirmar que deseas eliminarla definitivamente.
                         </DialogDescription>
                         <form className="space-y-6" onSubmit={deleteUser}>
                             <div className="grid gap-2">
                                 <Label htmlFor="password" className="sr-only">
-                                    Password
+                                    Contraseña
                                 </Label>
 
                                 <Input
@@ -62,7 +62,7 @@ export default function DeleteUser() {
                                     ref={passwordInput}
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
-                                    placeholder="Password"
+                                    placeholder="Contraseña"
                                     autoComplete="current-password"
                                 />
 
@@ -72,12 +72,12 @@ export default function DeleteUser() {
                             <DialogFooter className="gap-2">
                                 <DialogClose asChild>
                                     <Button variant="secondary" onClick={closeModal}>
-                                        Cancel
+                                        Cancelar
                                     </Button>
                                 </DialogClose>
 
                                 <Button variant="destructive" disabled={processing} asChild>
-                                    <button type="submit">Delete account</button>
+                                    <button type="submit">Eliminar cuenta</button>
                                 </Button>
                             </DialogFooter>
                         </form>

@@ -114,31 +114,36 @@ export default function CartShow({
     });
   };
 
-  const applyCoupon = async () => {
-    try {
-      const res = await applyCouponToCart(couponCode);
-      setAppliedCoupon({ code: couponCode, discountPercentage: res.data.discount });
-      toast.success('¡Cupón aplicado!', {
-        icon: '🎟️',
-        style: {
-          borderRadius: '10px',
-          background: '#16a34a',
-          color: '#fff',
-        },
-        duration: 1500,
-      });
-    } catch {
-      toast.error('Cupón inválido', {
-        icon: '❌',
-        style: {
-          borderRadius: '10px',
-          background: '#dc2626',
-          color: '#fff',
-        },
-        duration: 1500,
-      });
-    }
-  };
+const applyCoupon = async () => {
+  try {
+    const res = await applyCouponToCart(couponCode);
+    setAppliedCoupon({
+      code: couponCode,
+      discountPercentage: res.discount 
+    });
+
+    toast.success('¡Cupón aplicado!', {
+      icon: '🎟️',
+      style: {
+        borderRadius: '10px',
+        background: '#16a34a',
+        color: '#fff',
+      },
+      duration: 1500,
+    });
+  } catch {
+    toast.error('Cupón inválido', {
+      icon: '❌',
+      style: {
+        borderRadius: '10px',
+        background: '#dc2626',
+        color: '#fff',
+      },
+      duration: 1500,
+    });
+  }
+};
+
 
   const removeCoupon = () => {
     setAppliedCoupon(null);

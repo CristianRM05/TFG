@@ -119,7 +119,7 @@ export default function TicketView({ ticket }: { ticket: Ticket }) {
             <div>
               <h1 className="text-2xl font-bold text-gray-800">#{ticket.id}: {ticket.subject}</h1>
               <div className="flex items-center gap-4 mt-1 text-sm">
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 dark:text-black">
                   Estado:
                   <span className={`font-medium ${isClosed ? 'text-red-600' : 'text-green-600'}`}>
                     {status}
@@ -202,7 +202,7 @@ export default function TicketView({ ticket }: { ticket: Ticket }) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
-                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 resize-none transition-all"
+                className="w-full border rounded-lg p-3 focus:ring-2 dark:text-black focus:ring-blue-200 focus:border-blue-500 resize-none transition-all"
                 placeholder="Escribe tu mensaje..."
                 disabled={isSubmitting}
               />

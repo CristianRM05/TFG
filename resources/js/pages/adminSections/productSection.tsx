@@ -66,7 +66,7 @@ const ProductSection: React.FC<Props> = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Package size={24} style={{ color: styles.primary }} />
-                        <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>
+                        <h2 className="text-2xl font-bold dark:text-black" style={{ color: styles.dark }}>
                             Gestión de Productos
                         </h2>
                     </div>
@@ -169,7 +169,7 @@ const ProductSection: React.FC<Props> = ({
                                     } else if (productsPage <= 3) {
                                         page = i + 1;
                                     } else if (productsPage >= productsTotalPages - 2) {
-                                        page = (productsTotalPages - 5) + i + 1;  
+                                        page = (productsTotalPages - 5) + i + 1;
                                     } else {
                                         page = productsPage - 2 + i;
                                     }

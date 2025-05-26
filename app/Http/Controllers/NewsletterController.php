@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 
@@ -31,7 +32,7 @@ class NewsletterController extends Controller
         $subscribers = NewsletterSubscriber::all();
 
         foreach ($subscribers as $subscriber) {
-            Mail::to($subscriber->email)->queue(new NewsletterEmail(
+            Mail::to($subscriber->email)->send(new NewsletterEmail(
                 $request->subject,
                 $request->message
             ));
@@ -39,5 +40,4 @@ class NewsletterController extends Controller
 
         return response()->json(['message' => 'Newsletter enviada correctamente.']);
     }
-
 }

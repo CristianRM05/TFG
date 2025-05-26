@@ -45,17 +45,17 @@ export default function MyOrders() {
         'paid': {
             label: 'Pagado',
             color: 'bg-blue-100 text-blue-800 border-blue-200',
-            darkColor: 'bg-blue-900 text-blue-300 border-blue-800'
+            darkColor: 'bg-blue-900 text-white border-blue-800'
         },
         'In progress': {
             label: 'En Progreso',
             color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-            darkColor: 'bg-yellow-900 text-yellow-300 border-yellow-800'
+            darkColor: 'bg-yellow-900 text-white  border-yellow-800'
         },
         'Completed': {
             label: 'Completado',
             color: 'bg-green-100 text-green-800 border-green-200',
-            darkColor: 'bg-green-900 text-green-300 border-green-800'
+            darkColor: 'bg-green-900 text-white  border-green-800'
         }
     };
 
@@ -80,10 +80,10 @@ export default function MyOrders() {
             header="Mis Pedidos"
         >
             <Head title="Mis Pedidos" />
-            <div className="min-h-screen  px-6">
+            <div className="min-h-screen px-6">
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Mis Pedidos</h1>
+                        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Mis Pedidos</h1>
                     </div>
 
                     {/* Status Filter Badges */}
@@ -96,7 +96,7 @@ export default function MyOrders() {
                   px-3 py-1 rounded-full border-2 text-sm font-medium transition-all
                   ${selectedStatuses.includes(status as Order['status'])
                                         ? `${config.color} dark:${config.darkColor} border-opacity-100`
-                                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-transparent opacity-50'}
+                                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-white border-transparent opacity-50'}
                 `}
                             >
                                 {config.label}
@@ -112,11 +112,11 @@ export default function MyOrders() {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-amber-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7l9-4 9 4-9 4-9-4z M3 17l9 4 9-4-9-4-9 4z" />
                         </svg>
-                        <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-lg text-gray-600 dark:text-white mb-4">
                             No hay pedidos en los estados seleccionados.
                         </p>
                         <Link
-                            href={route('manager.dashboard')}
+                            href={route('dashboard')}
                             className="inline-block bg-amber-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-amber-500 transition"
                         >Explorar catálogo</Link>
                     </div>
@@ -135,7 +135,7 @@ export default function MyOrders() {
                                     >
                                         <div>
                                             <div className="flex items-center space-x-2">
-                                                <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">Pedido #{order.ref}</p>
+                                                <p className="text-lg font-semibold text-gray-800 dark:text-white">Pedido #{order.ref}</p>
                                                 <span
                                                     className={`
                             px-2 py-0.5 rounded-full text-xs font-medium
@@ -146,7 +146,7 @@ export default function MyOrders() {
                                                     {statusInfo.label}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(order.created_at).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-300">{new Date(order.created_at).toLocaleDateString()}</p>
                                         </div>
                                         <p className="text-lg font-bold text-amber-500">€{total}</p>
                                     </button>
@@ -165,10 +165,10 @@ export default function MyOrders() {
                                             {order.items.map(item => (
                                                 <div key={item.id} className="flex justify-between py-2">
                                                     <div>
-                                                        <p className="text-gray-800 dark:text-gray-100 font-medium">{item.product.name}</p>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400">x{item.quantity} × €{item.product.price.toFixed(2)}</p>
+                                                        <p className="text-gray-800 dark:text-white font-medium">{item.product.name}</p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-300">x{item.quantity} × €{item.product.price.toFixed(2)}</p>
                                                     </div>
-                                                    <p className="text-gray-800 dark:text-gray-100 font-semibold">€{(item.product.price * item.quantity).toFixed(2)}</p>
+                                                    <p className="text-gray-800 dark:text-white font-semibold">€{(item.product.price * item.quantity).toFixed(2)}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -189,7 +189,7 @@ export default function MyOrders() {
                                     Anterior
                                 </Link>
                             )}
-                            <span className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full text-gray-800 dark:text-gray-200">
+                            <span className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full text-gray-800 dark:text-white">
                                 Página {orders.current_page} de {orders.last_page}
                             </span>
                             {orders.next_page_url && (

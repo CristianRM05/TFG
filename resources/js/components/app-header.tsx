@@ -74,12 +74,14 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
             ];
         } else if (userRole === "Cliente") {
             return [
+                //lucide icon para ticket
                 {
-                    title: 'Cupones',
+                    title: 'Inicio',
                     href: '/',
-                    icon: Gift,
-
+                    icon: Home
                 },
+
+
                 {
                     title: 'Productos',
                     href: '/dashboard',
@@ -104,7 +106,7 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
     const navItems = getNavItems();
 
     return (
-        <header style={{ backgroundColor: 'var(--nav-bg)' }} className="shadow-lg">
+        <header  style={{ backgroundColor: 'var(--nav-bg)' }} className="shadow-lg">
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between relative">
                     {/* Logo */}
@@ -238,7 +240,7 @@ export function AppHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItem[]
                                     <div className="px-2 py-1">
                                         <button
                                             onClick={() => setShowCouponsModal(true)}
-                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md transition text-gray-800"
+                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-md transition dark:text-white text-gray-800"
                                         >
                                             🎟️ Ver mis cupones
                                         </button>
