@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AdminDashboardController;
 
 
 Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
@@ -26,6 +27,11 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
 
     //estanterias
     Route::get('/shelves', [ProductController::class, 'unassignedProducts'])->name('shelves.index');
+    Route::post('/shelves', [AdminDashboardController::class, 'storeShelf'])
+    ->name('manager.shelves.store');
+
+
+
     Route::put('/products/{product}/assign-shelf', [ProductController::class, 'assignShelf'])
         ->name('products.assign-shelf');
     Route::put('/products/{product}/assign-split', [ProductController::class, 'assignSplitToShelf'])

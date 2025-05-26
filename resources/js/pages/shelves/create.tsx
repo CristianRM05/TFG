@@ -1,33 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog } from '@headlessui/react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import InputError from '@/components/input-error';
-import Swal from 'sweetalert2';
-import { X } from 'lucide-react';
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
+import { Dialog } from "@headlessui/react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import InputError from "@/components/input-error"
+import Swal from "sweetalert2"
+import { X } from "lucide-react"
 
 const COLORS = {
-    primary: '#8F5C0C',
-    secondary: '#7C5F42',
-    black: '#000000',
-    white: '#F3F3F1',
-};
+    primary: "#8F5C0C",
+    secondary: "#7C5F42",
+    black: "#000000",
+    white: "#F3F3F1",
+}
 
 interface Props {
-    open: boolean;
-    onClose: () => void;
+    open: boolean
+    onClose: () => void
     shelfData: {
-        code: string;
-        location: string;
-        max_capacity: string;
-    };
-    setShelfData: (key: string, value: any) => void;
-    submitShelf: (e: React.FormEvent) => void;
-    shelfErrors: any;
-    processingShelf: boolean;
-    clearErrors: () => void;
-    existingLocations: string[];
+        code: string
+        location: string
+        max_capacity: string
+    }
+    setShelfData: (key: string, value: any) => void
+    submitShelf: (e: React.FormEvent, shelfData?: any) => void
+    shelfErrors: any
+    processingShelf: boolean
+    clearErrors: () => void
+    existingLocations: string[]
 }
 
 export default function ShelfModal({
@@ -41,95 +44,103 @@ export default function ShelfModal({
     clearErrors,
     existingLocations = [],
 }: Props) {
-    const [aisle, setAisle] = useState('');
-    const [section, setSection] = useState('');
+    const [aisle, setAisle] = useState("")
+    const [section, setSection] = useState("")
 
     useEffect(() => {
         if (!open) {
-            setShelfData('code', '');
-            setShelfData('location', '');
-            setShelfData('max_capacity', '');
-            setAisle('');
-            setSection('');
-            clearErrors();
+            setShelfData("code", "")
+            setShelfData("location", "")
+            setShelfData("max_capacity", "")
+            setAisle("")
+            setSection("")
+            clearErrors()
         }
-    }, [open, setShelfData, clearErrors]);
+    }, [open, setShelfData, clearErrors])
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault()
 
         // Validar código
-        const codeRegex = /^SH-\d+$/;
+        const codeRegex = /^SH-\d+$/
         if (!codeRegex.test(shelfData.code)) {
             Swal.fire({
-                title: 'Error',
-                text: 'El código debe tener el formato SH- seguido de números (Ej: SH-001)',
-                icon: 'error',
+                title: "Error",
+                text: "El código debe tener el formato SH- seguido de números (Ej: SH-001)",
+                icon: "error",
                 confirmButtonColor: COLORS.primary,
-            });
-            return;
+            })
+            return
         }
 
         // Validar pasillo
         if (!/^[A-Za-z]{1,3}$/.test(aisle.trim())) {
             Swal.fire({
-                title: 'Error',
-                text: 'El pasillo debe contener solo letras (máx. 3).',
-                icon: 'error',
+                title: "Error",
+                text: "El pasillo debe contener solo letras (máx. 3).",
+                icon: "error",
                 confirmButtonColor: COLORS.primary,
-            });
-            return;
+            })
+            return
         }
 
         // Validar sección
-        const sectionNum = parseInt(section, 10);
+        const sectionNum = Number.parseInt(section, 10)
         if (isNaN(sectionNum) || sectionNum < 1 || sectionNum > 100) {
             Swal.fire({
-                title: 'Error',
-                text: 'La sección debe ser un número entre 1 y 100.',
-                icon: 'error',
+                title: "Error",
+                text: "La sección debe ser un número entre 1 y 100.",
+                icon: "error",
                 confirmButtonColor: COLORS.primary,
-            });
-            return;
+            })
+            return
         }
 
         // Armar ubicación completa
-        const fullLocation = `Pasillo ${aisle.trim()}, Sección ${sectionNum}`;
-        setShelfData('location', fullLocation);
+        const fullLocation = `Pasillo ${aisle.trim()}, Sección ${sectionNum}`
 
         // Validar ubicación única
-        const isLocationTaken = existingLocations.some(
-            loc => loc.trim().toLowerCase() === fullLocation.toLowerCase()
-        );
+        const isLocationTaken = existingLocations.some((loc) => loc.trim().toLowerCase() === fullLocation.toLowerCase())
         if (isLocationTaken) {
             Swal.fire({
-                title: 'Error',
-                text: 'Esta ubicación ya está registrada en el sistema',
-                icon: 'error',
+                title: "Error",
+                text: "Esta ubicación ya está registrada en el sistema",
+                icon: "error",
                 confirmButtonColor: COLORS.primary,
-            });
-            return;
+            })
+            return
         }
 
         // Validar capacidad
-        if (parseFloat(shelfData.max_capacity) <= 0) {
+        if (Number.parseFloat(shelfData.max_capacity) <= 0) {
             Swal.fire({
-                title: 'Error',
-                text: 'La capacidad debe ser mayor que cero',
-                icon: 'error',
+                title: "Error",
+                text: "La capacidad debe ser mayor que cero",
+                icon: "error",
                 confirmButtonColor: COLORS.primary,
-            });
-            return;
+            })
+            return
         }
 
-        submitShelf(e);
-    };
+        // Crear objeto con datos completos
+        const completeShelfData = {
+            code: shelfData.code.trim(),
+            location: fullLocation,
+            max_capacity: shelfData.max_capacity.trim(),
+        }
+
+        // Pasar los datos completos a submitShelf
+        submitShelf(e, completeShelfData)
+    }
 
     return (
         <Dialog open={open} onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="fixed inset-0 z-40 backdrop-blur-sm bg-black/30" onClick={onClose} />
 
-            <Dialog.Panel className="relative z-50 bg-white rounded-xl shadow-xl p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]" style={{ backgroundColor: COLORS.white }}>
+            <Dialog.Panel
+                className="relative z-50 bg-white rounded-xl shadow-xl p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]"
+                style={{ backgroundColor: COLORS.white }}
+            >
                 <div className="flex justify-between items-center mb-6 pb-3 border-b" style={{ borderColor: COLORS.secondary }}>
                     <Dialog.Title className="text-2xl font-bold" style={{ color: COLORS.primary }}>
                         Registrar nueva estantería
@@ -152,8 +163,8 @@ export default function ShelfModal({
                             id="code"
                             value={shelfData.code}
                             onChange={(e) => {
-                                const value = e.target.value.toUpperCase();
-                                setShelfData('code', value);
+                                const value = e.target.value.toUpperCase()
+                                setShelfData("code", value)
                             }}
                             className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
                             style={{ borderColor: COLORS.secondary, color: COLORS.black }}
@@ -172,9 +183,9 @@ export default function ShelfModal({
                                 id="aisle"
                                 value={aisle}
                                 onChange={(e) => {
-                                    const value = e.target.value.toUpperCase();
+                                    const value = e.target.value.toUpperCase()
                                     if (/^[A-Za-z]{0,3}$/.test(value)) {
-                                        setAisle(value);
+                                        setAisle(value)
                                     }
                                 }}
                                 placeholder="Ej: A"
@@ -194,14 +205,14 @@ export default function ShelfModal({
                                 max="100"
                                 value={section}
                                 onChange={(e) => {
-                                    const value = e.target.value;
+                                    const value = e.target.value
                                     if (/^\d{0,3}$/.test(value)) {
-                                        setSection(value);
+                                        setSection(value)
                                     }
                                 }}
                                 onKeyDown={(e) => {
-                                    if (['-', 'e', 'E'].includes(e.key)) {
-                                        e.preventDefault();
+                                    if (["-", "e", "E"].includes(e.key)) {
+                                        e.preventDefault()
                                     }
                                 }}
                                 placeholder="Ej: 5"
@@ -222,14 +233,14 @@ export default function ShelfModal({
                             step="1"
                             value={shelfData.max_capacity}
                             onChange={(e) => {
-                                const value = e.target.value;
+                                const value = e.target.value
                                 if (/^\d*$/.test(value)) {
-                                    setShelfData('max_capacity', value);
+                                    setShelfData("max_capacity", value)
                                 }
                             }}
                             onKeyDown={(e) => {
                                 if (e.key === "-" || e.key === "e" || e.key === "E") {
-                                    e.preventDefault();
+                                    e.preventDefault()
                                 }
                             }}
                             className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
@@ -246,7 +257,7 @@ export default function ShelfModal({
                             className="px-4 py-2"
                             style={{
                                 borderColor: COLORS.secondary,
-                                color: COLORS.secondary
+                                color: COLORS.secondary,
                             }}
                         >
                             Cancelar
@@ -258,14 +269,14 @@ export default function ShelfModal({
                             style={{
                                 backgroundColor: COLORS.primary,
                                 color: COLORS.white,
-                                borderColor: COLORS.primary
+                                borderColor: COLORS.primary,
                             }}
                         >
-                            {processingShelf ? 'Procesando...' : 'Crear estantería'}
+                            {processingShelf ? "Procesando..." : "Crear estantería"}
                         </Button>
                     </div>
                 </form>
             </Dialog.Panel>
         </Dialog>
-    );
+    )
 }
