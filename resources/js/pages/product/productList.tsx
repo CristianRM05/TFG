@@ -111,10 +111,10 @@ const ProductList: React.FC = () => {
                             />
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="px-6 py-3 bg-[#E17100] text-white font-semibold hover:bg-opacity-90 transition-colors flex items-center"
+                                className="px-3 py-3 bg-[#E17100] text-white font-semibold hover:bg-opacity-90 transition-colors flex items-center"
                             >
-                                <Filter size={18} className="mr-2" />
-                                Filtros
+                                <Filter size={18} className="mr-1" />
+                                Filtro
                             </button>
                         </div>
 

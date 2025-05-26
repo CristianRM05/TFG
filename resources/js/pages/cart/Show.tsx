@@ -215,7 +215,7 @@ export default function CartShow({
                   <ShoppingBag size={60} className="mx-auto text-gray-400 mb-4" />
                   <p className="text-xl">Tu carrito está vacío</p>
                   <Link
-                    href="/productos"
+                    href="/dashboard"
                     className="mt-4 inline-block bg-amber-600 text-black font-semibold px-6 py-2 rounded-full hover:bg-amber-500 transition"
                   >
                     Explorar Productos
