@@ -78,7 +78,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📰 Andalubebidas News</h1>
+            <h1>Swapify News</h1>
         </div>
 
         <div class="content">
@@ -88,12 +88,12 @@
 
 
             <p style="text-align: center;">
-                <a href="http://localhost:8001/dashboard" class="button">Ir al Panel</a>
+                <a href="https://wealthy-walleye-severely.ngrok-free.app/dashboard" class="button">Ir al Panel</a>
             </p>
         </div>
 
         <div class="footer">
-            © {{ date('Y') }} Andalubebidas. Todos los derechos reservados.<br>
+            © {{ date('Y') }} Swapify. Todos los derechos reservados.<br>
             Este correo fue enviado automáticamente. Por favor, no respondas a este mensaje.
         </div>
     </div>

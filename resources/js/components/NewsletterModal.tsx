@@ -45,7 +45,7 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({ isOpen, onClose }) =>
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2"
+              className="w-full border border-gray-300 rounded-md p-2 dark:text-black"
               placeholder="Ej: ¡Nuevas ofertas disponibles!"
             />
           </div>
@@ -56,7 +56,8 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({ isOpen, onClose }) =>
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
-              className="w-full border border-gray-300 rounded-md p-2"
+              className="w-full border border-gray-300 rounded-md p-2
+               dark:text-black"
               placeholder="Escribe aquí el contenido del correo..."
             ></textarea>
           </div>
@@ -73,7 +74,7 @@ const NewsletterModal: React.FC<NewsletterModalProps> = ({ isOpen, onClose }) =>
 
           <button
             onClick={handleSend}
-            className="px-5 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition"
+            className="px-5 py-2 rounded-xl text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition"
             disabled={sending || !subject || !message}
           >
             {sending ? 'Enviando...' : 'Enviar'}
