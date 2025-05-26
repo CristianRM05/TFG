@@ -1,6 +1,7 @@
 // cartService.ts: todas las peticiones relacionadas al carrito
 
 import axios from 'axios';
+import Cookies from 'node_modules/@types/js-cookie';
 
 export const updateCartQuantity = async (id: number, quantity: number) => {
     return await axios.put(route('cart.updateQuantity', id), {
@@ -15,7 +16,7 @@ export const deleteProduct = async (id: number) => {
                 withCredentials: true,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': Cookies.get('XSRF-TOKEN') || '',
                 },
             }
         );
@@ -26,15 +27,16 @@ export const deleteProduct = async (id: number) => {
 };
 
 export const applyCouponToCart = async (couponCode: string) => {
-    return await axios.post('http://localhost:8000/apply-coupon', {
+    return await axios.post('/apply-coupon', {
         code: couponCode
     }, {
         withCredentials: true,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'X-CSRF-TOKEN': Cookies.get('XSRF-TOKEN') || '',
         }
     });
+
 };
 
 export const proceedToCheckout = async (discount: number) => {
