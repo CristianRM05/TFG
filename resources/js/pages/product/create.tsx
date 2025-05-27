@@ -138,8 +138,11 @@ export default function ProductModal({
             categoria: data.categoria || null,
         };
 
-        post('/admin/products', {
-            preserveScroll: true,
+        const isAdmin = window.location.pathname.includes('/admin/');
+        const rolePrefix = isAdmin ? 'admin' : 'manager';
+
+        post(`/${rolePrefix}/products`, {
+                    preserveScroll: true,
             onSuccess: () => {
                 Swal.fire({
                     title: '¡Éxito!',
@@ -233,8 +236,9 @@ export default function ProductModal({
     };
 
     useEffect(() => {
-        fetch('/admin/products/categorias')
-            .then(response => response.json())
+        const basePath = window.location.pathname.includes('admin') ? '/admin' : '/manager';
+        fetch(`${basePath}/products/categorias`)
+                .then(response => response.json())
             .then(data => setCategorias(data))
             .catch(error => console.error('Error al obtener categorías:', error));
     }, []);
