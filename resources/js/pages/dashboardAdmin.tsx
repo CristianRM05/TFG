@@ -456,55 +456,106 @@ export default function AdminDashboard() {
         }
     }
 
-    const submitShelf = (e: React.FormEvent) => {
+    // 🔥 FUNCIÓN CORREGIDA - USANDO EL MISMO MÉTODO QUE FUNCIONA
+    const submitShelf = async (e: React.FormEvent, completeShelfData?: any) => {
         e.preventDefault()
-        postShelf("/admin/shelves", {
-            preserveScroll: true,
-            onSuccess: () => {
-                resetShelf()
-                setOpenShelfModal(false)
 
-                Swal.fire({
-                    title: "¡Éxito!",
-                    text: "Estantería creada con éxito",
-                    icon: "success",
-                    showConfirmButton: false,
-                    timer: 3000,
-                })
+        if (processingShelf) {
+            console.log("⏳ Ya se está procesando, ignorando...")
+            return
+        }
 
-                // Actualizar estanterías
-                fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            setShelves(data.shelves)
-                            setTotalShelves(data.pagination.total)
-                            setShelvesTotalPages(data.pagination.last_page)
-                        }
+        // Usar completeShelfData si se proporciona, sino usar shelfData
+        const dataToSubmit = completeShelfData || {
+            code: shelfData.code.trim(),
+            location: shelfData.location.trim(),
+            max_capacity: shelfData.max_capacity.trim(),
+        }
+
+        console.log("🚀 ENVIANDO DATOS AL SERVIDOR:", dataToSubmit)
+
+        try {
+            // 🔥 USAR EL MISMO ENDPOINT Y MÉTODO QUE FUNCIONA
+            await router.post("/manager/shelves", dataToSubmit, {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    console.log("✅ ¡ÉXITO!")
+
+                    // Cerrar modal y limpiar
+                    resetShelf()
+                    setOpenShelfModal(false)
+
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        title: "¡Éxito!",
+                        text: "Estantería creada con éxito",
+                        icon: "success",
+                        showConfirmButton: false,
+                        timer: 3000,
                     })
 
-                // Importante: Mantener la paginación de productos actualizada
-                fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            setProducts(data.products)
-                            setTotalProducts(data.pagination.total)
-                            setProductsTotalPages(data.pagination.last_page)
-                        }
+                    // Actualizar estanterías
+                    fetch(`/admin/shelves?page=${shelvesPage}&per_page=${shelvesPerPage}`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                const shelvesWithCalculations = data.shelves.map((shelf: any) => ({
+                                    ...shelf,
+                                    total_stock: shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0,
+                                    products_count: shelf.products?.length || 0,
+                                    capacity_percentage:
+                                        shelf.max_capacity > 0
+                                            ? Math.min(
+                                                100,
+                                                ((shelf.products?.reduce((sum: number, p: any) => sum + (p.stock || 0), 0) || 0) /
+                                                    shelf.max_capacity) *
+                                                100,
+                                            )
+                                            : 0,
+                                }))
+
+                                setShelves(shelvesWithCalculations)
+                                setTotalShelves(data.pagination.total)
+                                setShelvesTotalPages(data.pagination.last_page)
+                            }
+                        })
+
+                    // Actualizar productos también
+                    fetch(`/admin/products?page=${productsPage}&per_page=${productsPerPage}`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                setProducts(data.products)
+                                setTotalProducts(data.pagination.total)
+                                setProductsTotalPages(data.pagination.last_page)
+                            }
+                        })
+                },
+                onError: (errors) => {
+                    console.log("❌ Error del servidor:", errors)
+
+                    const errorMessages = Object.values(errors).flat()
+                    const errorText = errorMessages.length > 0 ? errorMessages.join(", ") : "Error al crear estantería"
+
+                    Swal.fire({
+                        title: "Error",
+                        text: errorText,
+                        icon: "error",
+                        confirmButtonColor: "#7C5F42",
+                        timer: 3000,
                     })
-            },
-            onError: () => {
-                Swal.fire({
-                    title: "Error",
-                    text: "Hubo un problema al crear la estantería",
-                    icon: "error",
-                    confirmButtonColor: styles.secondary,
-                    showConfirmButton: false,
-                    timer: 3000,
-                })
-            },
-        })
+                },
+            })
+        } catch (error) {
+            console.error("❌ Error general:", error)
+            Swal.fire({
+                title: "Error",
+                text: "Error inesperado",
+                icon: "error",
+                confirmButtonColor: "#7C5F42",
+                timer: 3000,
+            })
+        }
     }
 
     const handleDeleteShelf = (shelfId: number) => {
@@ -863,29 +914,5 @@ export default function AdminDashboard() {
             </div>
         </AppLayout>
     )
-    // Al final de los imports o justo antes de return:
-    function handleDeleteWithPagination<T>({
-        setItems,
-        setTotalItems,
-        items,
-        currentPage,
-        setCurrentPage,
-        deletedItemId,
-    }: {
-        setItems: React.Dispatch<React.SetStateAction<T[]>>
-        setTotalItems: React.Dispatch<React.SetStateAction<number>>
-        items: T[]
-        currentPage: number
-        setCurrentPage: React.Dispatch<React.SetStateAction<number>>
-        deletedItemId: number
-    }) {
-        const updatedItems = items.filter((item) => (item as any).id !== deletedItemId)
-        setTotalItems((prev) => prev - 1)
-
-        if (updatedItems.length === 0 && currentPage > 1) {
-            setCurrentPage(currentPage - 1)
-        } else {
-            setItems(updatedItems)
-        }
-    }
 }
+  

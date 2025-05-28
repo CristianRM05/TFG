@@ -44,8 +44,8 @@ export default function MyTickets({ tickets, auth }: MyTicketsProps) {
                 className="border p-4 rounded-lg shadow-sm bg-white flex justify-between items-center"
               >
                 <div>
-                  <p className="text-lg  text-white dark:text-black font-semibold">{ticket.subject}</p>
-                  <p className="text-sm text-white dark:text-black">
+                  <p className="text-lg   dark:text-black font-semibold">{ticket.subject}</p>
+                  <p className="text-sm  dark:text-black">
                     Estado:{' '}
                     <span className={ticket.status === 'cerrado' ? 'text-red-600' : 'text-green-600'}>
                       {ticket.status}
