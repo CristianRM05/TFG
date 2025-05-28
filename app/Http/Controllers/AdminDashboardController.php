@@ -62,6 +62,37 @@ class AdminDashboardController extends Controller
         ]);
     }
 
+    //eliminar usuario
+public function destroy(User $user)
+{
+    if ($user->role === 'Admin') {
+        return response()->json(['message' => 'No se puede eliminar un administrador.'], 403);
+    }
+
+    try {
+        // Eliminar avatar si existe físicamente en el servidor
+        if ($user->avatar) {
+            $avatarPath = public_path('admin/photos/' . basename($user->avatar));
+            if (file_exists($avatarPath)) {
+                unlink($avatarPath);
+            }
+        }
+
+        // Eliminar el usuario
+        $user->delete();
+
+        return response()->json(['message' => 'Usuario eliminado correctamente.']);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error al eliminar el usuario.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
  public function updateUserRole(User $user, Request $request)
 {
     // Convertimos los enums a strings con ->value

@@ -72,6 +72,11 @@ Route::get('/crear-ticket', function () {
 
 Route::patch('/tickets/{id}/close', [TicketController::class, 'close'])->name('tickets.close');
 
+
+//eliminar usuario
+Route::delete('/users/{user}', [AdminDashboardController::class, 'destroy']);
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';
