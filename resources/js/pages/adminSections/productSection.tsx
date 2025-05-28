@@ -87,15 +87,15 @@ const ProductSection: React.FC<Props> = ({
                         <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
                             <thead style={{ backgroundColor: `${styles.secondary}10` }}>
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Imagen</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Nombre</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Referencia</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Stock</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Precio</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Descuento (%)</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Precio Final</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Estantería</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Acciones</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Imagen</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Nombre</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Referencia</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Stock</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Precio</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Descuento (%)</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Precio Final</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Estantería</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
@@ -110,7 +110,7 @@ const ProductSection: React.FC<Props> = ({
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 font-medium" style={{ color: styles.dark }}>{product.name}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600" style={{ color: styles.dark }}>{product.name}</td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{product.num_reference}</td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{product.stock}</td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{product.price}€</td>

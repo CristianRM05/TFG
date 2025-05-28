@@ -142,7 +142,7 @@ export default function ProductModal({
         const rolePrefix = isAdmin ? 'admin' : 'manager';
 
         post(`/${rolePrefix}/products`, {
-                    preserveScroll: true,
+            preserveScroll: true,
             onSuccess: () => {
                 Swal.fire({
                     title: '¡Éxito!',
@@ -238,7 +238,7 @@ export default function ProductModal({
     useEffect(() => {
         const basePath = window.location.pathname.includes('admin') ? '/admin' : '/manager';
         fetch(`${basePath}/products/categorias`)
-                .then(response => response.json())
+            .then(response => response.json())
             .then(data => setCategorias(data))
             .catch(error => console.error('Error al obtener categorías:', error));
     }, []);
@@ -277,8 +277,13 @@ export default function ProductModal({
                                 id="name"
                                 value={data.name}
                                 onChange={e => setData('name', e.target.value)}
-                                className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
-                                style={{ borderColor: COLORS.secondary, color: COLORS.black }}
+                                className="w-full px-3 py-2 rounded-md border text-sm focus:ring-2 focus:ring-opacity-50"
+                                style={{
+                                    backgroundColor: '#F3F3F1',
+                                    color: '#000000',
+                                    borderColor: '#7C5F42',
+                                }}
+
                             />
                             <InputError message={errors.name} />
                         </div>
@@ -291,8 +296,13 @@ export default function ProductModal({
                                 id="num_reference"
                                 value={data.num_reference}
                                 onChange={e => setData('num_reference', e.target.value)}
-                                className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
-                                style={{ borderColor: COLORS.secondary, color: COLORS.black }}
+                                className="w-full px-3 py-2 rounded-md border text-sm focus:ring-2 focus:ring-opacity-50"
+                                style={{
+                                    backgroundColor: '#F3F3F1',
+                                    color: '#000000',
+                                    borderColor: '#7C5F42',
+                                }}
+
                             />
                             <InputError message={errors.num_reference} />
                         </div>
@@ -330,8 +340,13 @@ export default function ProductModal({
                                         e.preventDefault(); // bloquea negativo y notación científica
                                     }
                                 }}
-                                className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
-                                style={{ borderColor: COLORS.secondary, color: COLORS.black }}
+                                className="w-full px-3 py-2 rounded-md border text-sm focus:ring-2 focus:ring-opacity-50"
+                                style={{
+                                    backgroundColor: '#F3F3F1',
+                                    color: '#000000',
+                                    borderColor: '#7C5F42',
+                                }}
+
                             />
                             <InputError message={errors.stock} />
                         </div>
@@ -352,8 +367,13 @@ export default function ProductModal({
                                         e.preventDefault(); // bloquea negativo y notación científica
                                     }
                                 }}
-                                className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
-                                style={{ borderColor: COLORS.secondary, color: COLORS.black }}
+                                className="w-full px-3 py-2 rounded-md border text-sm focus:ring-2 focus:ring-opacity-50"
+                                style={{
+                                    backgroundColor: '#F3F3F1',
+                                    color: '#000000',
+                                    borderColor: '#7C5F42',
+                                }}
+
                             />
                             <InputError message={errors.price} />
                         </div>
@@ -385,15 +405,20 @@ export default function ProductModal({
                     </div>
 
                     <div>
-                        <Label htmlFor="image_url" className="block mb-1 font-medium" style={{ color: COLORS.black }}>
+                        <Label htmlFor="image_url" className="block mb-1 font-medium text-gray-900 dark:text-white">
                             Fotografía
                         </Label>
-                        <Input
+
+                        <input
                             id="image_url"
                             type="file"
                             accept="image/*"
-                            className="w-full border rounded-md focus:ring-2 focus:ring-opacity-50"
-                            style={{ borderColor: COLORS.secondary, color: COLORS.black }}
+                            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-opacity-50"
+                            style={{
+                                borderColor: COLORS.secondary,
+                                backgroundColor: COLORS.white,
+                                color: COLORS.black
+                            }}
                             onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
@@ -403,7 +428,7 @@ export default function ProductModal({
                                             icon: 'error',
                                             title: 'Error al subir imagen',
                                             text: 'No se pudo subir la imagen a ImgBB.',
-                                            confirmButtonColor: COLORS.primary
+                                            confirmButtonColor: COLORS.primary,
                                         });
                                         return;
                                     }
@@ -411,19 +436,20 @@ export default function ProductModal({
                                 }
                             }}
                         />
+
                         <InputError message={errors.image_url} />
                     </div>
+
+
 
                     <div className="flex justify-end gap-3 pt-5 mt-6 border-t" style={{ borderColor: COLORS.secondary }}>
                         <Button
                             type="button"
                             variant="outline"
                             onClick={handleClose}
-                            className="px-4 py-2"
-                            style={{
-                                borderColor: COLORS.secondary,
-                                color: COLORS.secondary
-                            }}
+                            className="px-4 py-2 border rounded-md font-medium bg-transparent
+             text-[#7C5F42] border-[#7C5F42] hover:bg-[#7C5F42]/10
+             dark:bg-transparent dark:text-[#7C5F42] dark:border-[#7C5F42] dark:hover:bg-[#7C5F42]/20"
                         >
                             Cancelar
                         </Button>

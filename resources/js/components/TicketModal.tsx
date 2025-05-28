@@ -33,22 +33,17 @@ const TicketModal: React.FC<Props> = ({ ticket, onClose }) => {
     setLoading(true)
 
     try {
-      const response = await axios.post(`/admin/tickets/${ticket.id}/reply`, {
-        message: newMessage,
-      })
-
-      // Añadir mensaje localmente sin cerrar modal
+      await axios.post(`/admin/tickets/${ticket.id}/reply`, { message: newMessage })
       const now = new Date().toISOString()
       setMessages([
         ...messages,
         {
-          id: Date.now(), // temporal
+          id: Date.now(),
           message: newMessage,
           sender_type: "admin",
           created_at: now,
         },
       ])
-
       setNewMessage("")
     } catch (err) {
       console.error("Error enviando mensaje", err)
@@ -59,9 +54,7 @@ const TicketModal: React.FC<Props> = ({ ticket, onClose }) => {
 
   const handleCloseTicket = async () => {
     try {
-      await axios.patch(`/admin/tickets/${ticket.id}`, {
-        status: "cerrado",
-      })
+      await axios.patch(`/admin/tickets/${ticket.id}`, { status: "cerrado" })
       setStatus("cerrado")
     } catch (err) {
       console.error("Error cerrando el ticket", err)
@@ -70,18 +63,30 @@ const TicketModal: React.FC<Props> = ({ ticket, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-1">Ticket #{ticket.id}: {ticket.subject}</h2>
-        <p className="text-sm text-gray-500 mb-4">Estado: <span className={`font-semibold ${status === 'cerrado' ? 'text-red-600' : 'text-green-600'}`}>{status}</span></p>
+      <div className="bg-white dark:bg-gray-900 w-full max-w-2xl p-6 rounded-lg shadow-lg">
+        <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">
+          Ticket #{ticket.id}: {ticket.subject}
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+          Estado:{" "}
+          <span className={`font-semibold ${status === "cerrado" ? "text-red-600" : "text-green-500"}`}>
+            {status}
+          </span>
+        </p>
 
         <div className="max-h-64 overflow-y-auto space-y-2 mb-4">
-          {messages.map(msg => (
-            <div key={msg.id} className="p-2 rounded border">
-              <div className="text-sm font-semibold">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className="p-2 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
+            >
+              <div className="text-sm font-semibold text-gray-800 dark:text-white">
                 {msg.sender_type === "admin" ? "👨‍💼 Admin" : "👤 Usuario"}
               </div>
-              <div>{msg.message}</div>
-              <div className="text-xs text-gray-500">{new Date(msg.created_at).toLocaleString()}</div>
+              <div className="text-gray-700 dark:text-gray-300">{msg.message}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {new Date(msg.created_at).toLocaleString()}
+              </div>
             </div>
           ))}
         </div>
@@ -92,19 +97,19 @@ const TicketModal: React.FC<Props> = ({ ticket, onClose }) => {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               rows={3}
-              className="w-full border rounded p-2 mb-3"
+              className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded p-2 mb-3"
               placeholder="Responder al ticket..."
             />
             <div className="flex justify-between gap-2 mb-3">
               <button
                 onClick={handleCloseTicket}
-                className="bg-red-600 text-white px-4 py-2 rounded"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
               >
                 Cerrar Ticket
               </button>
               <button
                 onClick={handleSend}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                 disabled={loading}
               >
                 {loading ? "Enviando..." : "Enviar"}
@@ -116,7 +121,7 @@ const TicketModal: React.FC<Props> = ({ ticket, onClose }) => {
         <div className="flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-300 text-gray-800"
+            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
           >
             Cerrar ventana
           </button>

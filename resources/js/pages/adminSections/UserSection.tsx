@@ -220,19 +220,19 @@ const UserSection: React.FC<Props> = ({
                     <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
                         <thead style={{ backgroundColor: `${styles.secondary}10` }}>
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Nombre</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Email</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Teléfono</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Rol</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Acciones</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Nombre</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Email</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-mediume" style={{ color: styles.secondary }}>Teléfono</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Rol</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
 
 {users.length > 0 ? users.map((user) => (
   <tr key={user.id} className="hover:bg-gray-50">
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="flex items-center">
+    <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+      <div className=" flex items-center">
         <img
           src={user.avatar || "/images/default-avatar.png"}
           alt={user.name}
@@ -244,9 +244,10 @@ const UserSection: React.FC<Props> = ({
           style={{ borderColor: styles.primary }}
         />
         <div className="ml-4">
-          <div className="text-sm font-medium" style={{ color: styles.dark }}>
-            {user.name} {user.last_name}
-          </div>
+         <div className="px-6 py-4 text-sm text-gray-600">
+  {user.name} {user.last_name}
+</div>
+
         </div>
       </div>
     </td>

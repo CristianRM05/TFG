@@ -98,7 +98,7 @@ const TicketSection: React.FC<Props> = ({
             {openSection === "tickets" && (
                 <div className="overflow-x-auto">
                     {/* Filtro de estado */}
-                    <div className="p-4 flex justify-end">
+                    <div className="px-6 py-4 text-sm text-gray-600 flex justify-end">
                         <div className="flex items-center gap-2">
                             <Filter size={16} className="text-gray-500" />
                             <span className="text-sm text-gray-600">Filtrar por estado:</span>
@@ -121,19 +121,19 @@ const TicketSection: React.FC<Props> = ({
                         <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
                             <thead style={{ backgroundColor: `${styles.secondary}10` }}>
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>
                                         ID
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>
                                         Asunto
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>
                                         Usuario
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>
                                         Estado
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>
+                                    <th className="px-6 py-4 text-sm text-gray-600 font-medium uppercase" style={{ color: styles.secondary }}>
                                         Acciones
                                     </th>
                                 </tr>
