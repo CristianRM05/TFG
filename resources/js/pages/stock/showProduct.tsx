@@ -119,7 +119,6 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
         }
     };
 
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
@@ -131,7 +130,6 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
             setEditedProduct(name, value);
         }
     };
-
 
     const handleOpenAddStockModal = () => {
         setStockToAdd(0);
@@ -157,18 +155,18 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
     };
 
     return (
-        <AppLayout user={auth.user} header={<h2 className="text-2xl font-bold text-[#E17100]">Detalles del Producto</h2>}>
+        <AppLayout user={auth.user} header={<h2 className="text-2xl font-bold text-[#E17100] dark:text-orange-400">Detalles del Producto</h2>}>
             <Head title={`Detalles de ${product.name}`} />
 
             <div>
                 <div className="max-w-4xl mx-auto px-6 lg:px-8">
-                    <div className="bg-white border border-[#E17100]/30 rounded-2xl p-8 shadow-lg relative">
+                    <div className="bg-white dark:bg-gray-800 border border-[#E17100]/30 dark:border-orange-400/30 rounded-2xl p-8 shadow-lg relative">
                         <button
                             onClick={handleEditClick}
-                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-[#E17100]/10 transition-colors"
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-[#E17100]/10 dark:hover:bg-orange-400/10 transition-colors"
                             title="Editar producto"
                         >
-                            <Edit className="w-5 h-5 text-[#E17100]" />
+                            <Edit className="w-5 h-5 text-[#E17100] dark:text-orange-400" />
                         </button>
 
                         <div className="flex flex-col md:flex-row gap-8 mb-8">
@@ -176,7 +174,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                 <img
                                     src={product.image_url || "/placeholder.svg"}
                                     alt={product.name}
-                                    className="w-64 h-64 rounded-lg object-cover border border-[#E17100]/20"
+                                    className="w-64 h-64 rounded-lg object-cover border border-[#E17100]/20 dark:border-orange-400/20"
                                 />
                             </div>
                             <div className="w-full md:w-2/3">
@@ -188,12 +186,12 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                             value={editedProduct.name}
                                             onChange={handleInputChange}
                                             maxLength={30}
-                                            className="text-3xl font-bold mb-1 text-[#E17100] w-full p-2 border border-[#E17100]/30 rounded"
+                                            className="text-3xl font-bold mb-1 text-[#E17100] dark:text-orange-400 w-full p-2 border border-[#E17100]/30 dark:border-orange-400/30 rounded bg-white dark:bg-gray-700 dark:text-white"
                                         />
-                                        <p className="text-sm text-gray-500 mb-2">{editedProduct.name.length}/30 caracteres</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{editedProduct.name.length}/30 caracteres</p>
                                     </>
                                 ) : (
-                                    <h1 className="text-3xl font-bold mb-2 text-[#E17100]">{product.name}</h1>
+                                    <h1 className="text-3xl font-bold mb-2 text-[#E17100] dark:text-orange-400">{product.name}</h1>
                                 )}
 
                                 <div className="flex items-center gap-4 mb-4">
@@ -206,21 +204,21 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                                 onChange={handleInputChange}
                                                 min={0}
                                                 step="0.01"
-                                                className="text-xl font-semibold text-green-700 border border-[#E17100]/30 p-2 rounded w-32"
+                                                className="text-xl font-semibold text-green-700 dark:text-green-400 border border-[#E17100]/30 dark:border-orange-400/30 p-2 rounded w-32 bg-white dark:bg-gray-700"
                                             />
-                                            <span className="text-sm text-gray-600">USD</span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">USD</span>
                                         </>
                                     ) : (
                                         <>
-                                            <span className="text-2xl font-semibold text-green-700">
+                                            <span className="text-2xl font-semibold text-green-700 dark:text-green-400">
                                                 ${product.final_price ? product.final_price.toFixed(2) : product.price.toFixed(2)}
                                             </span>
                                             {product.discount_percent !== null && product.discount_percent > 0 && (
                                                 <>
-                                                    <span className="text-sm line-through text-gray-500">
+                                                    <span className="text-sm line-through text-gray-500 dark:text-gray-400">
                                                         ${product.price.toFixed(2)}
                                                     </span>
-                                                    <span className="bg-[#E17100] text-white px-2 py-1 rounded-full text-xs font-bold">
+                                                    <span className="bg-[#E17100] dark:bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                                                         -{product.discount_percent}%
                                                     </span>
                                                 </>
@@ -236,23 +234,22 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                             value={editedProduct.description}
                                             onChange={handleInputChange}
                                             maxLength={150}
-                                            className="text-gray-700 mb-1 w-full p-2 border border-[#E17100]/30 rounded h-32"
+                                            className="text-gray-700 dark:text-gray-300 mb-1 w-full p-2 border border-[#E17100]/30 dark:border-orange-400/30 rounded h-32 bg-white dark:bg-gray-700"
                                         />
-                                        <p className="text-sm text-gray-500 mb-6">{editedProduct.description.length}/150 caracteres</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{editedProduct.description.length}/150 caracteres</p>
                                     </>
                                 ) : (
-                                    <p className="text-gray-700 mb-6">
+                                    <p className="text-gray-700 dark:text-gray-300 mb-6">
                                         {product.description || "No hay descripción disponible."}
                                     </p>
                                 )}
-
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
-                                <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Información General</h2>
-                                <div className="space-y-2">
+                            <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
+                                <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Información General</h2>
+                                <div className="space-y-2 text-gray-800 dark:text-gray-200">
                                     <p><span className="font-medium">Referencia:</span> {product.num_reference}</p>
                                     <p><span className="font-medium">Categoría:</span> {product.categoria}</p>
                                     <p>
@@ -262,7 +259,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                     {isEditing && (
                                         <button
                                             onClick={handleOpenAddStockModal}
-                                            className="mt-2 inline-block bg-[#E17100] text-white text-sm px-4 py-1 rounded hover:bg-[#cc5f00] transition"
+                                            className="mt-2 inline-block bg-[#E17100] dark:bg-orange-500 text-white text-sm px-4 py-1 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
                                         >
                                             Añadir Stock +
                                         </button>
@@ -270,9 +267,9 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                 </div>
                             </div>
 
-                            <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
-                                <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Ubicación en Almacén</h2>
-                                <div className="space-y-2">
+                            <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
+                                <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Ubicación en Almacén</h2>
+                                <div className="space-y-2 text-gray-800 dark:text-gray-200">
                                     {product.shelf && product.shelf.location ? (
                                         <>
                                             <p><span className="font-medium">Estantería:</span> {product.shelf.location}</p>
@@ -285,10 +282,10 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                                     )}
                                                 </span>
                                             </p>
-                                            <div className="w-full bg-gray-200 rounded h-2 mt-1 overflow-hidden">
+                                            <div className="w-full bg-gray-200 dark:bg-gray-600 rounded h-2 mt-1 overflow-hidden">
                                                 <div
                                                     className={`h-full ${product.shelf.capacity_percentage >= 100
-                                                        ? 'bg-black'
+                                                        ? 'bg-black dark:bg-white'
                                                         : product.shelf.capacity_percentage > 85
                                                             ? 'bg-red-500'
                                                             : product.shelf.capacity_percentage > 50
@@ -300,16 +297,16 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                                     }}
                                                 />
                                             </div>
-                                            <p className="text-xs text-gray-500 mt-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                 {product.shelf.capacity_percentage.toFixed(0)}% de capacidad utilizada
                                             </p>
                                         </>
                                     ) : (
                                         <>
-                                            <p className="text-gray-500 italic">A la espera de que se ubique la mercancía</p>
+                                            <p className="text-gray-500 dark:text-gray-400 italic">A la espera de que se ubique la mercancía</p>
                                             <Link
                                                 href="/manager/shelves"
-                                                className="inline-block bg-[#E17100] text-white px-4 py-2 rounded hover:bg-[#cc5f00] transition"
+                                                className="inline-block bg-[#E17100] dark:bg-orange-500 text-white px-4 py-2 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
                                             >
                                                 Ubicar mercancía
                                             </Link>
@@ -318,10 +315,9 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                                 </div>
                             </div>
 
-
-                            <div className="bg-[#F3F3DF] border border-[#E17100]/10 p-4 rounded-lg shadow-sm">
-                                <h2 className="text-lg font-semibold mb-3 text-[#E17100]">Fechas</h2>
-                                <div className="space-y-2">
+                            <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
+                                <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Fechas</h2>
+                                <div className="space-y-2 text-gray-800 dark:text-gray-200">
                                     <p>
                                         <span className="font-medium">Creado:</span>{" "}
                                         {product.created_at
@@ -356,13 +352,13 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                             <div className="mt-6 flex justify-end gap-4">
                                 <button
                                     onClick={handleCancelEdit}
-                                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition"
                                 >
                                     <X size={18} /> Cancelar
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    className="flex items-center gap-2 px-4 py-2 bg-[#E17100] text-white rounded hover:bg-[#cc5f00] transition"
+                                    className="flex items-center gap-2 px-4 py-2 bg-[#E17100] dark:bg-orange-500 text-white rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
                                 >
                                     <Save size={18} /> Guardar cambios
                                 </button>
@@ -374,7 +370,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                 <div className="mt-10 text-center">
                     <Link
                         href="/manager/stock"
-                        className="inline-block bg-[#E17100] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#cc5f00] transition duration-300"
+                        className="inline-block bg-[#E17100] dark:bg-orange-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition duration-300"
                     >
                         ← Volver a todos los productos
                     </Link>
@@ -382,25 +378,25 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
 
                 {isAddStockModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-lg w-80 relative">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80 relative">
                             <button
                                 onClick={handleCloseAddStockModal}
-                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                                className="absolute top-2 right-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                             >
                                 <X size={20} />
                             </button>
-                            <h2 className="text-lg font-semibold mb-4 text-[#E17100]">Añadir Stock</h2>
+                            <h2 className="text-lg font-semibold mb-4 text-[#E17100] dark:text-orange-400">Añadir Stock</h2>
                             <input
                                 type="number"
                                 value={stockToAdd}
                                 onChange={(e) => setStockToAdd(parseInt(e.target.value) || 0)}
-                                className="w-full border border-[#E17100]/30 p-2 rounded mb-4"
+                                className="w-full border border-[#E17100]/30 dark:border-orange-400/30 p-2 rounded mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                 min="0"
                                 placeholder="Cantidad a añadir"
                             />
                             <button
                                 onClick={handleConfirmAddStock}
-                                className="w-full bg-[#E17100] text-white py-2 rounded hover:bg-[#cc5f00] transition"
+                                className="w-full bg-[#E17100] dark:bg-orange-500 text-white py-2 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
                             >
                                 Confirmar
                             </button>
@@ -408,7 +404,7 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                     </div>
                 )}
             </div>
-        </AppLayout >
+        </AppLayout>
     );
 };
 

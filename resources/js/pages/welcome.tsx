@@ -21,10 +21,8 @@ export default function PaginaBebidas() {
             setIsMobile(window.innerWidth < 768);
         };
 
-        // Verificar al cargar
         checkMobile();
 
-        // Escuchar cambios de tamaño
         window.addEventListener('resize', checkMobile);
 
         return () => window.removeEventListener('resize', checkMobile);
@@ -41,65 +39,39 @@ export default function PaginaBebidas() {
         }
     };
 
-    const categoriasBebidas = [
-        {
-            nombre: 'Bebidas Alcohólicas',
-            descripcion: 'Licores premium, cervezas y vinos selectos',
-            icono: '/images/icon-alcohol.svg',
-            productos: [
-                { nombre: 'Whisky Añejo', precio: '49.990 CLP', imagen: '/images/whisky.png' },
-                { nombre: 'Cervezas Artesanales', precio: '25.000 CLP', imagen: '/images/cerveza.png' },
-                { nombre: 'Vino Reserva', precio: '39.990 CLP', imagen: '/images/vino.png' },
-            ],
-        },
-        {
-            nombre: 'Bebidas Sin Alcohol',
-            descripcion: 'Jugos naturales, sodas y smoothies',
-            icono: '/images/icon-nalcohol.svg',
-            productos: [
-                { nombre: 'Smoothies Orgánicos', precio: '15.000 CLP', imagen: '/images/smoothie.png' },
-                { nombre: 'Aguas Saborizadas', precio: '10.000 CLP', imagen: '/images/agua.png' },
-                { nombre: 'Té Frío Artesanal', precio: '8.000 CLP', imagen: '/images/te.png' },
-            ],
-        },
-    ];
 
-    const beneficios = [
-        { icono: '🚚', titulo: 'Envío Gratis', descripcion: 'En compras sobre 1200€' },
-        { icono: '🍷', titulo: 'Asesoría', descripcion: 'Recomendaciones de expertos' },
-        { icono: '🏆', titulo: 'Calidad', descripcion: 'Productos seleccionados' },
-    ];
 
-    const testimonios = [
-        {
-            nombre: 'María Fernández',
-            comentario: 'La mejor selección de bebidas que he encontrado. ¡Increíble variedad!',
-            avatar: '/images/avatar-maria.jpg',
-        },
-        {
-            nombre: 'Carlos Mendoza',
-            comentario: 'Servicio impecable y productos de primera calidad.',
-            avatar: '/images/avatar-carlos.jpg',
-        },
-    ];
+
+
 
     return (
         <div className={`${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-800'} min-h-screen`}>
             <Head title="Swapify" />
 
-            {/* Newsletter */}
+            {/* Newsletter - Responsivo */}
             <button
                 onClick={() => setModalNewsletter(true)}
-                className="fixed bottom-20 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-white/20 cursor-pointer"
+                className={`fixed bottom-20 right-4 z-50 bg-orange-600 text-white shadow-lg hover:bg-orange-700 transition-all duration-200 cursor-pointer ${
+                    isMobile
+                        ? 'w-12 h-12 rounded-full flex items-center justify-center text-lg'
+                        : 'px-4 py-2 rounded-full'
+                }`}
+                title={isMobile ? 'Newsletter' : ''}
             >
-                📩 Newsletter
+                {isMobile ? '📩' : '📩 Newsletter'}
             </button>
+
             {!auth.user && (
                 <button
                     onClick={() => setShowModal(true)}
-                    className="fixed bottom-36 right-4 z-50 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-white/20 cursor-pointer"
+                    className={`fixed right-4 z-50 bg-orange-600 text-white shadow-lg hover:bg-orange-700 transition-all duration-200 cursor-pointer ${
+                        isMobile
+                            ? 'bottom-36 w-12 h-12 rounded-full flex items-center justify-center text-lg'
+                            : 'bottom-36 px-4 py-2 rounded-full'
+                    }`}
+                    title={isMobile ? 'Crear Ticket' : ''}
                 >
-                    📝 Crear Ticket
+                    {isMobile ? '📝' : '📝 Crear Ticket'}
                 </button>
             )}
 
@@ -113,10 +85,10 @@ export default function PaginaBebidas() {
                         </Link>
                     ) : (
                         <>
-                            <Link href={route('login')} className="inline-block px-3 md:px-4 py-2 hover:underline text-sm md:text-base">
+                            <Link href={route('login')} className="inline-block px-3 md:px-4 py-2 bg-amber-600 rounded-full text-white hover:bg-amber-700 transition-colors text-sm md:text-base">
                                 Iniciar Sesión
                             </Link>
-                            <Link href={route('register')} className="inline-block px-3 md:px-4 py-2 bg-amber-600 rounded-full text-white hover:bg-amber-700 transition-colors text-sm md:text-base">
+                            <Link href={route('register')} className="inline-block px-3 md:px-4 py-2 bg-orange-400 rounded-full text-white hover:bg-orange-500 transition-colors text-sm md:text-base">
                                 Registrarse
                             </Link>
                         </>
@@ -135,6 +107,7 @@ export default function PaginaBebidas() {
                         backgroundImage: `url('fondoLandingPage.png')`,
                         backgroundSize: isMobile ? 'cover' : '100%',
                         backgroundPosition: isMobile ? 'center' : 'center',
+                        
                     }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black to-black/0" />
@@ -215,7 +188,7 @@ export default function PaginaBebidas() {
                         href={route('dashboard')}
                         className="inline-block px-6 md:px-8 py-3 md:py-4 bg-amber-600 rounded-full uppercase tracking-wide text-white hover:bg-amber-700 transition-colors text-sm md:text-base"
                     >
-                        Recetario
+                        Productos
                     </Link>
                 </div>
             </section>
@@ -226,7 +199,8 @@ export default function PaginaBebidas() {
                 user={auth?.user}
             />
             {modalNewsletter && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+
+                <div className="fixed inset-0 bg-black/50 flex items-center bg-opacity-40 backdrop-blur-sm bg-opacity-50 justify-center z-50 px-4">
                     <div className="bg-white text-gray-800 p-6 md:p-8 rounded-xl max-w-md w-full">
                         <h2 className="text-xl md:text-2xl font-bold mb-4 text-center">¡Suscríbete y recibe ofertas!</h2>
                         <input
