@@ -88,21 +88,35 @@ export default function MyOrders() {
 
                     {/* Status Filter Badges */}
                     <div className="flex space-x-2 mb-4">
-                        {Object.entries(statusConfig).map(([status, config]) => (
-                            <button
-                                key={status}
-                                onClick={() => toggleStatusFilter(status as Order['status'])}
-                                className={`
-                  px-3 py-1 rounded-full border-2 text-sm font-medium transition-all
-                  ${selectedStatuses.includes(status as Order['status'])
-                                        ? `${config.color} dark:${config.darkColor} border-opacity-100`
-                                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-white border-transparent opacity-50'}
-                `}
-                            >
-                                {config.label}
-                            </button>
+                        {Object.entries(statusConfig).map(([status, config]) => {
+    const isSelected = selectedStatuses.includes(status as Order['status']);
+    let finalClass = 'px-3 py-1 rounded-full border-2 text-sm font-medium transition-all';
 
-                        ))}
+    if (status === 'paid') {
+        finalClass += isSelected
+            ? ' bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-white dark:border-blue-800'
+            : ' bg-gray-100 text-gray-500 border-transparent opacity-50 dark:bg-gray-800 dark:text-white';
+    } else if (status === 'In progress') {
+        finalClass += isSelected
+            ? ' bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-white dark:border-yellow-800'
+            : ' bg-gray-100 text-gray-500 border-transparent opacity-50 dark:bg-gray-800 dark:text-white';
+    } else if (status === 'Completed') {
+        finalClass += isSelected
+            ? ' bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-white dark:border-green-800'
+            : ' bg-gray-100 text-gray-500 border-transparent opacity-50 dark:bg-gray-800 dark:text-white';
+    }
+
+    return (
+        <button
+            key={status}
+            onClick={() => toggleStatusFilter(status as Order['status'])}
+            className={finalClass}
+        >
+            {config.label}
+        </button>
+    );
+})}
+
 
                     </div>
                 </div>
