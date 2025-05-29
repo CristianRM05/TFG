@@ -1,9 +1,10 @@
 import type React from "react"
 import { useState } from "react"
-import { Head, Link, useForm, router } from "@inertiajs/react"
+import { Head, Link, useForm, router, usePage } from "@inertiajs/react"
 import AppLayout from "../../layouts/app-layout"
 import { Edit, X, Save } from "lucide-react"
 import Swal from 'sweetalert2'
+import { useEffect } from "react"
 
 const COLORS = {
     primary: '#8F5C0C',
@@ -44,9 +45,16 @@ interface Props {
             email: string
         }
     }
+    ubicaciones: {
+    shelf_id: number | null
+    code: string
+    location: string
+    max_capacity: number | null
+    stock: number
+  }[]
 }
 
-const ShowProduct: React.FC<Props> = ({ product, auth }) => {
+const ShowProduct: React.FC<Props> = ({ product, auth, ubicaciones }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isAddStockModalOpen, setIsAddStockModalOpen] = useState(false);
     const [stockToAdd, setStockToAdd] = useState(0);
@@ -246,107 +254,117 @@ const ShowProduct: React.FC<Props> = ({ product, auth }) => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
-                                <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Información General</h2>
-                                <div className="space-y-2 text-gray-800 dark:text-gray-200">
-                                    <p><span className="font-medium">Referencia:</span> {product.num_reference}</p>
-                                    <p><span className="font-medium">Categoría:</span> {product.categoria}</p>
-                                    <p>
-                                        <span className="font-medium">Stock disponible: </span>
-                                        {editedProduct.stock} unidades
-                                    </p>
-                                    {isEditing && (
-                                        <button
-                                            onClick={handleOpenAddStockModal}
-                                            className="mt-2 inline-block bg-[#E17100] dark:bg-orange-500 text-white text-sm px-4 py-1 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
-                                        >
-                                            Añadir Stock +
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+  {/* Columna izquierda agrupada */}
+  <div className="flex flex-col gap-6">
+    {/* Información General */}
+    <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Información General</h2>
+      <div className="space-y-2 text-gray-800 dark:text-gray-200">
+        <p><span className="font-medium">Referencia:</span> {product.num_reference}</p>
+        <p><span className="font-medium">Categoría:</span> {product.categoria}</p>
+        <p>
+          <span className="font-medium">Stock disponible: </span>
+          {editedProduct.stock} unidades
+        </p>
+        {isEditing && (
+          <button
+            onClick={handleOpenAddStockModal}
+            className="mt-2 inline-block bg-[#E17100] dark:bg-orange-500 text-white text-sm px-4 py-1 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
+          >
+            Añadir Stock +
+          </button>
+        )}
+      </div>
+    </div>
 
-                            <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
-                                <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Ubicación en Almacén</h2>
-                                <div className="space-y-2 text-gray-800 dark:text-gray-200">
-                                    {product.shelf && product.shelf.location ? (
-                                        <>
-                                            <p><span className="font-medium">Estantería:</span> {product.shelf.location}</p>
-                                            <p className="flex flex-col">
-                                                <span className="font-medium">Uso de capacidad:</span>
-                                                <span className="text-sm">
-                                                    {product.shelf.total_stock} / {product.shelf.max_capacity} unidades
-                                                    {product.shelf.products_count && (
-                                                        <span> ({product.shelf.products_count} productos)</span>
-                                                    )}
-                                                </span>
-                                            </p>
-                                            <div className="w-full bg-gray-200 dark:bg-gray-600 rounded h-2 mt-1 overflow-hidden">
-                                                <div
-                                                    className={`h-full ${product.shelf.capacity_percentage >= 100
-                                                        ? 'bg-black dark:bg-white'
-                                                        : product.shelf.capacity_percentage > 85
-                                                            ? 'bg-red-500'
-                                                            : product.shelf.capacity_percentage > 50
-                                                                ? 'bg-yellow-500'
-                                                                : 'bg-green-500'
-                                                        }`}
-                                                    style={{
-                                                        width: `${Math.min(product.shelf.capacity_percentage, 100)}%`
-                                                    }}
-                                                />
-                                            </div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                {product.shelf.capacity_percentage.toFixed(0)}% de capacidad utilizada
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <p className="text-gray-500 dark:text-gray-400 italic">A la espera de que se ubique la mercancía</p>
-                                            <Link
-                                                href="/manager/shelves"
-                                                className="inline-block bg-[#E17100] dark:bg-orange-500 text-white px-4 py-2 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
-                                            >
-                                                Ubicar mercancía
-                                            </Link>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+    {/* Fechas */}
+    <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Fechas</h2>
+      <div className="space-y-2 text-gray-800 dark:text-gray-200">
+        <p>
+          <span className="font-medium">Creado:</span>{" "}
+          {product.created_at
+            ? new Date(product.created_at).toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+              })
+            : "No disponible"}
+        </p>
+        <p>
+          <span className="font-medium">Actualizado:</span>{" "}
+          {product.updated_at
+            ? new Date(product.updated_at).toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+              })
+            : "No disponible"}
+        </p>
+      </div>
+    </div>
+  </div>
 
-                            <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
-                                <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Fechas</h2>
-                                <div className="space-y-2 text-gray-800 dark:text-gray-200">
-                                    <p>
-                                        <span className="font-medium">Creado:</span>{" "}
-                                        {product.created_at
-                                            ? new Date(product.created_at).toLocaleString('es-ES', {
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                second: '2-digit'
-                                            })
-                                            : "No disponible"}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium">Actualizado:</span>{" "}
-                                        {product.updated_at
-                                            ? new Date(product.updated_at).toLocaleString('es-ES', {
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                second: '2-digit'
-                                            })
-                                            : "No disponible"}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+  {/* Columna derecha: Ubicación en Almacén */}
+  <div className="bg-[#F3F3DF] dark:bg-gray-700 border border-[#E17100]/10 dark:border-orange-400/10 p-4 rounded-lg shadow-sm">
+    <h2 className="text-lg font-semibold mb-3 text-[#E17100] dark:text-orange-400">Ubicación en Almacén</h2>
+    {ubicaciones.length > 0 ? (
+      <div className="space-y-4 text-gray-800 dark:text-gray-200">
+        {ubicaciones.map((shelf, idx) => {
+          const capacidad = shelf.max_capacity || 0;
+          const porcentaje = capacidad > 0 ? Math.min(100, Math.round((shelf.stock / capacidad) * 100)) : 0;
+
+          const color = porcentaje >= 100
+            ? 'bg-black dark:bg-white'
+            : porcentaje > 85
+            ? 'bg-red-500'
+            : porcentaje > 50
+            ? 'bg-yellow-500'
+            : 'bg-green-500';
+
+          return (
+            <div key={idx} className="border border-[#E17100]/10 dark:border-orange-400/20 rounded-lg p-3">
+              <p><span className="font-medium">Estantería:</span> {shelf.code} - {shelf.location}</p>
+              <p><span className="font-medium">Stock de este producto:</span> {shelf.stock} unidades</p>
+              {capacidad > 0 && (
+                <>
+                  <p><span className="font-medium">Capacidad máxima:</span> {capacidad} unidades</p>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded h-2 mt-2 overflow-hidden">
+                    <div
+                      className={`h-full ${color}`}
+                      style={{ width: `${porcentaje}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {porcentaje}% de capacidad utilizada
+                  </p>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      <>
+        <p className="text-gray-500 dark:text-gray-400 italic">A la espera de que se ubique la mercancía</p>
+        <Link
+          href="/manager/shelves"
+          className="inline-block bg-[#E17100] dark:bg-orange-500 text-white px-4 py-2 rounded hover:bg-[#cc5f00] dark:hover:bg-orange-600 transition"
+        >
+          Ubicar mercancía
+        </Link>
+      </>
+    )}
+  </div>
+</div>
+
 
                         {isEditing && (
                             <div className="mt-6 flex justify-end gap-4">

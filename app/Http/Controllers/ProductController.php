@@ -41,6 +41,25 @@ public function index(Request $request)
 
 public function show(Product $product)
 {
+    // Obtener todos los productos con la misma referencia
+    $ubicaciones = Product::where('num_reference', $product->num_reference)
+        ->with('shelf')
+        ->get()
+        ->groupBy('shelf_id')
+        ->map(function ($productos) {
+            $stock = $productos->sum('stock');
+            $shelf = $productos->first()->shelf;
+
+            return [
+                'shelf_id' => $shelf?->id,
+                'code' => $shelf?->code ?? 'N/A',
+                'location' => $shelf?->location ?? 'Sin ubicación',
+                'max_capacity' => $shelf?->max_capacity ?? null,
+                'stock' => $stock,
+            ];
+        })
+        ->values();
+
     $product->load(['shelf' => function ($query) {
         $query->withCount('products')
               ->withSum('products', 'stock');
@@ -51,15 +70,17 @@ public function show(Product $product)
         $maxCapacity = $product->shelf->max_capacity ?? 0;
 
         $product->shelf->total_stock = $totalStock;
-
-        // Solo calcular si max_capacity es mayor que 0
         $product->shelf->capacity_percentage = $maxCapacity > 0
             ? min(($totalStock / $maxCapacity) * 100, 100)
             : 0;
     }
 
     return Inertia::render('stock/showProduct', [
-        'product' => $product
+        'product' => $product,
+        'auth' => [
+            'user' => Auth::user()?->only(['name', 'email']),
+        ],
+        'ubicaciones' => $ubicaciones,
     ]);
 }
 
@@ -88,9 +109,8 @@ public function show(Product $product)
         return redirect()->back()->with('success', 'Producto creado con éxito');
     }
 
-    public function update(Request $request, Product $product)
+public function update(Request $request, Product $product)
 {
-
     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
@@ -98,13 +118,78 @@ public function show(Product $product)
         'price' => 'required|numeric|min:0',
     ]);
 
-    $product->update($validated);
+    DB::transaction(function () use ($validated, $product) {
+        $nuevoStock = $validated['stock'];
 
-    return back()->with([
-        'success' => 'Producto actualizado correctamente',
-        'product' => $product->fresh()
-    ]);
+        // Si tiene estantería asignada
+        if ($product->shelf_id) {
+            $shelf = Shelf::find($product->shelf_id);
+            $stockOtros = Product::where('shelf_id', $shelf->id)
+                ->where('id', '!=', $product->id)
+                ->sum('stock');
+
+            $espacioDisponible = $shelf->max_capacity - $stockOtros;
+
+            if ($nuevoStock > $espacioDisponible) {
+                // Guardar solo lo que cabe
+                $productoPrincipalStock = max(0, $espacioDisponible);
+                $restoStock = $nuevoStock - $productoPrincipalStock;
+
+                $product->update([
+                    'name' => $validated['name'],
+                    'description' => $validated['description'],
+                    'price' => $validated['price'],
+                    'stock' => $productoPrincipalStock,
+                ]);
+
+                // Buscar otra estantería con espacio para el resto
+                $otraEstanteria = Shelf::where('id', '!=', $shelf->id)->get()->first(function ($s) use ($restoStock) {
+                    $ocupado = Product::where('shelf_id', $s->id)->sum('stock');
+                    return ($s->max_capacity - $ocupado) >= $restoStock;
+                });
+
+                if ($otraEstanteria) {
+                    // Crear copia del producto con el stock sobrante
+                    $nuevoProducto = $product->replicate(['final_price']);
+                    $nuevoProducto->stock = $restoStock;
+                    $nuevoProducto->shelf_id = $otraEstanteria->id;
+                    $nuevoProducto->save();
+                } else {
+                    // Si no hay espacio, crear producto sin estantería
+                    $nuevoProducto = $product->replicate(['final_price']);
+                    $nuevoProducto->stock = $restoStock;
+                    $nuevoProducto->shelf_id = null;
+                    $nuevoProducto->save();
+                }
+
+                session()->flash('warning', 'El stock excedía la capacidad de la estantería. Parte del producto fue reasignado a otra ubicación.');
+            } else {
+                // Cabe todo, actualizar normalmente
+                $product->update($validated);
+            }
+        } else {
+            // No tiene estantería asignada → intentar asignar a cualquiera con espacio
+            $shelfDisponible = Shelf::get()->first(function ($s) use ($nuevoStock) {
+                $ocupado = Product::where('shelf_id', $s->id)->sum('stock');
+                return ($s->max_capacity - $ocupado) >= $nuevoStock;
+            });
+
+            if ($shelfDisponible) {
+                $validated['shelf_id'] = $shelfDisponible->id;
+            }
+
+            $product->update($validated);
+
+            if (!isset($validated['shelf_id'])) {
+                session()->flash('warning', 'El producto fue actualizado pero no hay estantería disponible. Quedó sin ubicación.');
+            }
+        }
+    });
+
+    return back()->with('success', 'Producto actualizado correctamente');
 }
+
+
 
     public function unassignedProducts()
     {
@@ -246,66 +331,80 @@ public function show(Product $product)
         return back()->with('success', 'Producto desasignado correctamente');
     }
 
-   public function assignSplitToShelf(Request $request, Product $product)
-{
-    $request->validate([
-        'shelf_id' => 'required|exists:shelves,id',
-        'quantity' => 'required|integer|min:1|max:' . $product->stock
-    ]);
+ public function assignSplitToShelf(Request $request, Product $product)
+    {
+        $request->validate([
+            'shelf_id' => 'required|exists:shelves,id',
+            'quantity' => 'required|integer|min:1|max:' . $product->stock
+        ]);
 
-    DB::transaction(function () use ($product, $request) {
-        $shelfId = $request->shelf_id;
-        $quantity = $request->quantity;
+        DB::transaction(function () use ($product, $request) {
+            $shelfId = $request->shelf_id;
+            $quantity = $request->quantity;
 
-        $shelf = Shelf::findOrFail($shelfId);
-        $usedSpace = $shelf->products()->sum('stock');
-        $availableSpace = $shelf->max_capacity - $usedSpace;
+            $shelf = Shelf::findOrFail($shelfId);
+            $usedSpace = Product::where('shelf_id', $shelf->id)->sum('stock');
+            $availableSpace = $shelf->max_capacity - $usedSpace;
 
-        if ($quantity > $availableSpace) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'quantity' => 'La estantería no tiene suficiente capacidad. ' .
-                    'Capacidad máxima: ' . $shelf->max_capacity .
-                    ', Stock actual: ' . $usedSpace .
-                    ', Espacio disponible: ' . $availableSpace .
-                    ', Intentando asignar: ' . $quantity,
-            ]);
-        }
+            $toAssign = min($quantity, $availableSpace);
 
-        $existingProduct = Product::where('num_reference', $product->num_reference)
-            ->where('shelf_id', $shelfId)
-            ->where('id', '!=', $product->id)
-            ->first();
+            if ($toAssign <= 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'quantity' => 'La estantería no tiene capacidad disponible.',
+                ]);
+            }
 
-        if ($existingProduct) {
-            $existingProduct->stock += $quantity;
-            $existingProduct->save();
+            $existingProduct = Product::where('num_reference', $product->num_reference)
+                ->where('shelf_id', $shelfId)
+                ->where('id', '!=', $product->id)
+                ->first();
 
-            $product->stock -= $quantity;
+            if ($existingProduct) {
+                $existingProduct->stock += $toAssign;
+                $existingProduct->save();
+            } else {
+                $newProduct = $product->replicate(['final_price']);
+                $newProduct->shelf_id = $shelfId;
+                $newProduct->stock = $toAssign;
+                $newProduct->save();
+            }
 
+            $product->stock -= $toAssign;
             if ($product->stock <= 0) {
                 $product->delete();
             } else {
                 $product->save();
             }
-        } else {
-            // Crear nueva entrada con cantidad especificada
-            $newProduct = $product->replicate(['final_price']);
-            $newProduct->shelf_id = $shelfId;
-            $newProduct->stock = $quantity;
-            $newProduct->save();
 
-            $product->stock -= $quantity;
+            // Si queda stock por repartir
+            if ($quantity > $toAssign && $product->stock > 0) {
+                $remaining = $quantity - $toAssign;
 
-            if ($product->stock <= 0) {
-                $product->delete();
-            } else {
-                $product->save();
+                $otherShelf = Shelf::where('id', '!=', $shelf->id)->get()->first(function ($s) use ($remaining) {
+                    $used = Product::where('shelf_id', $s->id)->sum('stock');
+                    return ($s->max_capacity - $used) >= $remaining;
+                });
+
+                if ($otherShelf) {
+                    $anotherProduct = $product->replicate(['final_price']);
+                    $anotherProduct->stock = $remaining;
+                    $anotherProduct->shelf_id = $otherShelf->id;
+                    $anotherProduct->save();
+                    $product->stock -= $remaining;
+                    if ($product->stock <= 0) {
+                        $product->delete();
+                    } else {
+                        $product->save();
+                    }
+                } else {
+                    session()->flash('warning', 'Parte del stock excede la capacidad de la estantería y no hay espacio en otras. Quedó sin ubicar.');
+                }
             }
-        }
-    });
+        });
 
-    return back()->with('success', 'Producto asignado correctamente');
-}
+        return back()->with('success', 'Producto asignado correctamente');
+    }
+
 
 
     public function removeAndMergeFromShelf(Product $product)
