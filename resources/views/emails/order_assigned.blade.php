@@ -21,7 +21,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background-color: #3b82f6;
+            background-color: #fd941c;
             color: #ffffff;
             padding: 30px 20px;
             text-align: center;
@@ -83,7 +83,7 @@
         }
         .btn {
             display: inline-block;
-            background-color: #3b82f6;
+            background-color: #f37024;
             color: #ffffff;
             text-decoration: none;
             padding: 12px 24px;
@@ -139,7 +139,7 @@
         <p>Te notificaremos cuando tu pedido esté completado. Si tienes alguna pregunta, no dudes en contactarnos.</p>
 
         <div style="text-align: center;">
-            <a href="http://localhost:8000/my-orders" class="btn">Ver detalles del pedido</a>
+            <a href="http://swapify-tfg.duckdns.org/my-orders" class="btn">Ver detalles del pedido</a>
         </div>
     </div>
 

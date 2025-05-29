@@ -43,6 +43,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //mis pedidos
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 });
+Route::get('/checkout/cancel', function () {
+    return Inertia::render('cart/checkoutcancel', );
+})->name('checkout.cancel');
+
 
 //NEWSLETTER
 Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
@@ -71,6 +75,11 @@ Route::get('/crear-ticket', function () {
 })->name('tickets.create');
 
 Route::patch('/tickets/{id}/close', [TicketController::class, 'close'])->name('tickets.close');
+
+
+//eliminar usuario
+Route::delete('/users/{user}', [AdminDashboardController::class, 'destroy']);
+
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

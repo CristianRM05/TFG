@@ -114,31 +114,36 @@ export default function CartShow({
     });
   };
 
-  const applyCoupon = async () => {
-    try {
-      const res = await applyCouponToCart(couponCode);
-      setAppliedCoupon({ code: couponCode, discountPercentage: res.data.discount });
-      toast.success('¡Cupón aplicado!', {
-        icon: '🎟️',
-        style: {
-          borderRadius: '10px',
-          background: '#16a34a',
-          color: '#fff',
-        },
-        duration: 1500,
-      });
-    } catch {
-      toast.error('Cupón inválido', {
-        icon: '❌',
-        style: {
-          borderRadius: '10px',
-          background: '#dc2626',
-          color: '#fff',
-        },
-        duration: 1500,
-      });
-    }
-  };
+const applyCoupon = async () => {
+  try {
+    const res = await applyCouponToCart(couponCode);
+    setAppliedCoupon({
+      code: couponCode,
+      discountPercentage: res.discount 
+    });
+
+    toast.success('¡Cupón aplicado!', {
+      icon: '🎟️',
+      style: {
+        borderRadius: '10px',
+        background: '#16a34a',
+        color: '#fff',
+      },
+      duration: 1500,
+    });
+  } catch {
+    toast.error('Cupón inválido', {
+      icon: '❌',
+      style: {
+        borderRadius: '10px',
+        background: '#dc2626',
+        color: '#fff',
+      },
+      duration: 1500,
+    });
+  }
+};
+
 
   const removeCoupon = () => {
     setAppliedCoupon(null);
@@ -215,7 +220,7 @@ export default function CartShow({
                   <ShoppingBag size={60} className="mx-auto text-gray-400 mb-4" />
                   <p className="text-xl">Tu carrito está vacío</p>
                   <Link
-                    href="/productos"
+                    href="/dashboard"
                     className="mt-4 inline-block bg-amber-600 text-black font-semibold px-6 py-2 rounded-full hover:bg-amber-500 transition"
                   >
                     Explorar Productos

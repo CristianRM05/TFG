@@ -4,6 +4,8 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -57,3 +59,5 @@ export interface StockProduct extends Product {
 }
 // This will set light / dark mode on load...
 initializeTheme();
+      <ToastContainer position="top-right" autoClose={3000} />
+

@@ -36,13 +36,17 @@ return [
     ],
 
     'google' => [
-        'client_id' => env('GOOGLE_OAUTH_ID'), // cambiado
-        'client_secret' => env('GOOGLE_OAUTH_KEY'), // cambiado
-        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'client_id' => env('GOOGLE_OAUTH_ID'),
+        'client_secret' => env('GOOGLE_OAUTH_KEY'),
+        'redirect' => env('APP_CUSTOM_ENV') === 'local'
+            ? env('APP_URL_LOCAL') . '/google-callback'
+            : env('APP_URL_PROD') . '/google-callback',
     ],
 
+
     'stripe' => [
-        'secret' => env('STRIPE_SECRET'),    ],
+        'secret' => env('STRIPE_SECRET'),
+    ],
 
 
 ];

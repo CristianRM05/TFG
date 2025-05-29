@@ -23,66 +23,66 @@ class OrderController extends Controller
 
 
     public function checkout(Request $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if (!$user->location) {
-        return response()->json([
-            'error' => 'Debes completar tu dirección antes de realizar el pedido.'
-        ], 422);
-    }
-
-    $cart = $user->cart()->where('status', 'active')->with('items.product')->first();
-
-    if (!$cart || $cart->items->isEmpty()) {
-        return response()->json([
-            'error' => 'El carrito está vacío.'
-        ], 400);
-    }
-
-    // 🔒 Comprobar stock antes de crear la sesión de Stripe
-    foreach ($cart->items as $item) {
-        $product = $item->product;
-        if ($product->stock < $item->quantity) {
+        if (!$user->location) {
             return response()->json([
-                'error' => "No hay suficiente stock para '{$product->name}'. Quedan {$product->stock} unidades."
+                'error' => 'Debes completar tu dirección antes de realizar el pedido.'
+            ], 422);
+        }
+
+        $cart = $user->cart()->where('status', 'active')->with('items.product')->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json([
+                'error' => 'El carrito está vacío.'
             ], 400);
         }
-    }
 
-    // Si todo OK, seguimos con Stripe
-    $discount = $request->input('discount', 0);
-    $discountFactor = (100 - $discount) / 100;
+        // 🔒 Comprobar stock antes de crear la sesión de Stripe
+        foreach ($cart->items as $item) {
+            $product = $item->product;
+            if ($product->stock < $item->quantity) {
+                return response()->json([
+                    'error' => "No hay suficiente stock para '{$product->name}'. Quedan {$product->stock} unidades."
+                ], 400);
+            }
+        }
 
-    Stripe::setApiKey(config('services.stripe.secret'));
+        // Si todo OK, seguimos con Stripe
+        $discount = $request->input('discount', 0);
+        $discountFactor = (100 - $discount) / 100;
 
-    $lineItems = [];
+        Stripe::setApiKey(config('services.stripe.secret'));
 
-    foreach ($cart->items as $item) {
-        $lineItems[] = [
-            'price_data' => [
-                'currency' => 'eur',
-                'product_data' => [
-                    'name' => $item->product->name,
+        $lineItems = [];
+
+        foreach ($cart->items as $item) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'product_data' => [
+                        'name' => $item->product->name,
+                    ],
+                    'unit_amount' => intval($item->price * 100 * $discountFactor),
                 ],
-                'unit_amount' => intval($item->price * 100 * $discountFactor),
-            ],
-            'quantity' => $item->quantity,
-        ];
+                'quantity' => $item->quantity,
+            ];
+        }
+
+        $session = StripeSession::create([
+            'payment_method_types' => ['card'],
+            'line_items' => $lineItems,
+            'mode' => 'payment',
+            'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('checkout.cancel'),
+        ]);
+
+        return response()->json([
+            'url' => $session->url,
+        ]);
     }
-
-    $session = StripeSession::create([
-        'payment_method_types' => ['card'],
-        'line_items' => $lineItems,
-        'mode' => 'payment',
-        'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
-        'cancel_url' => route('cart.show'),
-    ]);
-
-    return response()->json([
-        'url' => $session->url,
-    ]);
-}
 
 
 
@@ -111,14 +111,14 @@ class OrderController extends Controller
     }
 
     //para poder descargar el albaran desde manager
-public function downloadInvoiceManager($id)
-{
-    $order = Order::with('items.product')->findOrFail($id);
+    public function downloadInvoiceManager($id)
+    {
+        $order = Order::with('items.product')->findOrFail($id);
 
-    $pdf = Pdf::loadView('pdf.invoice', compact('order'));
+        $pdf = Pdf::loadView('pdf.invoice', compact('order'));
 
-    return $pdf->download("albaran_pedido_{$order->ref}.pdf");
-}
+        return $pdf->download("albaran_pedido_{$order->ref}.pdf");
+    }
 
 
 
@@ -162,7 +162,6 @@ public function downloadInvoiceManager($id)
                 $product->stock -= $item->quantity;
                 $product->save();
                 Mail::to($user->email)->send(new NewOrderMail($order));
-
             }
 
             return $order;
@@ -178,23 +177,23 @@ public function downloadInvoiceManager($id)
 
         return $ref;
     }
-  public function downloadInvoice(Order $order)
-{
-    // Validación manual: solo el dueño puede ver su factura
-    if ($order->user_id !== auth()->id()) {
-        abort(403, 'No tienes permiso para ver esta factura.');
+    public function downloadInvoice(Order $order)
+    {
+        // Validación manual: solo el dueño puede ver su factura
+        if ($order->user_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para ver esta factura.');
+        }
+
+        $order->load('items.product');
+
+        $pdf = Pdf::loadView('invoices.invoice', [
+            'order' => $order,
+            'user' => $order->user,
+            'date' => now()->format('d/m/Y'),
+        ]);
+
+        return $pdf->download("Factura_{$order->ref}.pdf");
     }
-
-    $order->load('items.product');
-
-    $pdf = Pdf::loadView('invoices.invoice', [
-        'order' => $order,
-        'user' => $order->user,
-        'date' => now()->format('d/m/Y'),
-    ]);
-
-    return $pdf->download("Factura_{$order->ref}.pdf");
-}
 
 
     public function assignOrder($id)
@@ -215,7 +214,4 @@ public function downloadInvoiceManager($id)
 
         return response()->json(['message' => 'Pedido asignado correctamente.']);
     }
-
-
-
 }

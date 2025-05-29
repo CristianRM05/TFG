@@ -75,8 +75,21 @@ export default function DiscountsIndex() {
     }, [flash])
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
+        e.preventDefault();
+
+        const discountValue = parseFloat(formData.discount_percent);
+
+        if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+            Swal.fire({
+                title: "Descuento inválido",
+                text: "El porcentaje debe estar entre 0 y 100.",
+                icon: "warning",
+                confirmButtonColor: "#E17100"
+            });
+            return;
+        }
+
+        setLoading(true);
 
         try {
             await router.post(route("discounts.store"), formData, {
@@ -87,14 +100,13 @@ export default function DiscountsIndex() {
                         text: "El descuento ha sido aplicado correctamente",
                         icon: "success",
                         timer: 2000,
-                        timerProgressBar: true,
                         toast: true,
                         position: "top",
                         showConfirmButton: false,
                         background: "#F3F3DF",
                         iconColor: "#E17100"
-                    })
-                    setFormData({ product_id: "", discount_percent: "" })
+                    });
+                    setFormData({ product_id: "", discount_percent: "" });
                 },
                 onError: (errors) => {
                     Swal.fire({
@@ -103,16 +115,17 @@ export default function DiscountsIndex() {
                         icon: "error",
                         confirmButtonColor: "#E17100",
                         background: "#F3F3DF"
-                    })
-                    console.error("Error details:", errors)
+                    });
+                    console.error("Error details:", errors);
                 },
-            })
+            });
         } catch (error) {
-            console.error("Error applying discount:", error)
+            console.error("Error applying discount:", error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
+
 
     const handleDelete = async (productId: number) => {
         Swal.fire({
@@ -208,7 +221,7 @@ export default function DiscountsIndex() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
                                         <select
                                             name="product_id"
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:text-black focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
                                             style={{ borderColor: "#E17100" }}
                                             value={formData.product_id}
                                             onChange={handleInputChange}
@@ -231,13 +244,18 @@ export default function DiscountsIndex() {
                                             <input
                                                 type="number"
                                                 name="discount_percent"
-                                                min="0"
+                                                min="1"
                                                 max="100"
                                                 step="0.01"
-                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
+                                                className="block w-full rounded-md border-gray-300 shadow-sm dark:text-black focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50"
                                                 style={{ borderColor: "#E17100" }}
                                                 value={formData.discount_percent}
                                                 onChange={handleInputChange}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                                        e.preventDefault(); // bloquea negativo y notación científica
+                                                    }
+                                                }}
                                                 required
                                             />
                                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -382,12 +400,11 @@ export default function DiscountsIndex() {
                                                             ${product.price?.toFixed(2)}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                                (product.discount_percent ?? 0) >= 50 ? 'bg-red-100 text-red-800' :
-                                                                (product.discount_percent ?? 0) >= 30 ? 'bg-amber-100 text-amber-700' :
-                                                                (product.discount_percent ?? 0) > 0 ? 'bg-green-100 text-green-800' :
-                                                                'bg-gray-100 text-gray-800'
-                                                            }`}>
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${(product.discount_percent ?? 0) >= 50 ? 'bg-red-100 text-red-800' :
+                                                                    (product.discount_percent ?? 0) >= 30 ? 'bg-amber-100 text-amber-700' :
+                                                                        (product.discount_percent ?? 0) > 0 ? 'bg-green-100 text-green-800' :
+                                                                            'bg-gray-100 text-gray-800'
+                                                                }`}>
                                                                 {product.discount_percent}%
                                                             </span>
                                                         </td>

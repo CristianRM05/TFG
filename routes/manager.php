@@ -7,12 +7,15 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AdminDashboardController;
 
 
 Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
     Route::get('/dashboard', [ManagerDashboardController::class, 'create'])->name('manager.dashboard');
     //ruta a stock y productos
     Route::get('/stock', [ProductController::class, 'stockIndexManager'])->name('stock.manager');
+    Route::get('/products/categorias', [ProductController::class, 'getCategorias']);
+    Route::post('/products', [ProductController::class, 'store']);
 
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
@@ -26,6 +29,11 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(func
 
     //estanterias
     Route::get('/shelves', [ProductController::class, 'unassignedProducts'])->name('shelves.index');
+    Route::post('/shelves', [AdminDashboardController::class, 'storeShelf'])
+    ->name('manager.shelves.store');
+
+
+
     Route::put('/products/{product}/assign-shelf', [ProductController::class, 'assignShelf'])
         ->name('products.assign-shelf');
     Route::put('/products/{product}/assign-split', [ProductController::class, 'assignSplitToShelf'])
@@ -64,9 +72,6 @@ Route::patch('/products/{product}/toggle-visibility', [ProductController::class,
     ->name('products.toggle-visibility');
 
 
-    Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->group(function () {
-    Route::get('/delivery-notes-page', [DeliveryNoteController::class, 'view'])
-        ->name('manager.delivery-notes.page');
-});
+
 
 

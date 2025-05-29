@@ -93,16 +93,16 @@ export default function Dashboard() {
 
             <section
                 className="
-                    relative
-                    bg-center bg-no-repeat bg-cover
-                    h-[600px]
-                    flex items-center justify-center
-                    px-4
-                    border-4 border-[#E17100]/30
-                    rounded-2xl
-                    overflow-hidden
-                    transition-opacity duration-300
-                "
+        relative
+        bg-center bg-no-repeat bg-cover
+        h-[400px] sm:h-[600px]
+        flex items-center justify-center
+        px-2 sm:px-4
+        border-4 border-[#E17100]/30
+        rounded-2xl
+        overflow-hidden
+        transition-opacity duration-300
+    "
                 style={{
                     opacity: opacityValue
                 }}

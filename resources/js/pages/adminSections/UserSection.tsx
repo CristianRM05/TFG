@@ -101,6 +101,55 @@ const UserSection: React.FC<Props> = ({
     }
     const roles = ["Admin", "Manager", "Cliente"];
 
+    const handleDeleteUser = (user: User) => {
+        if (user.role === "Admin") {
+            Swal.fire({
+                icon: "error",
+                title: "Acción no permitida",
+                text: "No puedes eliminar a un administrador.",
+                background: styles.light,
+                customClass: { popup: 'shadow-lg' }
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: `¿Estás seguro de eliminar a ${user.name}?`,
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: styles.primary,
+            cancelButtonColor: styles.secondary,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            background: styles.light,
+            customClass: { popup: 'shadow-lg', confirmButton: 'hover:opacity-90 transition-opacity' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`/admin/users/${user.id}`)
+                    .then(() => {
+                        setUsers(prev => prev.filter(u => u.id !== user.id));
+                        Swal.fire({
+                            icon: "success",
+                            title: "Usuario eliminado",
+                            showConfirmButton: false,
+                            timer: 1800,
+                            background: styles.light,
+                            customClass: { popup: 'shadow-lg' }
+                        });
+                    })
+                    .catch(() => {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error en el proceso",
+                            text: "No se pudo eliminar al usuario.",
+                            background: styles.light,
+                            customClass: { popup: 'shadow-lg' }
+                        });
+                    });
+            }
+        });
+    };
 
     const handleRoleChange = (user: User, newRole: string) => {
         if (newRole === user.role) return;
@@ -160,7 +209,7 @@ const UserSection: React.FC<Props> = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Users size={24} style={{ color: styles.primary }} />
-                        <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>Gestión de Usuarios</h2>
+                        <h2 className="text-2xl font-bold dark:text-black" style={{ color: styles.dark }}>Gestión de Usuarios</h2>
                     </div>
                     {openSection === "users" ? <ChevronUp size={24} style={{ color: styles.primary }} /> : <ChevronDown size={24} style={{ color: styles.primary }} />}
                 </div>
@@ -171,78 +220,86 @@ const UserSection: React.FC<Props> = ({
                     <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
                         <thead style={{ backgroundColor: `${styles.secondary}10` }}>
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Nombre</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Email</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Teléfono</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Rol</th>
-                                <th className="px-6 py-4 text-left text-xs font-medium uppercase" style={{ color: styles.secondary }}>Acciones</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Nombre</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Email</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-mediume" style={{ color: styles.secondary }}>Teléfono</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Rol</th>
+                                <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
-                            {users.length > 0 ? users.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt={user.name} className="h-10 w-10 rounded-full object-cover ring-2" style={{ borderColor: styles.primary }} />
-                                            ) : (
-                                                <div className="h-10 w-10 rounded-full flex items-center justify-center text-lg font-medium"
-                                                    style={{ backgroundColor: `${styles.primary}20`, color: styles.primary }}>
-                                                    {user.name.charAt(0)}
-                                                </div>
-                                            )}
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium" style={{ color: styles.dark }}>
-                                                    {user.name} {user.last_name}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{user.phone}</td>
-                                    <td className="px-6 py-4">
-                                        <select
-                                            disabled={authUser.id === user.id}
-                                            className="px-3 py-1 text-xs leading-5 font-semibold rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-opacity-50 cursor-pointer disabled:opacity-60"
-                                            style={{
-                                                backgroundColor: user.role === "Admin" ? "#fef9c3" : user.role === "Manager" ? "#dbeafe" : "rgba(0,128,0,0.2)",
-                                                color: user.role === "Admin" ? "#b45309" : user.role === "Manager" ? "#1d4ed8" : "green",
-                                                boxShadow: "none",
-                                                appearance: "auto"
-                                            }}
-                                            value={user.role}
-                                            onChange={(e) => handleRoleChange(user, e.target.value)}
-                                        >
-                                            {roles.map((role) => (
-                                                <option key={role} value={role}>
-                                                    {role}
-                                                </option>
-                                            ))}
-                                        </select>
 
-                                    </td>
-                                    {/* Acciones */}
-                                    <td className="px-6 py-4">
-                                        {/* Solo muestra el boton de banear para los que no son Admin */}
-                                        {user.role !== "Admin" && (
-                                            <button
-                                                onClick={() => handleBanToggle(user)}
-                                                className="px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm"
-                                                style={{
-                                                    backgroundColor: user.banned_at ? "rgba(0,128,0,0.15)" : "rgba(220,38,38,0.15)",
-                                                    color: user.banned_at ? "green" : "#dc2626"
-                                                }}
-                                            >
-                                                {user.banned_at ? "Desbanear" : "Banear"}
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan={5} className="text-center text-gray-500 py-8">No hay usuarios registrados</td>
-                                </tr>
-                            )}
+{users.length > 0 ? users.map((user) => (
+  <tr key={user.id} className="hover:bg-gray-50">
+    <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+      <div className=" flex items-center">
+        <img
+          src={user.avatar || "/images/default-avatar.png"}
+          alt={user.name}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/images/default-avatar.png";
+          }}
+          className="h-10 w-10 rounded-full object-cover ring-2"
+          style={{ borderColor: styles.primary }}
+        />
+        <div className="ml-4">
+         <div className="px-6 py-4 text-sm text-gray-600">
+  {user.name} {user.last_name}
+</div>
+
+        </div>
+      </div>
+    </td>
+    <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+    <td className="px-6 py-4 text-sm text-gray-600">{user.phone}</td>
+    <td className="px-6 py-4">
+      <select
+        disabled={authUser.id === user.id}
+        className="px-3 py-1 text-xs leading-5 font-semibold rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-opacity-50 cursor-pointer disabled:opacity-60"
+        style={{
+          backgroundColor: user.role === "Admin" ? "#fef9c3" : user.role === "Manager" ? "#dbeafe" : "rgba(0,128,0,0.2)",
+          color: user.role === "Admin" ? "#b45309" : user.role === "Manager" ? "#1d4ed8" : "green",
+          boxShadow: "none",
+          appearance: "auto"
+        }}
+        value={user.role}
+        onChange={(e) => handleRoleChange(user, e.target.value)}
+      >
+        {roles.map((role) => (
+          <option key={role} value={role}>{role}</option>
+        ))}
+      </select>
+    </td>
+    <td className="px-6 py-4 flex gap-2">
+      {user.role !== "Admin" && (
+        <>
+          <button
+            onClick={() => handleBanToggle(user)}
+            className="px-3 py-1 rounded-lg text-sm font-medium transition-all shadow-sm"
+            style={{
+              backgroundColor: user.banned_at ? "rgba(0,128,0,0.15)" : "rgba(220,38,38,0.15)",
+              color: user.banned_at ? "green" : "#dc2626"
+            }}
+          >
+            {user.banned_at ? "Desbanear" : "Banear"}
+          </button>
+          <button
+            onClick={() => handleDeleteUser(user)}
+            className="px-3 py-1 rounded-lg text-sm font-medium transition-all shadow-sm"
+            style={{ backgroundColor: "rgba(220,38,38,0.15)", color: "#dc2626" }}
+          >
+            Eliminar
+          </button>
+        </>
+      )}
+    </td>
+  </tr>
+)) : (
+  <tr>
+    <td colSpan={5} className="text-center text-gray-500 py-8">No hay usuarios registrados</td>
+  </tr>
+)}
                         </tbody>
                     </table>
 

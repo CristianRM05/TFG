@@ -55,7 +55,7 @@ const ShelfSection: React.FC<Props> = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Package2 size={24} style={{ color: styles.primary }} />
-                        <h2 className="text-2xl font-bold" style={{ color: styles.dark }}>Gestión de Estanterías</h2>
+                        <h2 className="text-2xl font-bold dark:text-black" style={{ color: styles.dark }}>Gestión de Estanterías</h2>
                     </div>
                     {openSection === "shelves" ? (
                         <ChevronUp size={24} style={{ color: styles.primary }} />
@@ -74,14 +74,14 @@ const ShelfSection: React.FC<Props> = ({
                         <table className="min-w-full divide-y" style={{ borderColor: `${styles.secondary}20` }}>
                             <thead style={{ backgroundColor: `${styles.secondary}10` }}>
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs uppercase font-medium" style={{ color: styles.secondary }}>Código</th>
-                                    <th className="px-6 py-4 text-left text-xs uppercase font-medium" style={{ color: styles.secondary }}>Ubicación</th>
-                                    <th className="px-6 py-4 text-left text-xs uppercase font-medium" style={{ color: styles.secondary }}>Capacidad</th>
-                                    <th className="px-6 py-4 text-left text-xs uppercase font-medium" style={{ color: styles.secondary }}>Fecha</th>
-                                    <th className="px-6 py-4 text-left text-xs uppercase font-medium" style={{ color: styles.secondary }}>Acciones</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Código</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Ubicación</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Capacidad</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Fecha</th>
+                                    <th className="px-6 py-4 text-sm text-gray-600 uppercase font-medium" style={{ color: styles.secondary }}>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y" style={{ borderColor: `${styles.secondary}20` }}>
+                            <tbody className="px-6 py-4 text-sm text-gray-600" style={{ borderColor: `${styles.secondary}20` }}>
                                 {shelves.length > 0 ? shelves.map(shelf => (
                                     <tr key={shelf.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 text-sm font-medium" style={{ color: styles.dark }}>{shelf.code}</td>

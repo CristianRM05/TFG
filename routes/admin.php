@@ -10,11 +10,18 @@ use App\Models\Categoria;
 use App\Models\Product;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\UserController;
 
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     // Ruta  del dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'create'])->name('admin.dashboard');
+
+    //ruta para eliminar usuarios
+    Route::delete('/users/{user}', [AdminDashboardController::class, 'destroy']);
+
+
+
 
     Route::get('/users', function () {
         $users = User::paginate(5);
@@ -33,17 +40,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
     Route::get('/shelves', function (\Illuminate\Http\Request $request) {
         $perPage = $request->input('per_page', 10);
-        
+
         $shelves = \App\Models\Shelf::with(['products' => function($query) {
             $query->select('id', 'shelf_id', 'stock');
         }])->paginate($perPage);
-    
+
         // Transformar los datos para incluir los cálculos
         $shelvesData = $shelves->getCollection()->map(function ($shelf) {
             $totalStock = $shelf->products->sum('stock');
             $productsCount = $shelf->products->count();
             $capacityPercentage = min(100, ($totalStock / $shelf->max_capacity) * 100);
-    
+
             return [
                 'id' => $shelf->id,
                 'code' => $shelf->code,
@@ -57,7 +64,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
                 'products' => $shelf->products,
             ];
         });
-    
+
         return response()->json([
             'success' => true,
             'shelves' => $shelvesData,
