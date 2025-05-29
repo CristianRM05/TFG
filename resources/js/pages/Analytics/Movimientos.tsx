@@ -27,16 +27,38 @@ interface Props {
   [key: string]: any;
 }
 
+// Componente personalizado para el tooltip
+const CustomTooltip = ({ active, payload, label, isDark = false }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className={`p-3 rounded-lg shadow-lg border ${
+        isDark
+          ? 'bg-gray-800 border-gray-600 text-white'
+          : 'bg-white border-gray-200 text-gray-800'
+      }`}>
+        <p className="font-medium">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} style={{ color: entry.color }} className="text-sm">
+            {entry.name}: {entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function Movimientos() {
   const { topProducts, monthlyRevenue, thisMonthRevenue, auth } =
     usePage<Props>().props;
 
   const revenueNumber = Number(thisMonthRevenue) || 0;
 
+  // Detectar modo oscuro
+  const isDarkMode = document.documentElement.classList.contains('dark');
+
   // Verificaciones para desarrollo/debug
   useEffect(() => {
-
-
     if (!Array.isArray(monthlyRevenue) || monthlyRevenue.length === 0) {
       console.warn("⚠️ No hay datos de ingresos mensuales para mostrar en la gráfica.");
     }
@@ -80,7 +102,10 @@ export default function Movimientos() {
               <XAxis dataKey="month" stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" />
               <CartesianGrid strokeDasharray="4 4" />
-              <Tooltip formatter={(val: any) => `€${val}`} />
+              <Tooltip
+                content={<CustomTooltip isDark={isDarkMode} />}
+                formatter={(val: any) => [`€${val}`, 'Ingresos']}
+              />
               <Area
                 type="monotone"
                 dataKey="revenue"
@@ -98,9 +123,17 @@ export default function Movimientos() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={topProducts} barSize={40}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis className='dark:text-black' dataKey="product.name" tick={false} axisLine={false} stroke="#94a3b8" />
+              <XAxis
+                dataKey="product.name"
+                tick={false}
+                axisLine={false}
+                stroke="#94a3b8"
+              />
               <YAxis stroke="#94a3b8" />
-              <Tooltip formatter={(val: any) => `${val} uds`} />
+              <Tooltip
+                content={<CustomTooltip isDark={isDarkMode} />}
+                formatter={(val: any) => [`${val} uds`, 'Vendidas']}
+              />
               <Legend />
               <Bar dataKey="total_qty" fill="#3b82f6" radius={[8, 8, 0, 0]} />
             </BarChart>

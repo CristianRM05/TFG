@@ -91,7 +91,7 @@
             <p>Tu pedido se ha registrado correctamente. Puedes consultar el estado y descargar la factura accediendo a tu cuenta en nuestra página web.</p>
 
             <p style="text-align: center;">
-                <a href="https://wealthy-walleye-severely.ngrok-free.app/my-orders" class="button">Ver mi pedido</a>
+                <a href="http://swapify-tfg.duckdns.org/my-orders" class="button">Ver mi pedido</a>
             </p>
         </div>
 

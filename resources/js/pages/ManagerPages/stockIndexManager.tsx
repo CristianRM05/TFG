@@ -2,25 +2,17 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Head, router } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import AppLayout from "../../layouts/app-layout"
 import type { StockProduct } from "../../app"
 import { Pagination } from "@/components/pagination"
 import { Search, Eye, EyeOff, ArrowRight, Package } from "lucide-react"
 import ProductModal from "@/pages/product/create"
 
-interface Props {
-  products: StockProduct[]
-  auth: {
-    user: {
-      name: string
-      email: string
-      role: string
-    }
-  }
-}
 
-const StockIndexManager: React.FC<Props> = ({ products, auth }) => {
+
+const StockIndexManager: React.FC = () => {
+  const { products, auth } = usePage<{ products: StockProduct[]; auth: { user: any } }>().props
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<StockProduct[]>([])
   const [showResults, setShowResults] = useState(false)
@@ -132,21 +124,18 @@ const StockIndexManager: React.FC<Props> = ({ products, auth }) => {
     setProductErrors({})
   }
 
-  // Obtener categorías para el modal de productos
-  useEffect(() => {
-    fetch("/admin/products/categorias")
-      .then((response) => response.json())
-      .then((data) => setCategorias(data))
-      .catch((error) => console.error("Error al obtener categorías:", error))
-  }, [])
+
 
   return (
-    <AppLayout user={auth.user} header={<h2 className="text-2xl font-bold text-amber-800">Gestión de Inventario</h2>}>
-      <Head title="Gestión de Inventario (Manager)" />
+        <AppLayout
+            user={auth.user}
+            header={<h2 className="text-xl font-semibold text-gray-800">Gestión de Descuentos</h2>}
+        >
+            <Head title="Gestión de Descuentos" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-8 py-10">
         {/* Products section with create button */}
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg">
+        <div className=" dark:bg-gray-800  rounded-lg">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-medium flex items-center text-amber-600 dark:text-white">

@@ -139,7 +139,7 @@
         <p>Te notificaremos cuando tu pedido esté completado. Si tienes alguna pregunta, no dudes en contactarnos.</p>
 
         <div style="text-align: center;">
-            <a href="https://wealthy-walleye-severely.ngrok-free.app/my-orders" class="btn">Ver detalles del pedido</a>
+            <a href="http://swapify-tfg.duckdns.org/my-orders" class="btn">Ver detalles del pedido</a>
         </div>
     </div>
 

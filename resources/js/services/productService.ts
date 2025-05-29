@@ -13,7 +13,7 @@ export const getProducts = async (
     const response = await axios.get('/products', {
         params: {
             page,
-            limit: 6, // sigue siendo 6 por página
+            limit: 6, 
             search,
             category,
             min_price: minPrice,
@@ -27,17 +27,19 @@ export const getCategories = async () => {
     const response = await axios.get('/products/categories');
     return response.data; // array con value y name
 };
-export const addToCart = async (productId: number) => {
+export const addToCart = async (productId: number, quantity: number = 1) => {
     try {
-        await axios.post(`/cart/add/${productId}`, {
-            quantity: 1,
-        });
+        const response = await axios.post(`/cart/add/${productId}`, { quantity });
 
-    } catch (error: any) {
-        if (error.response?.status === 419) {
-            console.error('⚠️ CSRF token inválido o expirado (419). Asegúrate de hacer axios.get("/sanctum/csrf-cookie") antes.');
-        } else {
-            console.error('❌ Error al añadir producto:', error);
-        }
+        const newCount = response.data.cartItemCount;
+
+        window.dispatchEvent(new CustomEvent('cart:updated', {
+            detail: { count: newCount }
+        }));
+
+    } catch (error) {
+        console.error("❌ Error al agregar al carrito:", error);
     }
 };
+
+

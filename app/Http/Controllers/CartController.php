@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
@@ -26,33 +27,35 @@ class CartController extends Controller
         ]);
     }
 
-    public function updateQuantity(Request $request, $id)
-    {
-        $quantity = $request->input('quantity');
+  public function updateQuantity(Request $request, $id)
+{
+    $quantity = $request->input('quantity');
 
-        if (!Auth::check()) {
-            return response()->json(['error' => 'No autenticado'], 401);
-        }
-
-        $user = Auth::user();
-
-        // Aseguramos que el ítem pertenezca al carrito activo del usuario
-        $cart = $user->cart()->where('status', 'active')->first();
-
-        if (!$cart) {
-            return response()->json(['error' => 'No tienes un carrito activo.'], 404);
-        }
-
-        $cartItem = $cart->items()->where('id', $id)->first();
-
-        if (!$cartItem) {
-            return response()->json(['error' => 'Producto no encontrado en tu carrito.'], 404);
-        }
-
-        $cartItem->update(['quantity' => $quantity]);
-
-        return response()->json(['message' => 'Cantidad actualizada en la base de datos.']);
+    if (!Auth::check()) {
+        return response()->json(['error' => 'No autenticado'], 401);
     }
+
+    $user = Auth::user();
+    $cart = $user->cart()->where('status', 'active')->first();
+
+    if (!$cart) {
+        return response()->json(['error' => 'No tienes un carrito activo.'], 404);
+    }
+
+    $cartItem = $cart->items()->where('id', $id)->first();
+
+    if (!$cartItem) {
+        return response()->json(['error' => 'Producto no encontrado en tu carrito.'], 404);
+    }
+
+    $cartItem->update(['quantity' => $quantity]);
+
+    return response()->json([
+        'message' => 'Cantidad actualizada correctamente.',
+        'cartItemCount' => $cart->items()->sum('quantity'), // 👈 devuelve el nuevo total
+    ]);
+}
+
 
     public function add(Product $product, Request $request)
     {
@@ -78,14 +81,25 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Producto añadido correctamente.']);
+        return response()->json([
+            'message' => 'Producto añadido correctamente.',
+            'cartItemCount' => $cart->items->sum('quantity')
+        ]);
     }
 
-    public function remove($cartItemId)
-    {
-        $cartItem = CartItem::findOrFail($cartItemId);
-        $cartItem->delete();
+  public function remove($cartItemId)
+{
+    $cartItem = CartItem::findOrFail($cartItemId);
+    $cart = $cartItem->cart;
 
-        return redirect()->route('cart.show')->with('success', 'Producto eliminado del carrito.');
-    }
+    $cartItem->delete();
+
+    $newCount = $cart->items()->sum('quantity');
+
+    return response()->json([
+        'message' => 'Producto eliminado del carrito.',
+        'cartItemCount' => $newCount,
+    ]);
+}
+
 }

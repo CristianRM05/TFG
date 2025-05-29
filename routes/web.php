@@ -43,6 +43,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //mis pedidos
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
 });
+Route::get('/checkout/cancel', function () {
+    return Inertia::render('cart/checkoutcancel', );
+})->name('checkout.cancel');
+
 
 //NEWSLETTER
 Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
