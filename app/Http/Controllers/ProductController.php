@@ -246,57 +246,67 @@ public function show(Product $product)
         return back()->with('success', 'Producto desasignado correctamente');
     }
 
-    public function assignSplitToShelf(Request $request, Product $product)
-    {
-        $request->validate([
-            'shelf_id' => 'required|exists:shelves,id',
-            'quantity' => 'required|integer|min:1|max:' . $product->stock
-        ]);
+   public function assignSplitToShelf(Request $request, Product $product)
+{
+    $request->validate([
+        'shelf_id' => 'required|exists:shelves,id',
+        'quantity' => 'required|integer|min:1|max:' . $product->stock
+    ]);
 
-        DB::transaction(function () use ($product, $request) {
-            $shelfId = $request->shelf_id;
-            $quantity = $request->quantity;
+    DB::transaction(function () use ($product, $request) {
+        $shelfId = $request->shelf_id;
+        $quantity = $request->quantity;
 
-            $existingProduct = Product::where('num_reference', $product->num_reference)
-                ->where('shelf_id', $shelfId)
-                ->where('id', '!=', $product->id)
-                ->first();
+        $shelf = Shelf::findOrFail($shelfId);
+        $usedSpace = $shelf->products()->sum('stock');
+        $availableSpace = $shelf->max_capacity - $usedSpace;
 
-            if ($existingProduct) {
-                $existingProduct->stock += $quantity;
-                $existingProduct->save();
+        if ($quantity > $availableSpace) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'quantity' => 'La estantería no tiene suficiente capacidad. ' .
+                    'Capacidad máxima: ' . $shelf->max_capacity .
+                    ', Stock actual: ' . $usedSpace .
+                    ', Espacio disponible: ' . $availableSpace .
+                    ', Intentando asignar: ' . $quantity,
+            ]);
+        }
 
-                $product->stock -= $quantity;
+        $existingProduct = Product::where('num_reference', $product->num_reference)
+            ->where('shelf_id', $shelfId)
+            ->where('id', '!=', $product->id)
+            ->first();
 
-                if ($product->stock <= 0) {
-                    $product->delete();
-                } else {
-                    $product->save();
-                }
+        if ($existingProduct) {
+            $existingProduct->stock += $quantity;
+            $existingProduct->save();
+
+            $product->stock -= $quantity;
+
+            if ($product->stock <= 0) {
+                $product->delete();
             } else {
-                $shelf = Shelf::findOrFail($shelfId);
-                $usedSpace = $shelf->products()->sum('stock');
-                $availableSpace = $shelf->max_capacity - $usedSpace;
-
-                $assignQuantity = min($quantity, $availableSpace);
-
-                $product->shelf_id = $shelfId;
-                $product->stock = $assignQuantity;
                 $product->save();
-
-                if ($quantity > $assignQuantity) {
-                    $remainingQuantity = $quantity - $assignQuantity;
-
-                    $newProduct = $product->replicate(['final_price']);
-                    $newProduct->stock = $remainingQuantity;
-                    $newProduct->shelf_id = null;
-                    $newProduct->save();
-                }
             }
-        });
+        } else {
+            // Crear nueva entrada con cantidad especificada
+            $newProduct = $product->replicate(['final_price']);
+            $newProduct->shelf_id = $shelfId;
+            $newProduct->stock = $quantity;
+            $newProduct->save();
 
-        return back()->with('success', 'Producto asignado correctamente');
-    }
+            $product->stock -= $quantity;
+
+            if ($product->stock <= 0) {
+                $product->delete();
+            } else {
+                $product->save();
+            }
+        }
+    });
+
+    return back()->with('success', 'Producto asignado correctamente');
+}
+
 
     public function removeAndMergeFromShelf(Product $product)
     {

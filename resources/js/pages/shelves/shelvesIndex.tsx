@@ -35,7 +35,7 @@ export default function ShelvesIndex() {
     const [processingShelf, setProcessingShelf] = useState(false)
     const [existingLocations, setExistingLocations] = useState<string[]>([])
 
-    // 🔥 ESTADO PARA CONTROLAR MENSAJES DE ÉXITO
+    //ESTADO PARA CONTROLAR MENSAJES DE ÉXITO
     const [showedSuccessMessage, setShowedSuccessMessage] = useState(false)
 
     // Estado para el modal de productos
@@ -59,53 +59,47 @@ export default function ShelvesIndex() {
     }, [shelves])
 
     const handleSetShelfData = (key: string, value: any) => {
-        console.log(`🔄 Actualizando ${key}:`, value)
         setShelfData((prev) => {
             const newData = {
                 ...prev,
                 [key]: value,
             }
-            console.log("📝 Nuevo estado shelfData:", newData)
             return newData
         })
     }
 
-    // 🔥 FUNCIÓN ACTUALIZADA CON MENSAJE CORRECTO
+    //FUNCIÓN ACTUALIZADA CON MENSAJE CORRECTO
     const handleSubmitShelf = async (e: React.FormEvent, completeData?: any) => {
         e.preventDefault()
 
         if (processingShelf) {
-            console.log("⏳ Ya se está procesando, ignorando...")
             return
         }
 
         setProcessingShelf(true)
         setShelfErrors({})
 
-        // 🔥 USAR DATOS COMPLETOS SI ESTÁN DISPONIBLES, SINO USAR ESTADO
+        // USAR DATOS COMPLETOS SI ESTÁN DISPONIBLES, SINO USAR ESTADO
         const submitData = completeData || {
             code: shelfData.code.trim(),
             location: shelfData.location.trim(),
             max_capacity: shelfData.max_capacity.trim(),
         }
 
-        console.log("🚀 ENVIANDO DATOS AL SERVIDOR:", submitData)
-
         try {
             await router.post("/manager/shelves", submitData, {
                 preserveScroll: true,
                 onSuccess: (page) => {
-                    console.log("✅ ¡ÉXITO AL PRIMER INTENTO!")
 
-                    // Cerrar modal y limpiar
+                    //Cerrar modal y limpiar
                     setIsModalOpen(false)
                     setShelfData({ code: "", location: "", max_capacity: "" })
                     setShelfErrors({})
 
-                    // 🔥 MARCAR QUE YA MOSTRAMOS EL MENSAJE
+                    // MARCAR QUE YA MOSTRAMOS EL MENSAJE
                     setShowedSuccessMessage(true)
 
-                    // 🔥 MOSTRAR MENSAJE CORRECTO
+                    //MOSTRAR MENSAJE CORRECTO
                     Swal.fire({
                         title: "¡Éxito!",
                         text: "Estanteria creada correctamente.",
@@ -120,8 +114,7 @@ export default function ShelvesIndex() {
                         router.reload({ only: ["shelves"] })
                     }, 500)
                 },
-                onError: (errors) => {
-                    console.log("❌ Error del servidor:", errors)
+                onError: (errors) => {bn
                     setShelfErrors(errors)
 
                     const errorMessages = Object.values(errors).flat()
@@ -244,7 +237,7 @@ export default function ShelvesIndex() {
         setLocalProducts(unassignedProducts.filter((product) => product.stock > 0))
     }, [unassignedProducts])
 
-    // 🔥 MEJORAR MANEJO DE FLASH MESSAGES
+    //MEJORAR MANEJO DE FLASH MESSAGES
     useEffect(() => {
         // Solo mostrar flash messages si no hemos mostrado ya un mensaje de éxito manual
         if (flash?.success && !showedSuccessMessage) {
@@ -280,7 +273,7 @@ export default function ShelvesIndex() {
             })
         }
 
-        // 🔥 RESETEAR EL FLAG DESPUÉS DE PROCESAR FLASH MESSAGES
+        //RESETEAR EL FLAG DESPUÉS DE PROCESAR FLASH MESSAGES
         if (showedSuccessMessage) {
             setShowedSuccessMessage(false)
         }
@@ -320,15 +313,19 @@ export default function ShelvesIndex() {
                             timer: 3000,
                         })
                     },
-                    onError: () => {
-                        setLocalProducts(unassignedProducts)
-                        Swal.fire({
-                            title: "Error",
-                            text: "Error al asignar estantería",
-                            icon: "error",
-                            background: "#F3F3DF",
-                            confirmButtonColor: "#E17100",
-                        })
+                    onError: (errors) => {
+                    // Restaurar el producto a la lista local
+                    setLocalProducts(unassignedProducts);
+
+                    const errorMessage = errors.quantity ?? "Error al asignar estantería";
+
+                    Swal.fire({
+                        title: "Error",
+                        text: errorMessage,
+                        icon: "error",
+                        background: "#F3F3DF",
+                        confirmButtonColor: "#E17100",
+                    });
                     },
                 },
             )
